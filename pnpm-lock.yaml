@@ -30,6 +30,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.25
+      '@types/pusher-js':
+        specifier: ^5.1.0
+        version: 5.1.0
       '@types/react':
         specifier: ^19
         version: 19.2.7
@@ -525,6 +528,10 @@ packages:
 
   '@types/node@20.19.25':
     resolution: {integrity: sha512-ZsJzA5thDQMSQO788d7IocwwQbI8B5OPzmqNvpf3NY/+MHDAS759Wo0gd2WQeXYt5AAAQjzcrTVC6SKCuYgoCQ==}
+
+  '@types/pusher-js@5.1.0':
+    resolution: {integrity: sha512-VubdW1NvHAojLFtJ+FWmZsIlkSE+EiaLrrfCKcW/t9UDlXWF85rSPVc+5zdpZLVzkwaUaFeyIYSgeNfXc9Dxlg==}
+    deprecated: This is a stub types definition. pusher-js provides its own type definitions, so you do not need this installed.
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -2426,6 +2433,10 @@ snapshots:
   '@types/node@20.19.25':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/pusher-js@5.1.0':
+    dependencies:
+      pusher-js: 8.4.0
 
   '@types/react-dom@19.2.3(@types/react@19.2.7)':
     dependencies:
