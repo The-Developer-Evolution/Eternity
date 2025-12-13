@@ -6,3 +6,118 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+
+/////////////////////////////////////////////////
+// TRADING TABLE
+/////////////////////////////////////////////////
+
+// ENUMS
+enum BalanceLogType {
+  CREDIT
+  DEBIT
+}
+
+enum BalanceTradingResource {
+  IDR
+  USD
+  ETERNITES
+  RAW
+  CRAFT
+  MAP
+}
+
+enum AdminTradingRole {
+  SUPER
+  SELL
+  BUYRAW
+  CRAFT
+  MAP
+  BLACKMARKET
+  PITCHING
+  CURRENCY
+  THUNT
+}
+
+// MASTER MODELS
+model PeriodeTrading {
+  id                   String @id @default(cuid())
+  periode              Int
+  cost_map             Int
+  price_map            Int
+  duration             Int
+}
+
+model MasterTrading {
+  id                  String @id @default(cuid())
+  current_periode     Int
+}
+
+
+// MODELS
+model User {
+  id        String         @id @default(cuid())
+  name      String
+  email     String         @unique
+  password  String
+  nim       String
+
+  tradingData  TradingData?
+  adminTrading AdminTrading?
+}
+
+model TradingData {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+
+  idr       Decimal @db.Decimal(18, 2)
+  usd       Decimal @db.Decimal(18, 2)
+  eternites Int
+  map       Int
+  point     Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rawItems   RawItem[]
+  craftItems CraftItem[]
+  balanceTradingLogs BalanceTradingLog[]
+}
+
+model RawItem {
+  id            String @id @default(cuid())
+  tradingDataId String
+
+  name          String
+
+  tradingData   TradingData @relation(fields: [tradingDataId],references: [id],onDelete: Cascade)
+}
+
+model CraftItem {
+  id            String @id @default(cuid())
+  tradingDataId String
+
+  name          String
+
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model BalanceTradingLog {
+  id            String        @id @default(cuid())
+  tradingDataId String
+
+  amount        Decimal
+  message       String  
+  type          BalanceLogType
+  resource      BalanceTradingResource
+
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model AdminTrading {
+  id     String  @id @default(cuid())
+  userId String  @unique
+
+  role AdminTradingRole
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
