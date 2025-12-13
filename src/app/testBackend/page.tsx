@@ -1,18 +1,22 @@
 'use client'
 import { register } from "@/features/auth/action";
 import { getUserRoles, UserRoles } from "@/features/auth/service";
-import { addTradingPointToUser, buyMaterial } from "@/features/trading/service";
-import { RawMaterial } from "@/features/trading/types";
+import { itemToCraft } from "@/features/trading/services/craft";
+import { buyMaterial } from "@/features/trading/services/buyRaw";
+import { addTradingPointToUser } from "@/features/trading/services/talkshow";
+import { CraftItem, RawMaterial, TradingAmounts } from "@/features/trading/types";
 import {  getAllUserWithAdmin } from "@/features/user/service";
 import { getUserTradingById } from "@/features/user/trading.service";
 import { UserTrading } from "@/features/user/types";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { extractRawCraftAmounts } from "@/features/trading/utils";
 
 export default function Home() {
     const { data: session, status } = useSession();
     const [roles, setRoles] = useState<UserRoles | null>(null);
     const [user, setUser] = useState<UserTrading | null> (null);
+    const [rawCraftAmount, setRawCraftAmount] = useState<TradingAmounts | null>(null);
     
     // get role
     useEffect(() => {
@@ -23,6 +27,8 @@ export default function Home() {
             setRoles(result);
             if(userDB.success){
                 setUser(userDB.data!);
+                const amounts = extractRawCraftAmounts(userDB.data!);
+                setRawCraftAmount(amounts)
             }
         }
         fetchRoles();
@@ -77,6 +83,48 @@ export default function Home() {
                             <div className="flex justify-between">
                                 <span className="text-slate-400">Points</span>
                                 <span>{user.tradingData.point}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Wood</span>
+                                <span>{rawCraftAmount?.raw.wood}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Glass</span>
+                                <span>{rawCraftAmount?.raw.glass}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">coal</span>
+                                <span>{rawCraftAmount?.raw.coal}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Metal</span>
+                                <span>{rawCraftAmount?.raw.metal}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Water</span>
+                                <span>{rawCraftAmount?.raw.water}</span>
+                            </div>
+
+                            {/* crafted */}
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Brown Paper</span>
+                                <span>{rawCraftAmount?.craft.brownPaper}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Dividers</span>
+                                <span>{rawCraftAmount?.craft.dividers}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Ink</span>
+                                <span>{rawCraftAmount?.craft.ink}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Pen</span>
+                                <span>{rawCraftAmount?.craft.pen}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-400">Magnifier</span>
+                                <span>{rawCraftAmount?.craft.magnifyingGlass}</span>
                             </div>
                             </div>
 
@@ -179,12 +227,20 @@ export default function Home() {
                 Run Service
             </button>
 
-
+{/* buy material (admin RAW) */}
             <button 
-                onClick={async () => { console.log( await buyMaterial("cmj4f6rk3000bu8hnardju86e", RawMaterial.coal)) }}
+                onClick={async () => { console.log( await buyMaterial("cmj4f6rk3000bu8hnardju86e", RawMaterial.wood)) }}
                 className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-semibold shadow-lg shadow-blue-900/20 transition-all transform hover:scale-[1.02] active:scale-95"
             >
                 Buy Material
+            </button>
+
+{/* convert raw to craft */}
+            <button 
+                onClick={async () => { console.log( await itemToCraft("cmj4f6rk3000bu8hnardju86e", "brownPaper")) }}
+                className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-semibold shadow-lg shadow-blue-900/20 transition-all transform hover:scale-[1.02] active:scale-95"
+            >
+                Convert Raw to Craft
             </button>
 
             </div>

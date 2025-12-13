@@ -1,5 +1,5 @@
 'use client'
-import { addTradingPointToUser } from "@/features/trading/service";
+import { addTradingPointToUser } from "@/features/trading/services/talkshow";
 
 export default function Home() {
   return (
