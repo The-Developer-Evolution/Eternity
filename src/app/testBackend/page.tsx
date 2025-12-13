@@ -4,7 +4,7 @@ import { getUserRoles, UserRoles } from "@/features/auth/service";
 import { itemToCraft } from "@/features/trading/services/craft";
 import { buyMaterial } from "@/features/trading/services/buyRaw";
 import { addTradingPointToUser } from "@/features/trading/services/talkshow";
-import { CraftItem, RawMaterial, TradingAmounts } from "@/features/trading/types";
+import { CraftItem, RawMaterial, TradingAmounts } from "@/features/trading/types/craft";
 import {  getAllUserWithAdmin } from "@/features/user/service";
 import { getUserTradingById } from "@/features/user/trading.service";
 import { UserTrading } from "@/features/user/types";
@@ -243,8 +243,16 @@ export default function Home() {
                 Convert Raw to Craft
             </button>
 
-            </div>
 
+{/* convert raw to craft */}
+            <button 
+                onClick={async () => { console.log( await itemToCraft("cmj4f6rk3000bu8hnardju86e", "brownPaper")) }}
+                className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-semibold shadow-lg shadow-blue-900/20 transition-all transform hover:scale-[1.02] active:scale-95"
+            >
+                Convert Raw to Craft
+            </button>
+
+            </div>
         </div>
         </div>
     );

@@ -4,10 +4,9 @@ import { checkUserRole } from "@/features/auth/utils";
 import { getUserTradingById } from "@/features/user/trading.service";
 import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import { ActionResult } from "@/types/actionResult";
-import { CraftItem, CraftItemKey, RawMaterial, RECIPES } from "../types";
+import { CraftItemKey, RawMaterial, RECIPES } from "../types/craft";
 import { TradingData } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import { countMaterials, matchRecipe } from "../utils";
 
 
 export async function itemToCraft(

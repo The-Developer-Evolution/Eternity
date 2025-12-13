@@ -1,5 +1,5 @@
 import { UserTrading } from "../user/types";
-import { CraftAmountMap, CraftItem, RawAmountMap, RawMaterial, Recipe, RECIPES, TradingAmounts } from "./types";
+import { CraftAmountMap, CraftItem, RawAmountMap, RawMaterial, Recipe, RECIPES, TradingAmounts } from "./types/craft";
 
 export function getRandomRawMaterial(): RawMaterial {
   const values = Object.values(RawMaterial);
