@@ -58,3 +58,4 @@ export interface TradingAmounts {
   raw: RawAmountMap;
   craft: CraftAmountMap;
 }
+
