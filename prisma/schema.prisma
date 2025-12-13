@@ -73,11 +73,11 @@ model TradingData {
   id        String  @id @default(cuid())
   userId    String  @unique
 
-  idr       Decimal @db.Decimal(18, 2)
-  usd       Decimal @db.Decimal(18, 2)
-  eternites Int
-  map       Int
-  point     Int
+  idr       Decimal @db.Decimal(18, 2) @default(-10000000000)
+  usd       Decimal @db.Decimal(18, 2) @default(0)
+  eternites Int     @default(0)
+  map       Int     @default(0)
+  point     Int     @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   rawItems   RawItem[]
