@@ -28,6 +28,7 @@ enum BalanceTradingResource {
 }
 
 enum AdminTradingRole {
+  TALKSHOW
   SUPER
   SELL
   BUYRAW
@@ -42,7 +43,7 @@ enum AdminTradingRole {
 // MASTER MODELS
 model PeriodeTrading {
   id                   String @id @default(cuid())
-  periode              Int
+  periode              Int @unique
   cost_map             Int
   price_map            Int
   duration             Int
@@ -50,7 +51,7 @@ model PeriodeTrading {
 
 model MasterTrading {
   id                  String @id @default(cuid())
-  current_periode     Int
+  current_periode     Int @default(1)
 }
 
 
@@ -183,8 +184,8 @@ enum Zone {
 // MASTER MODELS
 model MasterRally {
   id                    String @id @default(cuid())
-  current_periode       Int
-  special_ticket_stock  Int
+  current_periode       Int  @default(1)
+  special_ticket_stock  Int  @default(5)
 }
 
 model ZoneRally {
@@ -196,7 +197,7 @@ model ZoneRally {
 
 model PeriodeRally {
   id             String @id @default(cuid())
-  periode        Int
+  periode        Int @unique
   eonix_addition Int
 
   exchangeCosts ExchangeCostRally[]
@@ -227,13 +228,13 @@ model RallyData {
   id             String @id @default(cuid())
   userId         String @unique
 
-  point          Int
-  minusPoint     Int    
-  level          Int
-  eonix          Int
-  vault          Int
-  ticket         Int
-  specialTicket  Int    
+  point          Int    @default(0)
+  minusPoint     Int    @default(0)
+  level          Int    @default(0)
+  eonix          Int    @default(0)
+  vault          Int    @default(0)
+  ticket         Int    @default(0)
+  specialTicket  Int    @default(0)
 
   // Relationships
   user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
