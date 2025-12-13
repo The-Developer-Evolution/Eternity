@@ -13,6 +13,13 @@ datasource db {
 /////////////////////////////////////////////////
 
 // ENUMS
+enum GameStatus {
+  PENDING
+  PAUSED
+  RUNNING
+  FINISHED
+}
+
 enum BalanceLogType {
   CREDIT
   DEBIT
@@ -52,6 +59,9 @@ model PeriodeTrading {
 model MasterTrading {
   id                  String @id @default(cuid())
   current_periode     Int @default(1)
+  elapsed             Int  @default(0)
+  lastStartedAt       DateTime?   
+  status              GameStatus  @default(PENDING)
 }
 
 
@@ -74,8 +84,8 @@ model TradingData {
   id        String  @id @default(cuid())
   userId    String  @unique
 
-  idr       Decimal @db.Decimal(18, 2) @default(-10000000000)
-  usd       Decimal @db.Decimal(18, 2) @default(0)
+  idr       BigInt  @default(-10000000000)
+  usd       BigInt  @default(0)
   eternites Int     @default(0)
   map       Int     @default(0)
   point     Int     @default(0)
@@ -108,7 +118,7 @@ model BalanceTradingLog {
   id            String        @id @default(cuid())
   tradingDataId String
 
-  amount        Decimal @db.Decimal(18, 2)
+  amount        BigInt
   message       String  
   type          BalanceLogType
   resource      BalanceTradingResource
@@ -186,6 +196,10 @@ model MasterRally {
   id                    String @id @default(cuid())
   current_periode       Int  @default(1)
   special_ticket_stock  Int  @default(5)
+  duration              Int  @default(1200)
+  elapsed               Int  @default(0)  // seconds already counted
+  lastStartedAt         DateTime?   
+  status                GameStatus  @default(PENDING)
 }
 
 model ZoneRally {
@@ -246,7 +260,7 @@ model RallyData {
 model BalanceRallyLog {
   id          String               @id @default(cuid())
   rallyDataId String               
-  amount      Decimal              @db.Decimal(18, 2)  
+  amount      Int         
   message     String         
   type        BalanceLogType
   resource    BalanceRallyResource

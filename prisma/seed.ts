@@ -30,6 +30,7 @@ async function main() {
     update: {},
     create: {
       id: "tradingMasterData@Eternity",
+      
     },
   });
 
@@ -85,8 +86,11 @@ async function main() {
             password,
             nim: `NIM-${role.toUpperCase()}`,
             adminTrading: {
-            create: { role },
+              create: { role }
             },
+            tradingData:{
+              create:{}
+            }
         },
         });
 

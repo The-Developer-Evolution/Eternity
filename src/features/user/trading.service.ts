@@ -3,10 +3,11 @@
 import { User } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
+import { UserTrading } from "./types";
 
 
 // get user with all trading details data
-export async function getUserTradingById(userId: string): Promise<ActionResult<User>> {
+export async function getUserTradingById(userId: string): Promise<ActionResult<UserTrading>> {
   if (!userId) {
     return {
       success: false,
@@ -35,9 +36,16 @@ export async function getUserTradingById(userId: string): Promise<ActionResult<U
       };
     }
 
+    if(!user.tradingData){
+      return{
+        success:false,
+        error: "Unconfigured User"
+      }
+    }
+
     return {
       success: true,
-      data: user,
+      data: user as UserTrading,
       message: "User fetched successfully",
     };
   } catch (error) {
