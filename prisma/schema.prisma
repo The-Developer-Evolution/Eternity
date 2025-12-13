@@ -6,3 +6,283 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+/////////////////////////////////////////////////
+// TRADING TABLE
+/////////////////////////////////////////////////
+
+// ENUMS
+enum GameStatus {
+  PENDING
+  PAUSED
+  RUNNING
+  FINISHED
+}
+
+enum BalanceLogType {
+  CREDIT
+  DEBIT
+}
+
+enum BalanceTradingResource {
+  IDR
+  USD
+  ETERNITES
+  RAW
+  CRAFT
+  MAP
+}
+
+enum AdminTradingRole {
+  TALKSHOW
+  SUPER
+  SELL
+  BUYRAW
+  CRAFT
+  MAP
+  BLACKMARKET
+  PITCHING
+  CURRENCY
+  THUNT
+}
+
+// MASTER MODELS
+model PeriodeTrading {
+  id                   String @id @default(cuid())
+  periode              Int @unique
+  cost_map             Int
+  price_map            Int
+  duration             Int
+}
+
+model MasterTrading {
+  id                  String @id @default(cuid())
+  current_periode     Int @default(1)
+  elapsed             Int  @default(0)
+  lastStartedAt       DateTime?   
+  status              GameStatus  @default(PENDING)
+}
+
+
+// MODELS
+model User {
+  id        String         @id @default(cuid())
+  name      String
+  email     String         @unique
+  password  String
+  nim       String
+
+  tradingData  TradingData?
+  rallyData RallyData?
+
+  adminTrading AdminTrading?
+  adminRally AdminRally?
+}
+
+model TradingData {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+
+  idr       BigInt  @default(-10000000000)
+  usd       BigInt  @default(0)
+  eternites Int     @default(0)
+  map       Int     @default(0)
+  point     Int     @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rawItems   RawItem[]
+  craftItems CraftItem[]
+  balanceTradingLogs BalanceTradingLog[]
+}
+
+model RawItem {
+  id            String @id @default(cuid())
+  tradingDataId String
+
+  name          String
+
+  tradingData   TradingData @relation(fields: [tradingDataId],references: [id],onDelete: Cascade)
+}
+
+model CraftItem {
+  id            String @id @default(cuid())
+  tradingDataId String
+
+  name          String
+
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model BalanceTradingLog {
+  id            String        @id @default(cuid())
+  tradingDataId String
+
+  amount        BigInt
+  message       String  
+  type          BalanceLogType
+  resource      BalanceTradingResource
+
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model AdminTrading {
+  id     String  @id @default(cuid())
+  userId String  @unique
+
+  role AdminTradingRole
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+
+
+/////////////////////////////////////////////////
+// RALLY TABLE
+/////////////////////////////////////////////////
+
+// ENUMS
+enum BalanceRallyResource {
+  POINT
+  MINPOINT
+  EONIX
+  VAULT
+  ETSIGIL
+  CHROKEY
+  COFRAG
+  SIGIL
+  SHARD
+  CHRONO
+  RUNE
+  FRAGMENT
+  FLUX
+  TICKET
+  ZONECARD
+  STICKET
+}
+
+enum AdminRallyRole {
+  EXCHANGE
+  UPGRADE
+  POSTGUARD
+  MONSTER
+}
+
+enum SmallItem {
+  SHARDS
+  RUNE
+  FLUX
+  SIGIL
+  CHRONO
+  FRAGMENT
+}
+
+enum BigItem {
+  ETERGIL
+  CHROKEY
+  COFRAG
+}
+
+enum Zone {
+  AMERIKA
+  ASIA
+  EROPA
+  AFRIKA
+}
+
+// MASTER MODELS
+model MasterRally {
+  id                    String @id @default(cuid())
+  current_periode       Int  @default(1)
+  special_ticket_stock  Int  @default(5)
+  duration              Int  @default(1200)
+  elapsed               Int  @default(0)  // seconds already counted
+  lastStartedAt         DateTime?   
+  status                GameStatus  @default(PENDING)
+}
+
+model ZoneRally {
+  id   String    @id @default(cuid())
+  zone Zone
+
+  exchangeCosts ExchangeCostRally[]
+}
+
+model PeriodeRally {
+  id             String @id @default(cuid())
+  periode        Int @unique
+  eonix_addition Int
+
+  exchangeCosts ExchangeCostRally[]
+}
+
+model ExchangeCostRally {
+  id              String @id @default(cuid())
+  zoneRally_id    String
+  periodeRally_id String
+  eonix_amount    Int
+
+  // Relationships
+  zoneRally    ZoneRally @relation(fields: [zoneRally_id], references: [id], onDelete: Cascade)
+  periodeRally PeriodeRally   @relation(fields: [periodeRally_id], references: [id], onDelete: Cascade)
+}
+
+
+// MODELS
+model AdminRally {
+  id      String         @id @default(cuid())
+  userId  String         @unique
+  role    AdminRallyRole
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RallyData {
+  id             String @id @default(cuid())
+  userId         String @unique
+
+  point          Int    @default(0)
+  minusPoint     Int    @default(0)
+  level          Int    @default(0)
+  eonix          Int    @default(0)
+  vault          Int    @default(0)
+  ticket         Int    @default(0)
+  specialTicket  Int    @default(0)
+
+  // Relationships
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balanceRallyLogs  BalanceRallyLog[]
+  smallItems        SmallItemModel[]
+  bigItems          BigItemModel[]
+}
+
+model BalanceRallyLog {
+  id          String               @id @default(cuid())
+  rallyDataId String               
+  amount      Int         
+  message     String         
+  type        BalanceLogType
+  resource    BalanceRallyResource
+
+  // Relationship
+  rallyData   RallyData            @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+}
+
+model SmallItemModel {
+  id          String    @id @default(cuid())
+  rallyDataId String    
+  name        SmallItem
+
+  // Relationship
+  rallyData   RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+}
+
+model BigItemModel {
+  id          String    @id @default(cuid())
+  rallyDataId String  
+  name        BigItem  
+
+  // Relationship
+  rallyData   RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+}
