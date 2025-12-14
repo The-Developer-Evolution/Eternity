@@ -142,6 +142,7 @@ model BalanceTradingLog {
 enum RallyPeriodStatus {
   NOT_STARTED
   ON_GOING
+  PAUSED
   ENDED
 }
 
@@ -177,7 +178,10 @@ model RallyPeriod {
   id           String            @id @default(cuid())
   name         String            @unique
   duration     Int
-  elapsed_time Int               @default(0)
+  startTime           DateTime?
+  endTime             DateTime?
+  pausedTime          DateTime?
+  totalPausedDuration Int            @default(0)
   status       RallyPeriodStatus @default(NOT_STARTED)
   RallyPos     RallyPos[]
 }

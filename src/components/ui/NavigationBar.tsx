@@ -100,6 +100,7 @@ export default function NavigationBar() {
             }`}
         >
           <div className="flex flex-col gap-8 text-center">
+            
             {!session && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
@@ -111,6 +112,21 @@ export default function NavigationBar() {
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Login
+                </Link>
+              </div>
+            )}
+
+            {session?.user.role == "SUPER" && (
+              <div className="flex flex-col gap-4">
+                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
+                 Admin Super
+                </h3>
+                <Link
+                  href="/admin/super"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Super Admin Dashboard
                 </Link>
               </div>
             )}

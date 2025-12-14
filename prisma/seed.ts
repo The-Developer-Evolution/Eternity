@@ -103,6 +103,10 @@ async function main() {
         },
       });
 
+      await prisma.rallyData.createMany({
+        data: [{ user_id: user.id }],
+      });
+
       console.log(
         `Created admin -> name: "${name}", password: "${plainPassword}"`
       );
@@ -581,7 +585,7 @@ async function main() {
       { name: "Chopstick Master", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "Chopstick Master", period_id: "8", zone_id: "4", eonix_cost: 3 },
 
-      {name: "Tic Tac Toe", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Tic Tac Toe", period_id: "1", zone_id: "4", eonix_cost: 3 },
       { name: "Tic Tac Toe", period_id: "2", zone_id: "4", eonix_cost: 4 },
       { name: "Tic Tac Toe", period_id: "3", zone_id: "4", eonix_cost: 2 },
       { name: "Tic Tac Toe", period_id: "4", zone_id: "4", eonix_cost: 3 },
@@ -590,7 +594,7 @@ async function main() {
       { name: "Tic Tac Toe", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "Tic Tac Toe", period_id: "8", zone_id: "4", eonix_cost: 3 },
 
-      {name: "What the Hey", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "What the Hey", period_id: "1", zone_id: "4", eonix_cost: 3 },
       { name: "What the Hey", period_id: "2", zone_id: "4", eonix_cost: 4 },
       { name: "What the Hey", period_id: "3", zone_id: "4", eonix_cost: 2 },
       { name: "What the Hey", period_id: "4", zone_id: "4", eonix_cost: 3 },
@@ -599,7 +603,7 @@ async function main() {
       { name: "What the Hey", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "What the Hey", period_id: "8", zone_id: "4", eonix_cost: 3 },
 
-      {name: "Wrong Color", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Wrong Color", period_id: "1", zone_id: "4", eonix_cost: 3 },
       { name: "Wrong Color", period_id: "2", zone_id: "4", eonix_cost: 4 },
       { name: "Wrong Color", period_id: "3", zone_id: "4", eonix_cost: 2 },
       { name: "Wrong Color", period_id: "4", zone_id: "4", eonix_cost: 3 },
@@ -607,8 +611,8 @@ async function main() {
       { name: "Wrong Color", period_id: "6", zone_id: "4", eonix_cost: 2 },
       { name: "Wrong Color", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "Wrong Color", period_id: "8", zone_id: "4", eonix_cost: 3 },
-      
-      {name: "Scoop Them All", period_id: "1", zone_id: "4", eonix_cost: 3 },
+
+      { name: "Scoop Them All", period_id: "1", zone_id: "4", eonix_cost: 3 },
       { name: "Scoop Them All", period_id: "2", zone_id: "4", eonix_cost: 4 },
       { name: "Scoop Them All", period_id: "3", zone_id: "4", eonix_cost: 2 },
       { name: "Scoop Them All", period_id: "4", zone_id: "4", eonix_cost: 3 },
@@ -617,16 +621,56 @@ async function main() {
       { name: "Scoop Them All", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "Scoop Them All", period_id: "8", zone_id: "4", eonix_cost: 3 },
 
-      {name: "Walk The Landmine", period_id: "1", zone_id: "4", eonix_cost: 3 },
-      { name: "Walk The Landmine", period_id: "2", zone_id: "4", eonix_cost: 4 },
-      { name: "Walk The Landmine", period_id: "3", zone_id: "4", eonix_cost: 2 },
-      { name: "Walk The Landmine", period_id: "4", zone_id: "4", eonix_cost: 3 },
-      { name: "Walk The Landmine", period_id: "5", zone_id: "4", eonix_cost: 4 },
-      { name: "Walk The Landmine", period_id: "6", zone_id: "4", eonix_cost: 2 },
-      { name: "Walk The Landmine", period_id: "7", zone_id: "4", eonix_cost: 2 },
-      { name: "Walk The Landmine", period_id: "8", zone_id: "4", eonix_cost: 3 },
+      {
+        name: "Walk The Landmine",
+        period_id: "1",
+        zone_id: "4",
+        eonix_cost: 3,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "2",
+        zone_id: "4",
+        eonix_cost: 4,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "3",
+        zone_id: "4",
+        eonix_cost: 2,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "4",
+        zone_id: "4",
+        eonix_cost: 3,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "5",
+        zone_id: "4",
+        eonix_cost: 4,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "6",
+        zone_id: "4",
+        eonix_cost: 2,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "7",
+        zone_id: "4",
+        eonix_cost: 2,
+      },
+      {
+        name: "Walk The Landmine",
+        period_id: "8",
+        zone_id: "4",
+        eonix_cost: 3,
+      },
 
-      {name: "Granny Pants", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Granny Pants", period_id: "1", zone_id: "4", eonix_cost: 3 },
       { name: "Granny Pants", period_id: "2", zone_id: "4", eonix_cost: 4 },
       { name: "Granny Pants", period_id: "3", zone_id: "4", eonix_cost: 2 },
       { name: "Granny Pants", period_id: "4", zone_id: "4", eonix_cost: 3 },
@@ -644,7 +688,6 @@ async function main() {
       { name: "Boom-Pop", period_id: "7", zone_id: "4", eonix_cost: 2 },
       { name: "Boom-Pop", period_id: "8", zone_id: "4", eonix_cost: 3 },
 
-
       { name: "Exchange Pos", period_id: "1", zone_id: "1", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "2", zone_id: "1", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "3", zone_id: "1", eonix_cost: 0 },
@@ -659,7 +702,7 @@ async function main() {
       { name: "Exchange Pos", period_id: "2", zone_id: "3", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "3", zone_id: "3", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "4", zone_id: "3", eonix_cost: 0 },
-      
+
       { name: "Exchange Pos", period_id: "1", zone_id: "4", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "2", zone_id: "4", eonix_cost: 0 },
       { name: "Exchange Pos", period_id: "3", zone_id: "4", eonix_cost: 0 },
@@ -669,32 +712,32 @@ async function main() {
 
   await prisma.rallyBigItem.createMany({
     data: [
-      { id: "1", name: "Eternia Sigil"},
-      { id: "2", name: "Chrono Key"},
-      { id: "3", name: "Core Fragment"},
+      { id: "1", name: "Eternia Sigil" },
+      { id: "2", name: "Chrono Key" },
+      { id: "3", name: "Core Fragment" },
     ],
   });
 
   await prisma.rallySmallItem.createMany({
     data: [
-      { id: "1", name: "Sigil Token"},
-      { id: "2", name: "Chrono Token"},
-      { id: "3", name: "Fragment Token"},
-      { id: "4", name: "Rune"},
-      { id: "5", name: "Shard"},
-      { id: "6", name: "Flux"},
+      { id: "1", name: "Sigil Token" },
+      { id: "2", name: "Chrono Token" },
+      { id: "3", name: "Fragment Token" },
+      { id: "4", name: "Rune" },
+      { id: "5", name: "Shard" },
+      { id: "6", name: "Flux" },
     ],
   });
 
   await prisma.rallyBigItemRecipe.createMany({
     data: [
-      {result_item_id: "1", small_item_id:"1", quantity:1},
-      {result_item_id: "1", small_item_id:"5", quantity:2},
-      {result_item_id: "2", small_item_id:"2", quantity:1},
-      {result_item_id: "2", small_item_id:"4", quantity:2},
-      {result_item_id: "3", small_item_id:"3", quantity:1},
-      {result_item_id: "3", small_item_id:"6", quantity:2},
-    ]
+      { result_item_id: "1", small_item_id: "1", quantity: 1 },
+      { result_item_id: "1", small_item_id: "5", quantity: 2 },
+      { result_item_id: "2", small_item_id: "2", quantity: 1 },
+      { result_item_id: "2", small_item_id: "4", quantity: 2 },
+      { result_item_id: "3", small_item_id: "3", quantity: 1 },
+      { result_item_id: "3", small_item_id: "6", quantity: 2 },
+    ],
   });
 }
 

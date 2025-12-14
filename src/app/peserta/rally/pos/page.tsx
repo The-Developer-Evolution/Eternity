@@ -10,14 +10,18 @@ export default async function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-[80%] bg-opacity-20 rounded-lg space-y-4 my-[20%] sm:my-[10%]">
-          <h1 className="text-2xl font-bold mb-4 text-center text-white">Rally Pos</h1>
-          {pos.map((p) => (
-            <div key={p.id} className="p-4 rounded-lg bg-[#23328C]/80 backdrop-blur-lg border-white border-3 flex flex-col justify-center items-center">
-              <h2 className="text-xl font-semibold text-white">{p.name}</h2>
-              <p className="text-white">Location: {p.rally_zone.name}</p>
-            </div>
-          ))}
+       <div className="relative z-10 p-12 rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-center items-center gap-8 font-futura">
+          <h1 className="text-3xl md:text-5xl mb-4 text-center font-impact text-white">Rally Pos</h1>
+          {pos.length > 0 ? (
+            pos.map((p) => (
+              <div key={p.id} className="p-4 rounded-lg bg-[#23328C]/80 backdrop-blur-lg border-white border-3 flex flex-col justify-center items-center">
+                <h2 className="text-xl font-semibold text-white">{p.name}</h2>
+                <p className="text-white">Location: {p.rally_zone.name}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-white">No Pos available.</p>
+          )}
         </div>
       </div>
     </div>
