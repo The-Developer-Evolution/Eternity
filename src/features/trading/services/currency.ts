@@ -1,8 +1,6 @@
 'use server'
-
-import { checkUserRole } from "@/features/auth/utils";
 import { getUserTradingById } from "@/features/user/trading.service";
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
+import {  BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
@@ -20,12 +18,6 @@ export async function convertCurrency(
     from: CurrencyType, 
     to: CurrencyType
 ): Promise<ActionResult<TradingData>> {
-    
-    // 1. Check Role
-    const roleCheck = await checkUserRole([AdminTradingRole.CURRENCY, AdminTradingRole.SUPER]);
-    if (!roleCheck.success) {
-        return { success: false, error: roleCheck.error };
-    }
 
     // 2. Validate inputs
     if (amount <= 0) return { success: false, error: "Amount must be positive" };

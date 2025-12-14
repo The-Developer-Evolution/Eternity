@@ -1,8 +1,7 @@
 'use server'
 
-import { checkUserRole } from "@/features/auth/utils";
 import { getUserTradingById } from "@/features/user/trading.service";
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
+import {  BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import { ActionResult } from "@/types/actionResult";
 import { CraftItemKey, RawMaterial, RECIPES } from "../types/craft";
 import { TradingData } from "@/generated/prisma/client";
@@ -13,12 +12,6 @@ export async function itemToCraft(
   userId: string,
   craftItem: CraftItemKey
 ): Promise<ActionResult<TradingData>> {
-
-  // 1. Role check
-  const roleCheck = await checkUserRole([AdminTradingRole.CRAFT, AdminTradingRole.SUPER]);
-  if (!roleCheck.success) {
-    return { success: false, error: roleCheck.error };
-  }
 
   // 2. Get user trading data
   const userResult = await getUserTradingById(userId);

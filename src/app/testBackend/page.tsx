@@ -1,6 +1,5 @@
 'use client'
 import { register } from "@/features/auth/action";
-import { getUserRoles, UserRoles } from "@/features/auth/service";
 import { itemToCraft } from "@/features/trading/services/craft";
 import { buyMaterial } from "@/features/trading/services/buyRaw";
 import { addTradingPointToUser } from "@/features/trading/services/talkshow";
@@ -16,29 +15,9 @@ import { convertCurrency } from "@/features/trading/services/currency";
 import { givePitchingMoney, payPitchingFee } from "@/features/trading/services/pitching";
 
 export default function Home() {
-    const { data: session, status } = useSession();
-    const [roles, setRoles] = useState<UserRoles | null>(null);
+    const { data: session, status } = useSession()
     const [user, setUser] = useState<UserTrading | null>(null);
     const [rawCraftAmount, setRawCraftAmount] = useState<TradingAmounts | null>(null);
-
-    // get role
-    useEffect(() => {
-        if (!session?.user.id) return;
-        async function fetchRoles() {
-            const result = await getUserRoles(session!.user.id);
-            const userDB = await getUserTradingById(session!.user.id);
-            setRoles(result);
-
-            if (userDB.success) {
-                setUser(userDB.data!);
-                const amounts = extractRawCraftAmounts(userDB.data!);
-                setRawCraftAmount(amounts)
-            }else{
-                console.log(userDB.error);
-            }
-        }
-        fetchRoles();
-    }, [session?.user.id]);
 
     const StatCard = ({ label, value, colorClass = "text-white" }: { label: string, value: string | number | undefined, colorClass?: string }) => (
         <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between hover:border-slate-700 transition-colors">
@@ -79,7 +58,7 @@ export default function Home() {
                              <div className="text-sm text-slate-400">Logged in as <span className="text-white font-medium">{session.user?.name || session.user?.email}</span></div>
                              <div className="text-xs text-slate-500 font-mono mt-1">ID: {session.user.id}</div>
                              <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-wide border border-indigo-500/20">
-                                 {roles?.role || 'User'}
+                                 {user?.role || 'User'}
                              </div>
                          </div>
                     ) : (

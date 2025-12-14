@@ -33,9 +33,12 @@ enum BalanceTradingResource {
   MAP
 }
 
-enum AdminTradingRole {
-  TALKSHOW
+enum Role {
+  PARTICIPANT
   SUPER
+
+  //trading
+  TALKSHOW
   SELL
   BUYRAW
   CRAFT
@@ -45,6 +48,13 @@ enum AdminTradingRole {
   PITCHING
   CURRENCY
   THUNT
+  PRESSURE
+
+  // RALLY
+  EXCHANGE
+  UPGRADE
+  POSTGUARD
+  MONSTER
 }
 
 // MASTER MODELS
@@ -73,8 +83,7 @@ model User {
   tradingData TradingData?
   rallyData   RallyData?
 
-  adminTrading AdminTrading?
-  adminRally   AdminRally?
+  role Role @default(PARTICIPANT)
 }
 
 model TradingData {
@@ -123,15 +132,6 @@ model BalanceTradingLog {
   tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
 }
 
-model AdminTrading {
-  id     String @id @default(cuid())
-  userId String @unique
-
-  role AdminTradingRole
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 /////////////////////////////////////////////////
 // RALLY TABLE
 /////////////////////////////////////////////////
@@ -154,13 +154,6 @@ enum BalanceRallyResource {
   TICKET
   ZONECARD
   STICKET
-}
-
-enum AdminRallyRole {
-  EXCHANGE
-  UPGRADE
-  POSTGUARD
-  MONSTER
 }
 
 enum SmallItem {
@@ -222,14 +215,6 @@ model ExchangeCostRally {
   periodeRally PeriodeRally @relation(fields: [periodeRally_id], references: [id], onDelete: Cascade)
 }
 
-// MODELS
-model AdminRally {
-  id     String         @id @default(cuid())
-  userId String         @unique
-  role   AdminRallyRole
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model RallyData {
   id     String @id @default(cuid())

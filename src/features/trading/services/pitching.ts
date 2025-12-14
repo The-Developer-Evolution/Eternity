@@ -1,19 +1,13 @@
 'use server'
 
-import { checkUserRole } from "@/features/auth/utils";
 import { getUserTradingById } from "@/features/user/trading.service";
 import { TradingData } from "@/generated/prisma/client";
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
+import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import { ActionResult } from "@/types/actionResult";
 import prisma from "@/lib/prisma";
 
 // admin bayar biaya masuk (15000 eternites)
 export async function payPitchingFee(userId: string): Promise<ActionResult<TradingData>> {
-    const roleCheck = await checkUserRole([AdminTradingRole.PITCHINGGUARD, AdminTradingRole.SUPER]);
-    if (!roleCheck.success) {
-        return { success: false, error: roleCheck.error };
-    }
-
     const userResult = await getUserTradingById(userId);
     if (!userResult.success || !userResult.data?.tradingData) {
         return { success: false, error: "User not found" };
@@ -72,11 +66,6 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
 
 // admin beri uang dari pitching (IDR)
 export async function givePitchingMoney(userId: string, amount: number): Promise<ActionResult<TradingData>> {
-    const roleCheck = await checkUserRole([AdminTradingRole.PITCHINGGUARD, AdminTradingRole.SUPER]);
-    if (!roleCheck.success) {
-        return { success: false, error: roleCheck.error };
-    }
-
     if (amount <= 0) {
         return { success: false, error: "Amount must be positive" };
     }

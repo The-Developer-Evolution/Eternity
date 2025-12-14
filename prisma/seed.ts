@@ -1,4 +1,4 @@
-import { AdminTradingRole, PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient, Role } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
@@ -18,7 +18,12 @@ const passwords = [
   "Golf246&",
   "Hotel135*",
   "India864(",
-  "Juliet753)"
+  "Juliet753)",
+  "Kilo987!",
+  "Lima246@",
+  "Mike753#",
+  "November468$",
+  "Oscar159%",
 ];
 
 async function main() {
@@ -30,7 +35,6 @@ async function main() {
     update: {},
     create: {
       id: "tradingMasterData@Eternity",
-      
     },
   });
 
@@ -51,63 +55,61 @@ async function main() {
   // =========================
   // Rally Master Data
   // =========================
-    const masterRally = await prisma.masterRally.upsert({
-        where: { id: "rallyMasterData@Eternity" },
-        update: {},
-        create: {
-        id: "rallyMasterData@Eternity",
-        },
-    });
+  const masterRally = await prisma.masterRally.upsert({
+    where: { id: "rallyMasterData@Eternity" },
+    update: {},
+    create: {
+      id: "rallyMasterData@Eternity",
+    },
+  });
 
-    // create Admin user for each role
-    const roles: AdminTradingRole[] = [
-      "TALKSHOW",
-      "SUPER",
-      "SELL",
-      "BUYRAW",
-      "CRAFT",
-      "MAP",
-      "BLACKMARKET",
-      "PITCHING",
-      "CURRENCY",
-      "THUNT",
-    ];
+  // create Admin user for each role
+  const roles: Role[] = [
+    Role.SUPER,
+    Role.BLACKMARKET,
+    Role.BUYRAW,
+    Role.SELL,
+    Role.CRAFT,
+    Role.CURRENCY,
+    Role.EXCHANGE,
+    Role.MAP,
+    Role.MONSTER,
+    Role.PITCHING,
+    Role.PITCHINGGUARD,
+    Role.POSTGUARD,
+    Role.TALKSHOW,
+    Role.THUNT,
+    Role.UPGRADE,
+  ];
 
-    for (let i = 0; i < roles.length; i++) {
-      const role = roles[i];
-      const plainPassword = passwords[i]; // fixed password from array
-      const password = await bcrypt.hash(plainPassword, 10);
+  for (let i = 0; i < roles.length; i++) {
+    const role = roles[i];
+    const plainPassword = passwords[i]; // ambil password dari array
 
-      const name = `Admin ${role}`;
+    if (!plainPassword) {
+      console.error(`No password defined for role index ${i}: ${role}`);
+      continue; // skip jika password tidak ada
+    }
 
+    const password = await bcrypt.hash(plainPassword, 10);
+    const name = `Admin ${role}`;
+
+    try {
       const user = await prisma.user.create({
         data: {
           name,
-          password
+          password,
+          role,
         },
       });
-
-      await prisma.$transaction([
-        prisma.adminTrading.create({
-          data: {
-            userId: user.id,
-            role,
-          },
-        }),
-        prisma.tradingData.create({
-          data: {
-            userId: user.id,
-          },
-        }),
-      ]);
 
       console.log(
         `Created admin -> name: "${name}", password: "${plainPassword}"`
       );
+    } catch (error) {
+      console.log(`Admin ${name} already exists, skipping...`);
     }
-    
-
-
+  }
 
   // =========================
   // Dummy Users
@@ -117,7 +119,7 @@ async function main() {
     update: {},
     create: {
       name: "Dummy User One",
-      password: "password123", // ⚠️ hash in real app
+      password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
       },
@@ -129,7 +131,7 @@ async function main() {
     update: {},
     create: {
       name: "Dummy User Two",
-      password: "password123",
+      password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
       },

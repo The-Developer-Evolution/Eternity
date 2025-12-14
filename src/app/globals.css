@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Hemi Head';
+  src: url('/fonts/hemi-head.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Impact';
+  src: url('/fonts/impact.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura';
+  src: url('/fonts/FuturaCyrillicMedium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 :root {
   --background: #000F46;
   --foreground: #171717;
@@ -10,6 +35,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-hemi: 'Hemi Head', sans-serif;
+  --font-impact: 'Impact', sans-serif;
+  --font-futura: 'Futura', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

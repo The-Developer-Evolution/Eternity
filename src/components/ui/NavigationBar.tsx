@@ -1,17 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { checkUserRole } from "@/features/auth/utils";
-import { AdminRally, AdminRallyRole } from "@/generated/prisma/client";
-import { AdminTradingRole } from "@/generated/prisma/client";
-import { getUserRoles, UserRoles } from "@/features/auth/service";
+import ActionButton from "@/components/common/ActionButton";
+import { Role } from "@/generated/prisma/enums";
 
 export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
-
-  const [roles, setRoles] = useState<UserRoles | null>(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -21,29 +17,37 @@ export default function NavigationBar() {
     setIsOpen(false);
   };
 
-  const ActionButton = ({ onClick, children, variant = 'primary' }: { onClick: () => void, children: React.ReactNode, variant?: 'primary' | 'secondary' | 'danger' | 'debug' }) => {
-        const baseStyle = "w-full py-3 px-4 rounded-xl font-semibold transition-all transform active:scale-95 text-sm shadow-lg backdrop-blur-sm mb-2";
-        const variants = {
-            primary: "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-900/20",
-            secondary: "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700",
-            danger: "bg-red-900/10 hover:bg-red-900/30 text-red-200 border border-red-900/30",
-            debug: "bg-amber-900/10 hover:bg-amber-900/20 text-amber-500 border border-dashed border-amber-900/30"
-        };
-        return (
-            <button onClick={onClick} className={`${baseStyle} ${variants[variant]}`}>
-                {children}
-            </button>
-        );
-    };
+  // Get user role from session
+  const userRole = session?.user?.role as Role | undefined;
 
-  useEffect(() => {
-    if (!session?.user.id) return;
-    async function fetchRoles() {
-      const result = await getUserRoles(session!.user.id);
-      setRoles(result);
-    }
-    fetchRoles();
-  }, [session?.user.id]);
+  // Check if user has trading admin role
+  const isTradingAdmin =
+    userRole &&
+    [
+      Role.BLACKMARKET,
+      Role.BUYRAW,
+      Role.CRAFT,
+      Role.MAP,
+      Role.TALKSHOW,
+      Role.CURRENCY,
+      Role.PITCHING,
+      Role.PITCHINGGUARD,
+      Role.THUNT,
+      Role.SELL,
+      Role.PRESSURE,
+      Role.SUPER,
+    ].includes(userRole);
+
+  // Check if user has rally admin role
+  const isRallyAdmin =
+    userRole &&
+    [
+      Role.MONSTER,
+      Role.UPGRADE,
+      Role.EXCHANGE,
+      Role.POSTGUARD,
+      Role.SUPER,
+    ].includes(userRole);
 
   return (
     <>
@@ -58,18 +62,17 @@ export default function NavigationBar() {
 
         {/* Hamburger Button */}
         <div className="flex gap-4 items-center justify-center">
-          {session?.user && roles ? (
+          {!session ? (
             <Link
-              href="/admin"
+              href="/login"
               className="text-black hover:text-black hover:bg-[#5db4d6] transition-colors text-xl  bg-[#78CCEE] p-2 rounded-lg"
             >
               Login
             </Link>
           ) : (
-            <ActionButton variant="danger" onClick={() => signOut()}>
-                                                Logout
-                                            </ActionButton>
-            
+            <ActionButton onClick={() => signOut()} variant="danger">
+              Logout
+            </ActionButton>
           )}
           <button
             onClick={toggleMenu}
@@ -101,13 +104,13 @@ export default function NavigationBar() {
           }`}
         >
           <div className="flex flex-col gap-8 text-center">
-            {session?.user && roles && (
+            {!session && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
                   Authentication
                 </h3>
                 <Link
-                  href="/admin"
+                  href="/login"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
@@ -116,73 +119,102 @@ export default function NavigationBar() {
               </div>
             )}
 
-            <div className="flex flex-col gap-4">
-              <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
-                Admin
-              </h3>
-              <Link
-                href="/admin"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/admin/trading"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Talkshow
-              </Link>
-              <Link
-                href="/admin/trading"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Trading
-              </Link>
-              <Link
-                href="/admin/talkshow"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Pressure
-              </Link>
-              <Link
-                href="/admin/talkshow"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Rally
-              </Link>
-            </div>
+            {/* Admin Trading Menu - Only show for trading admins */}
+            {isTradingAdmin && (
+              <div className="flex flex-col gap-4">
+                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
+                  Admin Trading
+                </h3>
+                <Link
+                  href="/admin/trading"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Talkshow
+                </Link>
+                <Link
+                  href="/admin/trading"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Trading
+                </Link>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Pressure
+                </Link>
+              </div>
+            )}
 
-            <div className="flex flex-col gap-4 mt-4">
-              <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
-                Peserta
-              </h3>
-              <Link
-                href="/peserta/rally"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Rally
-              </Link>
-              <Link
-                href="/peserta/trading"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Trading
-              </Link>
-              <Link
-                href="/peserta/talkshow"
-                onClick={closeMenu}
-                className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-              >
-                Talkshow
-              </Link>
-            </div>
+            {/* Admin Rally Menu - Only show for rally admins */}
+            {isRallyAdmin && (
+              <div className="flex flex-col gap-4">
+                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
+                  Admin Rally
+                </h3>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Minus Point
+                </Link>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Upgrade
+                </Link>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Exchange
+                </Link>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Postguard
+                </Link>
+              </div>
+            )}
+
+            {/* Peserta Menu - Show for all logged in users */}
+            {session && (
+              <div className="flex flex-col gap-4 mt-4">
+                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
+                  Peserta
+                </h3>
+                <Link
+                  href="/peserta/rally"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Rally
+                </Link>
+                <Link
+                  href="/peserta/trading"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Trading
+                </Link>
+                <Link
+                  href="/peserta/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Talkshow
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </nav>

@@ -1,9 +1,8 @@
 'use server'
 
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource, TradingData } from "@/generated/prisma/client";
+import { BalanceLogType, BalanceTradingResource, TradingData } from "@/generated/prisma/client";
 import { RawMaterial } from "../types/craft";
 import { ActionResult } from "@/types/actionResult";
-import { checkUserRole } from "@/features/auth/utils";
 import { getUserTradingById } from "@/features/user/trading.service";
 import prisma from "@/lib/prisma";
 
@@ -14,14 +13,6 @@ export async function buyMaterial(
   userId: string,
   material: RawMaterial
 ): Promise<ActionResult<TradingData>> {
-
-  // 1. Check user role
-  const roleCheck = await checkUserRole([AdminTradingRole.BUYRAW, AdminTradingRole.SUPER]);
-  if (!roleCheck.success) {
-    return { success: false, error: roleCheck.error };
-  }
-
-  // 2. Fetch user + trading data
   const buyer = await getUserTradingById(userId);
   if (!buyer.success || !buyer.data?.tradingData) {
     return { success: false, error: "User or trading data not found" };
