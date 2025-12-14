@@ -81,11 +81,13 @@ model TradingData {
   id     String @id @default(cuid())
   userId String @unique
 
-  idr       BigInt @default(-10000000000)
-  usd       BigInt @default(0)
-  eternites Int    @default(0)
-  map       Int    @default(0)
-  point     Int    @default(0)
+  idr           BigInt  @default(-10000000000)
+  usd           BigInt  @default(0)
+  eternites     Int     @default(0)
+  map           Int     @default(0)
+  point         Int     @default(0)
+  isPlayedThunt Boolean @default(false)
+  itemFromThunt Int     @default(0)
 
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   rawItems           RawItem[]
