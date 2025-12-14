@@ -3,23 +3,17 @@ import React from "react";
 interface ActionButtonProps {
   onClick: () => void;
   children: React.ReactNode;
-  variant?: "primary" | "danger";
 }
 
 export default function ActionButton({
   onClick,
   children,
-  variant = "primary",
 }: ActionButtonProps) {
   const baseStyle =
-    "text-black hover:text-black transition-colors text-xl p-2 rounded-lg";
-  const variants = {
-    primary: "bg-[#78CCEE] hover:bg-[#5db4d6]",
-    danger: "bg-red-500 hover:bg-red-600 text-white",
-  };
+    "w-full justify-start rounded-lg px-3 py-2 text-lg md:text-2xl bg-[#78CCEE] text-black font-impact font-medium flex items-center gap-4 hover:bg-[#5AA8D6]";
 
   return (
-    <button onClick={onClick} className={`${baseStyle} ${variants[variant]}`}>
+    <button onClick={onClick} className={`${baseStyle}`}>
       {children}
     </button>
   );

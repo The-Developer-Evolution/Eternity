@@ -21,33 +21,33 @@ export default function NavigationBar() {
   const userRole = session?.user?.role as Role | undefined;
 
   // Check if user has trading admin role
+  const tradingAdminRoles = [
+    Role.BLACKMARKET,
+    Role.BUYRAW,
+    Role.CRAFT,
+    Role.MAP,
+    Role.TALKSHOW,
+    Role.CURRENCY,
+    Role.PITCHING,
+    Role.PITCHINGGUARD,
+    Role.THUNT,
+    Role.SELL,
+    Role.PRESSURE,
+    Role.SUPER,
+  ] as const;
   const isTradingAdmin =
-    userRole &&
-    [
-      Role.BLACKMARKET,
-      Role.BUYRAW,
-      Role.CRAFT,
-      Role.MAP,
-      Role.TALKSHOW,
-      Role.CURRENCY,
-      Role.PITCHING,
-      Role.PITCHINGGUARD,
-      Role.THUNT,
-      Role.SELL,
-      Role.PRESSURE,
-      Role.SUPER,
-    ].includes(userRole);
+    userRole && (tradingAdminRoles as readonly Role[]).includes(userRole);
 
   // Check if user has rally admin role
+  const rallyAdminRoles = [
+    Role.MONSTER,
+    Role.UPGRADE,
+    Role.EXCHANGE,
+    Role.POSTGUARD,
+    Role.SUPER,
+  ] as const;
   const isRallyAdmin =
-    userRole &&
-    [
-      Role.MONSTER,
-      Role.UPGRADE,
-      Role.EXCHANGE,
-      Role.POSTGUARD,
-      Role.SUPER,
-    ].includes(userRole);
+    userRole && (rallyAdminRoles as readonly Role[]).includes(userRole);
 
   return (
     <>
@@ -55,7 +55,7 @@ export default function NavigationBar() {
         <Link
           href={"/"}
           onClick={closeMenu}
-          className="text-[#78CCEE] z-50 relative"
+          className="text-[#78CCEE] z-50 relative font-impact text-5xl"
         >
           E
         </Link>
@@ -65,12 +65,12 @@ export default function NavigationBar() {
           {!session ? (
             <Link
               href="/login"
-              className="text-black hover:text-black hover:bg-[#5db4d6] transition-colors text-xl  bg-[#78CCEE] p-2 rounded-lg"
+              className="w-full justify-start rounded-lg px-3 py-2 text-lg md:text-2xl bg-[#78CCEE] text-black font-impact font-medium flex items-center gap-4 hover:bg-[#5AA8D6]"
             >
               Login
             </Link>
           ) : (
-            <ActionButton onClick={() => signOut()} variant="danger">
+            <ActionButton onClick={() => signOut()}>
               Logout
             </ActionButton>
           )}
@@ -80,28 +80,24 @@ export default function NavigationBar() {
             aria-label="Toggle menu"
           >
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${
-                isOpen ? "rotate-45 translate-y-2" : ""
-              }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "rotate-45 translate-y-2" : ""
+                }`}
             ></div>
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${
-                isOpen ? "opacity-0" : ""
-              }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "opacity-0" : ""
+                }`}
             ></div>
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${
-                isOpen ? "-rotate-45 -translate-y-2" : ""
-              }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-2" : ""
+                }`}
             ></div>
           </button>
         </div>
 
         {/* Menu Overlay */}
         <div
-          className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center transition-transform duration-300 ease-in-out ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
+            }`}
         >
           <div className="flex flex-col gap-8 text-center">
             {!session && (

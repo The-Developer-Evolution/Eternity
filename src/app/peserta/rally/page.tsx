@@ -1,6 +1,9 @@
 import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
+import CardPanel from "@/components/ui/CardPanel";
+import LinkButton from "@/components/common/LinkButton";
+import { FaBook, FaChartBar, FaBox, FaHouseUser } from "react-icons/fa";
 
 export default function Page() {
   return (
@@ -9,14 +12,14 @@ export default function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-screen top-0 left-0"></div>
-        <Image
-          src={"/assets/eternity-logo.svg"}
-          alt="eternity-logo"
-          draggable={false}
-          width={1920}
-          height={1080}
-          className="relative z-1 w-1/2 h-auto"
-        ></Image>
+        <CardPanel title="RALLY GAMES" period="Spring">
+          <div className="flex flex-col gap-2 h-full w-full justify-center items-center">
+            <LinkButton link="/peserta/rally/leaderboard" text="Leaderboard" icon={<FaChartBar />}></LinkButton>
+            <LinkButton link="/peserta/rally/inventory" text="Inventory" icon={<FaBox />}></LinkButton>
+            <LinkButton link="/peserta/rally/pos" text="Pos" icon={<FaHouseUser />}></LinkButton>
+          </div>
+          <LinkButton link="/#" text="Guidebook" icon={<FaBook />}></LinkButton>
+        </CardPanel>
       </div>
     </div>
   );

@@ -40,16 +40,13 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="relative z-10 w-full max-w-md mx-auto p-8">
+    <div className="relative font-futura z-10 w-full max-w-md mx-auto p-8">
 
       {/* Form Container */}
-      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-8 shadow-2xl">
-        <h2 className="text-3xl font-bold text-center mb-2 text-white">
+      <div className="rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md border-[#684095] border-3 p-8 shadow-2xl">
+        <h2 className="text-3xl text-center mb-2 text-white font-impact">
           Welcome Back
         </h2>
-        <p className="text-slate-400 text-center mb-8 text-sm">
-          Sign in to access your dashboard
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Message */}
@@ -61,7 +58,7 @@ export default function LoginForm() {
 
           {/* Username Field */}
           <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="name" className="block text-md font-bold text-slate-100">
               Username
             </label>
             <input
@@ -78,7 +75,7 @@ export default function LoginForm() {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="password" className="block text-md font-bold text-slate-100">
               Password
             </label>
             <input
@@ -97,18 +94,11 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-lg transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-blue-900/20"
+            className="w-full justify-center border-[#3E344A] border-3 rounded-lg px-4 py-2 text-lg md:text-2xl bg-[#78CCEE] text-[#3E344A] font-impact flex items-center gap-4 hover:bg-[#5AA8D6]"
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
-        {/* Additional Info */}
-        <div className="mt-6 text-center">
-          <p className="text-slate-500 text-xs">
-            Protected by Eternity Security
-          </p>
-        </div>
       </div>
     </div>
   );

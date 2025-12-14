@@ -30,7 +30,7 @@ export default withAuth(
       }
     }
 
-    if (path.startsWith("/peserta")) {
+    if (pathname.startsWith("/peserta")) {
       if (!token) {
         return NextResponse.redirect(new URL("/login", req.url))
       }

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
-import LoginForm from "@/components/common/LoginForm";
+import LoginForm from "@/components/ui/LoginForm";
 import Link from "next/link";
 export default function Unauthorized() {
   return (
