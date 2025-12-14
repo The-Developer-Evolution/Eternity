@@ -117,10 +117,11 @@ model BalanceTradingLog {
   id            String @id @default(cuid())
   tradingDataId String
 
-  amount   BigInt
-  message  String
-  type     BalanceLogType
-  resource BalanceTradingResource
+  amount    BigInt
+  message   String
+  type      BalanceLogType
+  resource  BalanceTradingResource
+  createdAt DateTime               @default(now())
 
   tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
 }
