@@ -32,12 +32,19 @@ export default function NavigationBar() {
         {/* Menu Overlay */}
         <div className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex flex-col gap-8 text-center">
-            
+            <div className="flex flex-col gap-4">
+              <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">Authentication</h3>
+              <Link href="/admin" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Login</Link>
+            </div>
+
+
             <div className="flex flex-col gap-4">
               <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">Admin</h3>
               <Link href="/admin" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Dashboard</Link>
+              <Link href="/admin/trading" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Talkshow</Link>
               <Link href="/admin/trading" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Trading</Link>
-              <Link href="/admin/talkshow" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Talkshow</Link>
+              <Link href="/admin/talkshow" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Pressure</Link>
+              <Link href="/admin/talkshow" onClick={closeMenu} className="text-white hover:text-[#78CCEE] transition-colors text-xl">Rally</Link>
             </div>
 
             <div className="flex flex-col gap-4 mt-4">
