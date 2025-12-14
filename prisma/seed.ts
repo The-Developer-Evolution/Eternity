@@ -52,20 +52,10 @@ async function main() {
     skipDuplicates: true,
   });
 
-
-  await prisma.levelUpgradeCost.createMany({
-    data: [
-     { eonix_cost: 5, big_item_required: 1, small_item_required: 1, require_one_of_each_big_item: false },
-     { eonix_cost: 8, big_item_required: 2, small_item_required: 2, require_one_of_each_big_item: false },
-     { eonix_cost: 12, big_item_required: 2, small_item_required: 3, require_one_of_each_big_item: false },
-     { eonix_cost: 15, big_item_required: 3, small_item_required: 3, require_one_of_each_big_item: true },
-    ]
-  })
-
   // =========================
   // Rally Master Data
   // =========================
-  const masterRally = await prisma.masterRally.upsert({
+  const masterRally = await prisma.rallyMaster.upsert({
     where: { id: "rallyMasterData@Eternity" },
     update: {},
     create: {
@@ -149,6 +139,563 @@ async function main() {
   });
 
   console.log({ masterTrading, masterRally, user1, user2 });
+
+  // Rally Datas
+  await prisma.rallyPeriod.createMany({
+    data: [
+      { id: "1", name: "Pasang Surut", duration: 20 },
+      { id: "2", name: "Musim Kemarau", duration: 20 },
+      { id: "3", name: "Musim Salju", duration: 20 },
+      { id: "4", name: "Banjir", duration: 20 },
+      { id: "5", name: "Bulan Merah", duration: 20 },
+      { id: "6", name: "Cuaca Cerah", duration: 20 },
+      { id: "7", name: "Hujan Asam", duration: 20 },
+      { id: "8", name: "Tornado", duration: 20 },
+    ],
+  });
+
+  await prisma.rallyZone.createMany({
+    data: [
+      { id: "1", name: "Amerika" },
+      { id: "2", name: "Asia" },
+      { id: "3", name: "Eropa" },
+      { id: "4", name: "Afrika" },
+    ],
+  });
+
+  await prisma.rallyPos.createMany({
+    data: [
+      // Amerika Zone
+      {
+        name: "Ledger Of Balance",
+        period_id: "1",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "2",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "3",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "4",
+        zone_id: "1",
+        eonix_cost: 4,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "5",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "6",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "7",
+        zone_id: "1",
+        eonix_cost: 4,
+      },
+      {
+        name: "Ledger Of Balance",
+        period_id: "8",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+
+      { name: "Spell Station", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Spell Station", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Spell Station", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Spell Station", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Spell Station", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Spell Station", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Spell Station", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Spell Station", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Word Bridge", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Word Bridge", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Word Bridge", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Word Bridge", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Word Bridge", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Word Bridge", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Word Bridge", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Word Bridge", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Count The Pion", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Count The Pion", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Count The Pion", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Count The Pion", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Count The Pion", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Count The Pion", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Count The Pion", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Count The Pion", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      {
+        name: "Create Your Story",
+        period_id: "1",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "2",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "3",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "4",
+        zone_id: "1",
+        eonix_cost: 4,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "5",
+        zone_id: "1",
+        eonix_cost: 2,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "6",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "7",
+        zone_id: "1",
+        eonix_cost: 4,
+      },
+      {
+        name: "Create Your Story",
+        period_id: "8",
+        zone_id: "1",
+        eonix_cost: 3,
+      },
+
+      { name: "Charades", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Charades", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Charades", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Charades", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Charades", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Charades", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Charades", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Charades", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Memory Run", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Memory Run", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Memory Run", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Memory Run", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Memory Run", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Memory Run", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Memory Run", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Memory Run", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Find The Ball", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Find The Ball", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Find The Ball", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Find The Ball", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Find The Ball", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Find The Ball", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Find The Ball", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Find The Ball", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Drawing Relay", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Drawing Relay", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Drawing Relay", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Drawing Relay", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Drawing Relay", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Drawing Relay", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Drawing Relay", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Drawing Relay", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Flip It", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Flip It", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Flip It", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Flip It", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Flip It", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Flip It", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Flip It", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Flip It", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      { name: "Make The Tower", period_id: "1", zone_id: "1", eonix_cost: 2 },
+      { name: "Make The Tower", period_id: "2", zone_id: "1", eonix_cost: 2 },
+      { name: "Make The Tower", period_id: "3", zone_id: "1", eonix_cost: 3 },
+      { name: "Make The Tower", period_id: "4", zone_id: "1", eonix_cost: 4 },
+      { name: "Make The Tower", period_id: "5", zone_id: "1", eonix_cost: 2 },
+      { name: "Make The Tower", period_id: "6", zone_id: "1", eonix_cost: 3 },
+      { name: "Make The Tower", period_id: "7", zone_id: "1", eonix_cost: 4 },
+      { name: "Make The Tower", period_id: "8", zone_id: "1", eonix_cost: 3 },
+
+      // Benua Asia
+      { name: "Trivia Quiz", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Trivia Quiz", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Trivia Quiz", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Trivia Quiz", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Trivia Quiz", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Trivia Quiz", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Trivia Quiz", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Trivia Quiz", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      { name: "Guess The Order", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Order", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Order", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Guess The Order", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Order", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Order", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Order", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Order", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      { name: "Tunnel And Ball", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Tunnel And Ball", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Tunnel And Ball", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Tunnel And Ball", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Tunnel And Ball", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Tunnel And Ball", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Tunnel And Ball", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Tunnel And Ball", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      {
+        name: "Leading The Blind",
+        period_id: "1",
+        zone_id: "2",
+        eonix_cost: 3,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "2",
+        zone_id: "2",
+        eonix_cost: 2,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "3",
+        zone_id: "2",
+        eonix_cost: 4,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "4",
+        zone_id: "2",
+        eonix_cost: 2,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "5",
+        zone_id: "2",
+        eonix_cost: 2,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "6",
+        zone_id: "2",
+        eonix_cost: 3,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "7",
+        zone_id: "2",
+        eonix_cost: 3,
+      },
+      {
+        name: "Leading The Blind",
+        period_id: "8",
+        zone_id: "2",
+        eonix_cost: 2,
+      },
+
+      { name: "Lava Floor", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Lava Floor", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Lava Floor", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Lava Floor", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Lava Floor", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Lava Floor", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Lava Floor", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Lava Floor", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      { name: "Running Man", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Running Man", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Running Man", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Running Man", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Running Man", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Running Man", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Running Man", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Running Man", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      { name: "Guess The Song", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Song", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Song", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Guess The Song", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Song", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Guess The Song", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Song", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Guess The Song", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      { name: "Let Those Out", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Let Those Out", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Let Those Out", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Let Those Out", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Let Those Out", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Let Those Out", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Let Those Out", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Let Those Out", period_id: "8", zone_id: "2", eonix_cost: 2 },
+
+      // Benua Eropa
+      { name: "Fly Cup, Fly", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Fly Cup, Fly", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Fly Cup, Fly", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Fly Cup, Fly", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Fly Cup, Fly", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Fly Cup, Fly", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Fly Cup, Fly", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Fly Cup, Fly", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      { name: "Estafet Gelas", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Estafet Gelas", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Estafet Gelas", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Estafet Gelas", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Estafet Gelas", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Estafet Gelas", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Estafet Gelas", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Estafet Gelas", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      { name: "Pair Hunt", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Pair Hunt", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Pair Hunt", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Pair Hunt", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Pair Hunt", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Pair Hunt", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Pair Hunt", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Pair Hunt", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      { name: "Cup And Rubby", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Cup And Rubby", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Cup And Rubby", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Cup And Rubby", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Cup And Rubby", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Cup And Rubby", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Cup And Rubby", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Cup And Rubby", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      { name: "Maze Marker", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Maze Marker", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Maze Marker", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Maze Marker", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Maze Marker", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Maze Marker", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Maze Marker", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Maze Marker", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      { name: "Pass The Flour", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Pass The Flour", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Pass The Flour", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Pass The Flour", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Pass The Flour", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Pass The Flour", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Pass The Flour", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Pass The Flour", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      {
+        name: "Two Facts One Lies",
+        period_id: "1",
+        zone_id: "3",
+        eonix_cost: 2,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "2",
+        zone_id: "3",
+        eonix_cost: 3,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "3",
+        zone_id: "3",
+        eonix_cost: 3,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "4",
+        zone_id: "3",
+        eonix_cost: 3,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "5",
+        zone_id: "3",
+        eonix_cost: 3,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "6",
+        zone_id: "3",
+        eonix_cost: 4,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "7",
+        zone_id: "3",
+        eonix_cost: 2,
+      },
+      {
+        name: "Two Facts One Lies",
+        period_id: "8",
+        zone_id: "3",
+        eonix_cost: 2,
+      },
+
+      { name: "Glass Race", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      { name: "Glass Race", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      { name: "Glass Race", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      { name: "Glass Race", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      { name: "Glass Race", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      { name: "Glass Race", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      { name: "Glass Race", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      { name: "Glass Race", period_id: "8", zone_id: "3", eonix_cost: 2 },
+
+      // Benua Afrika
+      { name: "Chopstick Master", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Chopstick Master", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Chopstick Master", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Chopstick Master", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Chopstick Master", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Chopstick Master", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Chopstick Master", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Chopstick Master", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      {name: "Tic Tac Toe", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Tic Tac Toe", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Tic Tac Toe", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Tic Tac Toe", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Tic Tac Toe", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Tic Tac Toe", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Tic Tac Toe", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Tic Tac Toe", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      {name: "What the Hey", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "What the Hey", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "What the Hey", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "What the Hey", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "What the Hey", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "What the Hey", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "What the Hey", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "What the Hey", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      {name: "Wrong Color", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Wrong Color", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Wrong Color", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Wrong Color", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Wrong Color", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Wrong Color", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Wrong Color", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Wrong Color", period_id: "8", zone_id: "4", eonix_cost: 3 },
+      
+      {name: "Scoop Them All", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Scoop Them All", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Scoop Them All", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Scoop Them All", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Scoop Them All", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Scoop Them All", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Scoop Them All", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Scoop Them All", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      {name: "Walk The Landmine", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Walk The Landmine", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Walk The Landmine", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Walk The Landmine", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Walk The Landmine", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Walk The Landmine", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Walk The Landmine", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Walk The Landmine", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      {name: "Granny Pants", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Granny Pants", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Granny Pants", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Granny Pants", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Granny Pants", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Granny Pants", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Granny Pants", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Granny Pants", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+      { name: "Boom-Pop", period_id: "1", zone_id: "4", eonix_cost: 3 },
+      { name: "Boom-Pop", period_id: "2", zone_id: "4", eonix_cost: 4 },
+      { name: "Boom-Pop", period_id: "3", zone_id: "4", eonix_cost: 2 },
+      { name: "Boom-Pop", period_id: "4", zone_id: "4", eonix_cost: 3 },
+      { name: "Boom-Pop", period_id: "5", zone_id: "4", eonix_cost: 4 },
+      { name: "Boom-Pop", period_id: "6", zone_id: "4", eonix_cost: 2 },
+      { name: "Boom-Pop", period_id: "7", zone_id: "4", eonix_cost: 2 },
+      { name: "Boom-Pop", period_id: "8", zone_id: "4", eonix_cost: 3 },
+
+
+      { name: "Exchange Pos", period_id: "1", zone_id: "1", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "2", zone_id: "1", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "3", zone_id: "1", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "4", zone_id: "1", eonix_cost: 0 },
+
+      { name: "Exchange Pos", period_id: "1", zone_id: "2", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "2", zone_id: "2", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "3", zone_id: "2", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "4", zone_id: "2", eonix_cost: 0 },
+
+      { name: "Exchange Pos", period_id: "1", zone_id: "3", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "2", zone_id: "3", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "3", zone_id: "3", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "4", zone_id: "3", eonix_cost: 0 },
+      
+      { name: "Exchange Pos", period_id: "1", zone_id: "4", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "2", zone_id: "4", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "3", zone_id: "4", eonix_cost: 0 },
+      { name: "Exchange Pos", period_id: "4", zone_id: "4", eonix_cost: 0 },
+    ],
+  });
+
+  await prisma.rallyBigItem.createMany({
+    data: [
+      { id: "1", name: "Eternia Sigil"},
+      { id: "2", name: "Chrono Key"},
+      { id: "3", name: "Core Fragment"},
+    ],
+  });
+
+  await prisma.rallySmallItem.createMany({
+    data: [
+      { id: "1", name: "Sigil Token"},
+      { id: "2", name: "Chrono Token"},
+      { id: "3", name: "Fragment Token"},
+      { id: "4", name: "Rune"},
+      { id: "5", name: "Shard"},
+      { id: "6", name: "Flux"},
+    ],
+  });
+
+  await prisma.rallyBigItemRecipe.createMany({
+    data: [
+      {result_item_id: "1", small_item_id:"1", quantity:1},
+      {result_item_id: "1", small_item_id:"5", quantity:2},
+      {result_item_id: "2", small_item_id:"2", quantity:1},
+      {result_item_id: "2", small_item_id:"4", quantity:2},
+      {result_item_id: "3", small_item_id:"3", quantity:1},
+      {result_item_id: "3", small_item_id:"6", quantity:2},
+    ]
+  });
 }
 
 main()

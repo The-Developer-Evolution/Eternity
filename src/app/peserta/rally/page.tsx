@@ -3,7 +3,7 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import CardPanel from "@/components/ui/CardPanel";
 import LinkButton from "@/components/common/LinkButton";
-import { FaBook, FaChartBar, FaHistory, FaIdCard, FaBox, FaHouseUser } from "react-icons/fa";
+import { FaBook, FaChartBar, FaHistory, FaIdCard, FaBox, FaHouseUser, FaTable } from "react-icons/fa";
 
 export default function Page() {
   return (
@@ -16,6 +16,7 @@ export default function Page() {
           <div className="flex flex-col gap-2 h-full w-full justify-center items-center">
             <LinkButton link="/peserta/rally/leaderboard" text="Leaderboard" icon={<FaChartBar />}></LinkButton>
             <LinkButton link="/peserta/rally/access-card" text="Access Card" icon={<FaIdCard />}></LinkButton>
+            <LinkButton link="/peserta/rally/craft" text="Craft" icon={<FaTable />}></LinkButton>
             <LinkButton link="/peserta/rally/inventory" text="Inventory" icon={<FaBox />}></LinkButton>
             <LinkButton link="/peserta/rally/activity-log" text="Activity Log" icon={<FaHistory />}></LinkButton>
             <LinkButton link="/peserta/rally/pos" text="Pos" icon={<FaHouseUser />}></LinkButton>
