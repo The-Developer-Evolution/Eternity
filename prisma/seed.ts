@@ -52,6 +52,16 @@ async function main() {
     skipDuplicates: true,
   });
 
+
+  await prisma.levelUpgradeCost.createMany({
+    data: [
+     { eonix_cost: 5, big_item_required: 1, small_item_required: 1, require_one_of_each_big_item: false },
+     { eonix_cost: 8, big_item_required: 2, small_item_required: 2, require_one_of_each_big_item: false },
+     { eonix_cost: 12, big_item_required: 2, small_item_required: 3, require_one_of_each_big_item: false },
+     { eonix_cost: 15, big_item_required: 3, small_item_required: 3, require_one_of_each_big_item: true },
+    ]
+  })
+
   // =========================
   // Rally Master Data
   // =========================

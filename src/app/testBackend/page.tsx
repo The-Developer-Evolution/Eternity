@@ -15,7 +15,7 @@ import { convertCurrency } from "@/features/trading/services/currency";
 import { givePitchingMoney, payPitchingFee } from "@/features/trading/services/pitching";
 
 export default function Home() {
-    const { data: session, status } = useSession()
+    const { data: session} = useSession()
     const [user, setUser] = useState<UserTrading | null>(null);
     const [rawCraftAmount, setRawCraftAmount] = useState<TradingAmounts | null>(null);
 
@@ -73,7 +73,7 @@ export default function Home() {
                     {/* Main Content Area */}
                     <main className="lg:col-span-8 space-y-8">
                         
-                        {user?.tradingData && (
+                        {user?.role && (
                             <>
                                 {/* Key Metrics */}
                                 <section>
@@ -160,7 +160,7 @@ export default function Home() {
                         {/* Auth Panel */}
                         <div className="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl backdrop-blur-md">
                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Authentication</h3>
-                             <ActionButton onClick={() => signIn("credentials", { name: "Admin SUPER", password: "Bravo456@", redirect: false })}>
+                             <ActionButton onClick={() => signIn("credentials", { name: "Admin SUPER", password: "Alpha123!", redirect: false })}>
                                 Login as Super Admin
                             </ActionButton>
                             <div className="grid grid-cols-2 gap-3">

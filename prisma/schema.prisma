@@ -189,6 +189,15 @@ model MasterRally {
   status               GameStatus @default(PENDING)
 }
 
+model LevelUpgradeCost{
+  id          String @id @default(cuid())
+  eonix_cost  Int
+  big_item_required Int
+  small_item_required  Int
+  require_one_of_each_big_item  Boolean
+  RallyData RallyData[]
+}
+
 model ZoneRally {
   id   String @id @default(cuid())
   zone Zone
@@ -227,11 +236,14 @@ model RallyData {
   vault         Int @default(0)
   ticket        Int @default(0)
   specialTicket Int @default(0)
+  playedPosCount Int @default(0)
+  level_upgrade_cost_id String
 
   // Relationships
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   balanceRallyLogs BalanceRallyLog[]
   smallItems       SmallItemModel[]
+  levelUpgradeCost LevelUpgradeCost @relation(fields: [level_upgrade_cost_id], references: [id], onDelete: Cascade)
   bigItems         BigItemModel[]
 }
 

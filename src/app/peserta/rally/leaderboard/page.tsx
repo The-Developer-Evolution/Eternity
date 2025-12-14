@@ -32,7 +32,7 @@ export default function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="my-[5%] relative z-10 w-full flex flex-col items-center gap-6">
+        <div className="my-[10%] md:my-[5%] relative z-10 w-full flex flex-col items-center gap-6">
           <LeaderboardRally 
             data={dummyData}
             title="Rally Leaderboard"

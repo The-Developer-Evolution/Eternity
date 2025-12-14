@@ -15,7 +15,7 @@ export default function Home() {
           draggable={false}
           width={1920}
           height={1080}
-          className="relative z-1 w-1/2 h-auto"
+          className="relative z-1 w-[80%] md:w-1/2 h-auto"
         ></Image>
       </div>
     </div>
