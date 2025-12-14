@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { extractRawCraftAmounts } from "@/features/trading/utils";
 import { craftToMap } from "@/features/trading/services/map";
 import { convertCurrency } from "@/features/trading/services/currency";
+import { givePitchingMoney, payPitchingFee } from "@/features/trading/services/pitching";
 
 export default function Home() {
     const { data: session, status } = useSession();
@@ -219,6 +220,9 @@ export default function Home() {
                                     <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.coal)) }}>
                                         Buy Coal
                                     </ActionButton>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.water)) }}>
+                                        Buy Water
+                                    </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
@@ -242,6 +246,16 @@ export default function Home() {
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Currency Converter</div>
                                      <ActionButton onClick={async () => { console.log(await convertCurrency("cmj56jol2000bv8hnvmu9m9yt", 16000, "IDR", "USD")) }}>
                                         Convert 16000 IDR to USD
+                                    </ActionButton>
+                                </div>
+                                
+                                <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                                    <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Pitching Station</div>
+                                     <ActionButton onClick={async () => { console.log(await payPitchingFee("cmj56jol2000bv8hnvmu9m9yt")) }}>
+                                        Pay Pitching Fee
+                                    </ActionButton>
+                                     <ActionButton onClick={async () => { console.log(await givePitchingMoney("cmj56jol2000bv8hnvmu9m9yt", 16000)) }}>
+                                        Give Pitching Money
                                     </ActionButton>
                                 </div>
                             </div>
