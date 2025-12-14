@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/generated/prisma/enums";
 import { NextResponse } from "next/server";
+import { upgradeAccessCard } from "@/features/rally/services/upgrade";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     // Only admins can upgrade
-    const adminRoles = [Role.SUPER, Role.UPGRADE];
+    const adminRoles: Role[] = [Role.SUPER, Role.UPGRADE];
     if (!adminRoles.includes(session.user.role as Role)) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
@@ -33,26 +34,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get current level
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { rallyData: true },
-    });
-
-    if (!user?.rallyData) {
-      return NextResponse.json(
-        { success: false, error: "User rally data not found" },
-        { status: 404 }
-      );
-    }
-
-    // Upgrade access card level
-    const newLevel = user.rallyData.access_card_level + 1;
-    
-    const updated = await prisma.rallyData.update({
-      where: { user_id: userId },
-      data: { access_card_level: newLevel },
-    });
+    // Upgrade access card logic via service
+    const updated = await upgradeAccessCard(userId);
 
     return NextResponse.json({
       success: true,
@@ -61,9 +44,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error upgrading access card:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to upgrade access card";
     return NextResponse.json(
-      { success: false, error: "Failed to upgrade access card" },
-      { status: 500 }
+      { success: false, error: errorMessage },
+      { status: 500 } // Or 400 depending on logic, but 500 is safe for now or logic errors
     );
   }
 }
