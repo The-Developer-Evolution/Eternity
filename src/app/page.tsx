@@ -4,7 +4,7 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 
 export default function Home() {
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-4 justify-center items-center">
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
@@ -15,7 +15,7 @@ export default function Home() {
           draggable={false}
           width={1920}
           height={1080}
-          className="relative z-1 w-1/2 h-auto"
+          className="relative z-1 w-[80%] md:w-1/2 h-auto"
         ></Image>
       </div>
     </div>

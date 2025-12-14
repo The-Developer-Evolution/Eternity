@@ -3,7 +3,7 @@
 import { User } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
-
+import { Role } from "@/generated/prisma/client";
 //////////////////////
 // GET FUNCTION
 /////////////////////
@@ -29,8 +29,7 @@ export async function getAllUser(): Promise<ActionResult<User[]>> {
   try {
     const users = await prisma.user.findMany({
       where: {
-        adminTrading: null,
-        adminRally: null,
+        role: Role.PARTICIPANT
       },
     });
 

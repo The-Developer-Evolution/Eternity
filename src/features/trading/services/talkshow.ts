@@ -4,19 +4,10 @@ import prisma from "@/lib/prisma"
 import { ActionResult } from "@/types/actionResult"
 import { handlePrismaError } from "@/utils/prisma"
 import { revalidatePath } from "next/cache"
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums"
-import { checkUserRole } from "../../auth/utils"
+import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums"
 
 // For Talkshow: add trading point to user
 export async function addTradingPointToUser(userId: string, points: number): Promise<ActionResult<number>> {
-    //   Check user role
-    const result = await checkUserRole([AdminTradingRole.TALKSHOW]);
-    if (!result.success) {
-        console.log(result.error)
-        return {
-            success: false, error: result.error
-        } 
-    }
     
     try {
         const updatedTradingData = await prisma.tradingData.update({

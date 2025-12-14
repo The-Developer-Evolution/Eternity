@@ -1,6 +1,5 @@
 'use client'
 import { register } from "@/features/auth/action";
-import { getUserRoles, UserRoles } from "@/features/auth/service";
 import { itemToCraft } from "@/features/trading/services/craft";
 import { buyMaterial } from "@/features/trading/services/buyRaw";
 import { addTradingPointToUser } from "@/features/trading/services/talkshow";
@@ -19,30 +18,9 @@ import { getTransactionByUserId, setStatusTrading } from "@/features/trading/ser
 import { GameStatus } from "@/generated/prisma/enums";
 
 export default function Home() {
-    const { data: session, status } = useSession();
-    const [roles, setRoles] = useState<UserRoles | null>(null);
+    const { data: session} = useSession()
     const [user, setUser] = useState<UserTrading | null>(null);
     const [rawCraftAmount, setRawCraftAmount] = useState<TradingAmounts | null>(null);
-
-    // get role
-    useEffect(() => {
-        if (!session?.user.id) return;
-        async function fetchRoles() {
-            const result = await getUserRoles(session!.user.id);
-            const userDB = await getUserTradingById(session!.user.id);
-            setRoles(result);
-            console.log(userDB)
-
-            if (userDB.success) {
-                setUser(userDB.data!);
-                const amounts = extractRawCraftAmounts(userDB.data!);
-                setRawCraftAmount(amounts)
-            }else{
-                console.log(userDB.error);
-            }
-        }
-        fetchRoles();
-    }, [session?.user.id]);
 
     const StatCard = ({ label, value, colorClass = "text-white" }: { label: string, value: string | number | undefined, colorClass?: string }) => (
         <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between hover:border-slate-700 transition-colors">
@@ -83,7 +61,7 @@ export default function Home() {
                              <div className="text-sm text-slate-400">Logged in as <span className="text-white font-medium">{session.user?.name || session.user?.email}</span></div>
                              <div className="text-xs text-slate-500 font-mono mt-1">ID: {session.user.id}</div>
                              <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-wide border border-indigo-500/20">
-                                 {roles?.role || 'User'}
+                                 {user?.role || 'User'}
                              </div>
                          </div>
                     ) : (
@@ -98,7 +76,7 @@ export default function Home() {
                     {/* Main Content Area */}
                     <main className="lg:col-span-8 space-y-8">
                         
-                        {user?.tradingData && (
+                        {user?.role && (
                             <>
                                 {/* Key Metrics */}
                                 <section>
@@ -185,7 +163,7 @@ export default function Home() {
                         {/* Auth Panel */}
                         <div className="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl backdrop-blur-md">
                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Authentication</h3>
-                             <ActionButton onClick={() => signIn("credentials", { name: "Admin SUPER", password: "Bravo456@", redirect: false })}>
+                             <ActionButton onClick={() => signIn("credentials", { name: "Admin SUPER", password: "Alpha123!", redirect: false })}>
                                 Login as Super Admin
                             </ActionButton>
                             <div className="grid grid-cols-2 gap-3">
