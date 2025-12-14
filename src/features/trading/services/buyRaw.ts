@@ -1,69 +1,22 @@
 'use server'
 
-import prisma from "@/lib/prisma"
-import { ActionResult } from "@/types/actionResult"
-import { handlePrismaError } from "@/utils/prisma"
-import { revalidatePath } from "next/cache"
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums"
-import { checkUserRole } from "../auth/utils"
-import { TradingData, User } from "@/generated/prisma/client"
-import { RawMaterial } from "./types"
-import { getRandomRawMaterial } from "./utils"
-import { getUserTradingById } from "../user/trading.service"
-
-// For Talkshow: add trading point to user
-export async function addTradingPointToUser(userId: string, points: number): Promise<ActionResult<number>> {
-    //   Check user role
-    const result = await checkUserRole([AdminTradingRole.TALKSHOW]);
-    if (!result.success) {
-        console.log(result.error)
-        return {
-            success: false, error: result.error
-        } 
-    }
-    
-    try {
-        const updatedTradingData = await prisma.tradingData.update({
-            where: {
-                userId: userId,
-            },
-            data: {
-                point: {
-                    increment: points,
-                },
-            },
-        });
-
-        revalidatePath('/');
-
-        return {
-            success: true,
-            data: updatedTradingData.point,
-            message: `Successfully added ${points} points.`,
-        };
-
-    } catch (error) {
-        console.error("Error updating trading points:", error);
-        // console.error("Error updating trading points:", handlePrismaError(error));
-        return {
-                success: false,
-                error: handlePrismaError(error),
-        };
-    }
-}
-
-
-// Beli Raw Material
+import { AdminTradingRole, BalanceLogType, BalanceTradingResource, TradingData } from "@/generated/prisma/client";
+import { RawMaterial } from "../types/craft";
+import { ActionResult } from "@/types/actionResult";
+import { checkUserRole } from "@/features/auth/utils";
+import { getUserTradingById } from "@/features/user/trading.service";
+import prisma from "@/lib/prisma";
 
 const MATERIAL_PRICE = 100;
 
+// Beli Raw Material
 export async function buyMaterial(
   userId: string,
   material: RawMaterial
 ): Promise<ActionResult<TradingData>> {
 
   // 1. Check user role
-  const roleCheck = await checkUserRole([AdminTradingRole.SUPER]);
+  const roleCheck = await checkUserRole([AdminTradingRole.BUYRAW, AdminTradingRole.SUPER]);
   if (!roleCheck.success) {
     return { success: false, error: roleCheck.error };
   }
