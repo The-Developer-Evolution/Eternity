@@ -7,7 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 /////////////////////////////////////////////////
 // TRADING TABLE
 /////////////////////////////////////////////////
@@ -49,50 +48,47 @@ enum AdminTradingRole {
 
 // MASTER MODELS
 model PeriodeTrading {
-  id                   String @id @default(cuid())
-  periode              Int @unique
-  cost_map             Int
-  price_map            Int
-  duration             Int
+  id        String @id @default(cuid())
+  periode   Int    @unique
+  cost_map  Int
+  price_map Int
+  duration  Int
 }
 
 model MasterTrading {
-  id                  String @id @default(cuid())
-  current_periode     Int @default(1)
-  elapsed             Int  @default(0)
-  lastStartedAt       DateTime?   
-  status              GameStatus  @default(PENDING)
+  id              String     @id @default(cuid())
+  current_periode Int        @default(1)
+  elapsed         Int        @default(0)
+  lastStartedAt   DateTime?
+  status          GameStatus @default(PENDING)
 }
-
 
 // MODELS
 model User {
-  id        String         @id @default(cuid())
-  name      String
-  email     String         @unique
-  password  String
-  nim       String
+  id       String @id @default(cuid())
+  name     String @unique
+  password String
 
-  tradingData  TradingData?
-  rallyData RallyData?
+  tradingData TradingData?
+  rallyData   RallyData?
 
   adminTrading AdminTrading?
-  adminRally AdminRally?
+  adminRally   AdminRally?
 }
 
 model TradingData {
-  id        String  @id @default(cuid())
-  userId    String  @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  idr       BigInt  @default(-10000000000)
-  usd       BigInt  @default(0)
-  eternites Int     @default(0)
-  map       Int     @default(0)
-  point     Int     @default(0)
+  idr       BigInt @default(-10000000000)
+  usd       BigInt @default(0)
+  eternites Int    @default(0)
+  map       Int    @default(0)
+  point     Int    @default(0)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rawItems   RawItem[]
-  craftItems CraftItem[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rawItems           RawItem[]
+  craftItems         CraftItem[]
   balanceTradingLogs BalanceTradingLog[]
 }
 
@@ -100,43 +96,40 @@ model RawItem {
   id            String @id @default(cuid())
   tradingDataId String
 
-  name          String
+  name String
 
-  tradingData   TradingData @relation(fields: [tradingDataId],references: [id],onDelete: Cascade)
+  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
 }
 
 model CraftItem {
   id            String @id @default(cuid())
   tradingDataId String
 
-  name          String
+  name String
 
-  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
 }
 
 model BalanceTradingLog {
-  id            String        @id @default(cuid())
+  id            String @id @default(cuid())
   tradingDataId String
 
-  amount        BigInt
-  message       String  
-  type          BalanceLogType
-  resource      BalanceTradingResource
+  amount   BigInt
+  message  String
+  type     BalanceLogType
+  resource BalanceTradingResource
 
-  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
 }
 
 model AdminTrading {
-  id     String  @id @default(cuid())
-  userId String  @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
   role AdminTradingRole
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-
-
 
 /////////////////////////////////////////////////
 // RALLY TABLE
@@ -193,17 +186,17 @@ enum Zone {
 
 // MASTER MODELS
 model MasterRally {
-  id                    String @id @default(cuid())
-  current_periode       Int  @default(1)
-  special_ticket_stock  Int  @default(5)
-  duration              Int  @default(1200)
-  elapsed               Int  @default(0)  // seconds already counted
-  lastStartedAt         DateTime?   
-  status                GameStatus  @default(PENDING)
+  id                   String     @id @default(cuid())
+  current_periode      Int        @default(1)
+  special_ticket_stock Int        @default(5)
+  duration             Int        @default(1200)
+  elapsed              Int        @default(0) // seconds already counted
+  lastStartedAt        DateTime?
+  status               GameStatus @default(PENDING)
 }
 
 model ZoneRally {
-  id   String    @id @default(cuid())
+  id   String @id @default(cuid())
   zone Zone
 
   exchangeCosts ExchangeCostRally[]
@@ -211,7 +204,7 @@ model ZoneRally {
 
 model PeriodeRally {
   id             String @id @default(cuid())
-  periode        Int @unique
+  periode        Int    @unique
   eonix_addition Int
 
   exchangeCosts ExchangeCostRally[]
@@ -224,65 +217,64 @@ model ExchangeCostRally {
   eonix_amount    Int
 
   // Relationships
-  zoneRally    ZoneRally @relation(fields: [zoneRally_id], references: [id], onDelete: Cascade)
-  periodeRally PeriodeRally   @relation(fields: [periodeRally_id], references: [id], onDelete: Cascade)
+  zoneRally    ZoneRally    @relation(fields: [zoneRally_id], references: [id], onDelete: Cascade)
+  periodeRally PeriodeRally @relation(fields: [periodeRally_id], references: [id], onDelete: Cascade)
 }
-
 
 // MODELS
 model AdminRally {
-  id      String         @id @default(cuid())
-  userId  String         @unique
-  role    AdminRallyRole
+  id     String         @id @default(cuid())
+  userId String         @unique
+  role   AdminRallyRole
 
-  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RallyData {
-  id             String @id @default(cuid())
-  userId         String @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  point          Int    @default(0)
-  minusPoint     Int    @default(0)
-  level          Int    @default(0)
-  eonix          Int    @default(0)
-  vault          Int    @default(0)
-  ticket         Int    @default(0)
-  specialTicket  Int    @default(0)
+  point         Int @default(0)
+  minusPoint    Int @default(0)
+  level         Int @default(0)
+  eonix         Int @default(0)
+  vault         Int @default(0)
+  ticket        Int @default(0)
+  specialTicket Int @default(0)
 
   // Relationships
-  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  balanceRallyLogs  BalanceRallyLog[]
-  smallItems        SmallItemModel[]
-  bigItems          BigItemModel[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balanceRallyLogs BalanceRallyLog[]
+  smallItems       SmallItemModel[]
+  bigItems         BigItemModel[]
 }
 
 model BalanceRallyLog {
   id          String               @id @default(cuid())
-  rallyDataId String               
-  amount      Int         
-  message     String         
+  rallyDataId String
+  amount      Int
+  message     String
   type        BalanceLogType
   resource    BalanceRallyResource
 
   // Relationship
-  rallyData   RallyData            @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+  rallyData RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
 }
 
 model SmallItemModel {
   id          String    @id @default(cuid())
-  rallyDataId String    
+  rallyDataId String
   name        SmallItem
 
   // Relationship
-  rallyData   RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+  rallyData RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
 }
 
 model BigItemModel {
-  id          String    @id @default(cuid())
-  rallyDataId String  
-  name        BigItem  
+  id          String  @id @default(cuid())
+  rallyDataId String
+  name        BigItem
 
   // Relationship
-  rallyData   RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
+  rallyData RallyData @relation(fields: [rallyDataId], references: [id], onDelete: Cascade)
 }
