@@ -168,28 +168,28 @@ export default function NavigationBar() {
                   Admin Rally
                 </h3>
                 <Link
-                  href="/admin/talkshow"
+                  href="/admin/rally/minus-point"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Minus Point
                 </Link>
                 <Link
-                  href="/admin/talkshow"
+                  href="/admin/rally/upgrade"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Upgrade
                 </Link>
                 <Link
-                  href="/admin/talkshow"
+                  href="/admin/rally/exchange"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Exchange
                 </Link>
                 <Link
-                  href="/admin/talkshow"
+                  href="/admin/rally/posguard"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
