@@ -30,8 +30,7 @@ export default function LoginForm() {
         return;
       }
 
-      // Redirect to admin page on success
-      router.push("/admin");
+      router.push("/");
       router.refresh();
     } catch (error) {
       setError("An error occurred. Please try again.");
