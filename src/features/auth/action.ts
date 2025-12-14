@@ -5,20 +5,18 @@ import bcrypt from "bcrypt";
 
 export async function register(
   name: string,
-  email: string,
-  password: string,
-  nim: string
+  password: string
 ) {
-  if (!name || !email || !password || !nim) {
+  if (!name || !password) {
     throw new Error("Missing fields");
   }
 
   const existingUser = await prisma.user.findUnique({
-    where: { email },
+    where: { name },
   });
 
   if (existingUser) {
-    throw new Error("Email already registered");
+    throw new Error("Username already registered");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,14 +24,12 @@ export async function register(
   const user = await prisma.user.create({
     data: {
         name,
-        email,
         password: hashedPassword,
-        nim,
     },
   });
 
   return {
     id: user.id,
-    email: user.email,
+    name: user.name,
   };
 }

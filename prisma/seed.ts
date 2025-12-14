@@ -61,42 +61,49 @@ async function main() {
 
     // create Admin user for each role
     const roles: AdminTradingRole[] = [
-        "TALKSHOW",
-        "SUPER",
-        "SELL",
-        "BUYRAW",
-        "CRAFT",
-        "MAP",
-        "BLACKMARKET",
-        "PITCHING",
-        "CURRENCY",
-        "THUNT",
+      "TALKSHOW",
+      "SUPER",
+      "SELL",
+      "BUYRAW",
+      "CRAFT",
+      "MAP",
+      "BLACKMARKET",
+      "PITCHING",
+      "CURRENCY",
+      "THUNT",
     ];
 
     for (let i = 0; i < roles.length; i++) {
-        const role = roles[i];
-        const email = `admin@${role.toLowerCase()}.eternity`;
-        const plainPassword = passwords[i]; // fixed password from array
-        const password = await bcrypt.hash(plainPassword, 10);
+      const role = roles[i];
+      const plainPassword = passwords[i]; // fixed password from array
+      const password = await bcrypt.hash(plainPassword, 10);
 
-        const user = await prisma.user.create({
+      const name = `Admin ${role}`;
+
+      const user = await prisma.user.create({
         data: {
-            name: `Admin ${role}`,
-            email,
-            password,
-            nim: `NIM-${role.toUpperCase()}`,
-            adminTrading: {
-              create: { role }
-            },
-            tradingData:{
-              create:{}
-            }
+          name,
+          password
         },
-        });
+      });
 
-        console.log(
-        `Created user: ${user.name}, email: ${email}, password: ${plainPassword}`
-        );
+      await prisma.$transaction([
+        prisma.adminTrading.create({
+          data: {
+            userId: user.id,
+            role,
+          },
+        }),
+        prisma.tradingData.create({
+          data: {
+            userId: user.id,
+          },
+        }),
+      ]);
+
+      console.log(
+        `Created admin -> name: "${name}", password: "${plainPassword}"`
+      );
     }
     
 
@@ -106,13 +113,11 @@ async function main() {
   // Dummy Users
   // =========================
   const user1 = await prisma.user.upsert({
-    where: { email: "dummy1@example.com" },
+    where: { name: "team1" },
     update: {},
     create: {
-      email: "dummy1@example.com",
       name: "Dummy User One",
       password: "password123", // ⚠️ hash in real app
-      nim: "1234500001",
       tradingData: {
         create: {},
       },
@@ -120,13 +125,11 @@ async function main() {
   });
 
   const user2 = await prisma.user.upsert({
-    where: { email: "dummy2@example.com" },
+    where: { name: "team2" },
     update: {},
     create: {
-      email: "dummy2@example.com",
       name: "Dummy User Two",
       password: "password123",
-      nim: "1234500002",
       tradingData: {
         create: {},
       },

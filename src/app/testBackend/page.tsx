@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { extractRawCraftAmounts } from "@/features/trading/utils";
 import { craftToMap } from "@/features/trading/services/map";
 import { convertCurrency } from "@/features/trading/services/currency";
+import { givePitchingMoney, payPitchingFee } from "@/features/trading/services/pitching";
 
 export default function Home() {
     const { data: session, status } = useSession();
@@ -27,10 +28,13 @@ export default function Home() {
             const result = await getUserRoles(session!.user.id);
             const userDB = await getUserTradingById(session!.user.id);
             setRoles(result);
+
             if (userDB.success) {
                 setUser(userDB.data!);
                 const amounts = extractRawCraftAmounts(userDB.data!);
                 setRawCraftAmount(amounts)
+            }else{
+                console.log(userDB.error);
             }
         }
         fetchRoles();
@@ -177,11 +181,11 @@ export default function Home() {
                         {/* Auth Panel */}
                         <div className="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl backdrop-blur-md">
                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Authentication</h3>
-                             <ActionButton onClick={() => signIn("credentials", { email: "admin@super.eternity", password: "Bravo456@", redirect: false })}>
+                             <ActionButton onClick={() => signIn("credentials", { name: "Admin SUPER", password: "Bravo456@", redirect: false })}>
                                 Login as Super Admin
                             </ActionButton>
                             <div className="grid grid-cols-2 gap-3">
-                                <ActionButton variant="secondary" onClick={() => register("Felix", "f@gmail.com", "asdfasdfasdf", "78546312456")}>
+                            <ActionButton variant="secondary" onClick={() => register("Felix", "asdfasdfasdf")}>
                                     Register Test
                                 </ActionButton>
                                 <ActionButton variant="danger" onClick={() => signOut()}>
@@ -210,35 +214,48 @@ export default function Home() {
                             <div className="space-y-3">
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Raw Material Market</div>
-                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj4f6rk3000bu8hnardju86e", RawMaterial.wood)) }}>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.wood)) }}>
                                         Buy Wood
                                     </ActionButton>
-                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj4f6rk3000bu8hnardju86e", RawMaterial.coal)) }}>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.coal)) }}>
                                         Buy Coal
+                                    </ActionButton>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.water)) }}>
+                                        Buy Water
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Crafting Station</div>
-                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj4f6rk3000bu8hnardju86e", "brownPaper")) }}>
+                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj56jol2000bv8hnvmu9m9yt", "brownPaper")) }}>
                                         Craft Brown Paper
                                     </ActionButton>
-                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj4f6rk3000bu8hnardju86e", "pen")) }}>
+                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj56jol2000bv8hnvmu9m9yt", "pen")) }}>
                                         Craft Pen
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Map Workshop</div>
-                                     <ActionButton onClick={async () => { console.log(await craftToMap("cmj4f6rk3000bu8hnardju86e", ["brownPaper", "pen"])) }}>
+                                     <ActionButton onClick={async () => { console.log(await craftToMap("cmj56jol2000bv8hnvmu9m9yt", ["brownPaper", "pen"])) }}>
                                         Craft Map (2 BrownPaper + 1 Pen)
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Currency Converter</div>
-                                     <ActionButton onClick={async () => { console.log(await convertCurrency("cmj4f6rk3000bu8hnardju86e", 16000, "IDR", "USD")) }}>
+                                     <ActionButton onClick={async () => { console.log(await convertCurrency("cmj56jol2000bv8hnvmu9m9yt", 16000, "IDR", "USD")) }}>
                                         Convert 16000 IDR to USD
+                                    </ActionButton>
+                                </div>
+                                
+                                <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                                    <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Pitching Station</div>
+                                     <ActionButton onClick={async () => { console.log(await payPitchingFee("cmj56jol2000bv8hnvmu9m9yt")) }}>
+                                        Pay Pitching Fee
+                                    </ActionButton>
+                                     <ActionButton onClick={async () => { console.log(await givePitchingMoney("cmj56jol2000bv8hnvmu9m9yt", 16000)) }}>
+                                        Give Pitching Money
                                     </ActionButton>
                                 </div>
                             </div>
