@@ -5,6 +5,9 @@ import { getActiveContest, getAllRallyPeriods } from "@/features/rally/services/
 import { AdminDashboard } from "@/components/ui/AdminDashboard";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 
+// Add this line to prevent pre-rendering at build time
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   let initialContestStatus: RallyPeriodStatus | null = null;
   let activePeriodId: string | null = null;
