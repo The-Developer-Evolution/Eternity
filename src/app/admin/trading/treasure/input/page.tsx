@@ -1,9 +1,12 @@
 import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
-import TreasureHuntStatusInterface from "@/components/trading/TreasureHuntStatusInterface";
+import TreasureHuntInterface from "@/components/trading/TreasureHuntInterface";
+import { getAllRawItems } from "@/features/trading/services/thunt";
 
-export default function Page() {
+export default async function Page() {
+  const rawItems = await getAllRawItems();
+
   return (
     <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-4 justify-center items-center pb-20">
@@ -18,8 +21,8 @@ export default function Page() {
           height={1080}
           className="relative z-1 w-1/2 h-auto"
         />
-         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
-             <TreasureHuntStatusInterface />
+        <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
+             <TreasureHuntInterface rawItems={rawItems} />
         </div>
       </div>
     </div>
