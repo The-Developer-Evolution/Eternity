@@ -20,6 +20,7 @@ export async function GET() {
       status: trading.status,
       startTime: trading.startTime?.toISOString(),
       endTime: trading.endTime?.toISOString(),
+      pausedTime: trading.pausedTime?.toISOString(),
       serverTime: new Date().toISOString(),
     });
   } catch (error) {

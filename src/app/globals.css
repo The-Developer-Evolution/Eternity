@@ -52,3 +52,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.text-shadow-glow {
+  text-shadow: 0 0 10px rgba(117, 232, 240, 0.5), 0 0 20px rgba(117, 232, 240, 0.3);
+}

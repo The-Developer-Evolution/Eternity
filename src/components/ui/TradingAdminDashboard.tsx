@@ -14,7 +14,18 @@ interface TradingPeriod {
 
 interface TradingStatusResponse {
   status: RallyPeriodStatus;
+  startTime?: string;
+  endTime?: string;
+  pausedTime?: string;
+  serverTime?: string;
 }
+
+const formatTime = (seconds: number) => {
+  if (seconds <= 0) return "00:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+};
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -41,7 +52,54 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   );
   const [duration, setDuration] = useState<number>(20);
 
+
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
+
+  // Sync timer with server data
+  useEffect(() => {
+    if (!tradingData) return;
+
+    const calculateTimeLeft = () => {
+      if (status === "ENDED" || status === "NOT_STARTED") {
+        return 0;
+      }
+      
+      if (status === "PAUSED") {
+        if (tradingData.endTime && tradingData.pausedTime) {
+           const end = new Date(tradingData.endTime).getTime();
+           const paused = new Date(tradingData.pausedTime).getTime();
+           return Math.max(0, Math.floor((end - paused) / 1000));
+        }
+        return timeLeft; // Keep current if data missing
+      }
+
+      if (status === "ON_GOING" && tradingData.endTime && tradingData.serverTime) {
+        // Calculate offset between client and server to prevent drift
+        const serverNow = new Date(tradingData.serverTime).getTime();
+        const clientNow = Date.now();
+        const offset = serverNow - clientNow;
+        
+        const end = new Date(tradingData.endTime).getTime();
+        const now = Date.now() + offset;
+        return Math.max(0, Math.floor((end - now) / 1000));
+      }
+
+      return 0;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+
+    // Only set interval if running
+    if (status === "ON_GOING") {
+      const interval = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+
+  }, [tradingData, status]);
 
   useEffect(() => {
     const period = periods.find(p => p.id === selectedPeriodId);
@@ -90,13 +148,19 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
     <div className="max-w-2xl mx-auto bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl mb-8">
       <div className="mb-6 text-center border-b border-gray-700 pb-4">
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">Trading Status</p>
-        <p className={`text-3xl font-impact tracking-wide ${
+        <p className={`text-4xl font-impact tracking-wide ${
           status === "ON_GOING" ? "text-green-400" : 
           status === "PAUSED" ? "text-yellow-400" : 
           status === "ENDED" ? "text-red-400" : "text-white"
         }`}>
             {status ? status.replace(/_/g, " ") : "LOADING..."}
         </p>
+        
+        {(status === "ON_GOING" || status === "PAUSED") && (
+             <div className="mt-2 text-6xl font-mono text-white font-bold tabular-nums tracking-widest text-shadow-glow">
+                {formatTime(timeLeft)}
+             </div>
+        )}
       </div>
 
       {(status === RallyPeriodStatus.NOT_STARTED || status === RallyPeriodStatus.ENDED) && (
