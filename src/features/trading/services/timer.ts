@@ -18,7 +18,7 @@ export async function getActiveTradingPeriod() {
   return await prisma.periodeTrading.findFirst({
     where: {
       status: {
-        in: ["ON_GOING"],
+        in: ["ON_GOING", "PAUSED"],
       },
     },
   });
