@@ -25,6 +25,12 @@ const RECIPES: RecipePattern[] = [
   { input: { wood: 15, metal: 5 }, output: "dividers" },
 ];
 
+const MAP_RECIPES = [
+  { brownPaper: 2, pen: 1 },
+  { magnifyingGlass: 1, ink: 3 },
+  { magnifyingGlass: 1, ink: 1, dividers: 1 }
+];
+
 // 3. Helper Maps (Mapping your string keys to DB IDs)
 const RAW_ID_MAP: Record<string, string> = {
   wood: "1",
@@ -110,6 +116,33 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+
+
+  // SEEDING MAP RECIPES
+  console.log(`Seeding ${MAP_RECIPES.length} Map Recipes...`);
+  for (const recipe of MAP_RECIPES) {
+    // Convert the simple object { pen: 1 } into Prisma's "create" format
+    const componentsData = Object.entries(recipe).map(([key, amount]) => {
+      const craftId = CRAFT_ID_MAP[key];
+      
+      if (!craftId) {
+        throw new Error(`Invalid item key: ${key}`);
+      }
+
+      return {
+        amount: amount,
+        craftItemId: craftId
+      };
+    });
+
+    // Create the Parent (MapRecipe) AND Children (Components) in one go
+    await prisma.mapRecipe.create({
+      data: {
+        mapRecipeComponents: {
+          create: componentsData
+        }
+      }
+  })}
 
 
 

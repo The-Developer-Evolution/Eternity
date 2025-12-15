@@ -4,16 +4,29 @@ import { getUserTradingById } from "@/features/user/trading.service";
 import {  BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
-import { CraftItemKey } from "../types/craft";
-import { MAP_RECIPES } from "../types/map";
 import { TradingData } from "@/generated/prisma/client";
+
+export async function getAllMapRecipes() {
+    return await prisma.mapRecipe.findMany({
+        include: {
+            mapRecipeComponents: {
+                include: {
+                    craftItem: true
+                }
+            }
+        }
+    });
+}
 
 export async function craftToMap(
   userId: string,
-  crafts: CraftItemKey[]
+  mapRecipeId: string,
+  amount: number = 1
 ): Promise<ActionResult<TradingData>> {
 
-  // 2. Get user trading data
+  if (amount <= 0) return { success: false, error: "Amount must be positive" };
+
+  // 1. Get user trading data
   const userResult = await getUserTradingById(userId);
   if (!userResult.success || !userResult.data?.tradingData) {
     return { success: false, error: "User not found" };
@@ -21,96 +34,86 @@ export async function craftToMap(
 
   const tradingData = userResult.data.tradingData;
 
-  // 3. Find recipe based on input keys
-  // distinct keys from input
-  const inputKeys = Array.from(new Set(crafts));
-
-  const recipe = MAP_RECIPES.find(r => {
-    const recipeKeys = Object.keys(r.input) as CraftItemKey[];
-    if (recipeKeys.length !== inputKeys.length) return false;
-    // check if all keys present
-    return recipeKeys.every(k => inputKeys.includes(k));
+  // 2. Get Recipe
+  const recipe = await prisma.mapRecipe.findUnique({
+      where: { id: mapRecipeId },
+      include: {
+          mapRecipeComponents: {
+              include: { craftItem: true }
+          }
+      }
   });
 
   if (!recipe) {
-    return { success: false, error: "Recipe not found for these ingredients" };
+      return { success: false, error: "Recipe not found." };
   }
 
-  // 4. Check inventory & collect item IDs
-  const craftItemIdsToConsume: string[] = [];
-  let totalItemsToConsume = 0;
-  
-  for (const [itemKey, qty] of Object.entries(recipe.input) as [CraftItemKey, number][]) {
-    const items = await prisma.craftItem.findMany({
-      where: {
-        tradingDataId: tradingData.id,
-        name: itemKey,
-      },
-      take: qty,
-    });
+  // 3. Check Inventory & Prepare Transaction
+  const ops: any[] = [];
+  let totalItemsConsumed = 0;
 
-    if (items.length < qty) {
-      return {
-        success: false,
-        error: `Not enough ${itemKey} (Required: ${qty})`,
-      };
-    }
+  for (const component of recipe.mapRecipeComponents) {
+      const requiredAmount = BigInt(component.amount) * BigInt(amount);
+      const userItem = tradingData.craftUserAmounts.find(u => u.craftItemId === component.craftItemId);
 
-    craftItemIdsToConsume.push(...items.map(i => i.id));
-    totalItemsToConsume += qty;
+      if (!userItem || userItem.amount < requiredAmount) {
+          return {
+              success: false,
+              error: `Insufficient ${component.craftItem.name}. Required: ${requiredAmount}, Available: ${userItem?.amount || 0}`
+          };
+      }
+
+      // Add decrement op
+      ops.push(prisma.craftUserAmount.update({
+          where: { id: userItem.id },
+          data: { amount: { decrement: requiredAmount } }
+      }));
+      
+      totalItemsConsumed += Number(requiredAmount); // Approx for log
   }
 
-  // 5. Transaction
-  const [, , , , updatedTradingData] = await prisma.$transaction([
-    // delete craft items
-    prisma.craftItem.deleteMany({
-      where: { id: { in: craftItemIdsToConsume } },
-    }),
+  // 4. Add Map & Log
+  ops.push(
+      prisma.tradingData.update({
+          where: { id: tradingData.id },
+          data: { map: { increment: amount } }
+      }),
+      prisma.balanceTradingLog.create({
+          data: {
+              tradingDataId: tradingData.id,
+              amount: BigInt(-totalItemsConsumed), // Just a simplistic log, better to log credited Map separately? Existing logic logged debit & credit.
+              type: BalanceLogType.DEBIT,
+              resource: BalanceTradingResource.CRAFT,
+              message: `Consumed items for ${amount} Map(s)`
+          }
+      }),
+      prisma.balanceTradingLog.create({
+          data: {
+              tradingDataId: tradingData.id,
+              amount: BigInt(amount),
+              type: BalanceLogType.CREDIT,
+              resource: BalanceTradingResource.MAP,
+              message: `Crafted ${amount} Map(s)`
+          }
+      })
+  );
 
-    // update map count
-    prisma.tradingData.update({
-        where: { id: tradingData.id },
-        data: {
-            map: { increment: 1 }
-        }
-    }),
+  try {
+      await prisma.$transaction(ops);
 
-    // debit log (consumed items)
-    prisma.balanceTradingLog.create({
-      data: {
-        tradingDataId: tradingData.id,
-        amount: BigInt(-totalItemsToConsume),
-        type: BalanceLogType.DEBIT,
-        resource: BalanceTradingResource.CRAFT, 
-        message: `Consumed items to craft Map`,
-      },
-    }),
+      const finalData = await prisma.tradingData.findUnique({
+          where: { id: tradingData.id },
+          include: {
+              rawUserAmounts: { include: { rawItem: true } },
+              craftUserAmounts: { include: { craftItem: true } },
+              balanceTradingLogs: true,
+          },
+      });
 
-    // credit log (Map)
-    prisma.balanceTradingLog.create({
-      data: {
-        tradingDataId: tradingData.id,
-        amount: BigInt(1),
-        type: BalanceLogType.CREDIT,
-        resource: BalanceTradingResource.MAP,
-        message: `Crafted 1 Map`,
-      },
-    }),
+      return { success: true, data: finalData!, message: `Successfully crafted ${amount} Map(s)` };
 
-    // return updated data
-    prisma.tradingData.findUnique({
-      where: { id: tradingData.id },
-      include: {
-        rawItems: true,
-        craftItems: true,
-        balanceTradingLogs: true,
-      },
-    }),
-  ]);
-
-  return {
-    success: true,
-    data: updatedTradingData!,
-    message: "Successfully crafted Map",
-  };
+  } catch (error) {
+      console.error("Craft Map Error", error);
+      return { success: false, error: "Transaction failed" };
+  }
 }

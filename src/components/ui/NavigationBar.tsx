@@ -182,7 +182,15 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Convert Material
+                  Craft Item
+                </Link>
+                
+                <Link
+                  href="/admin/trading/convert/map"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Create Map
                 </Link>
 
                 <Link
@@ -191,6 +199,14 @@ export default function NavigationBar() {
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Pitching
+                </Link>
+
+                <Link
+                  href="/admin/trading/treasure"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Treasure Hunt Check
                 </Link>
 
                 <Link

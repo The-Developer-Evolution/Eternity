@@ -115,6 +115,23 @@ model TradingData {
   craftUserAmounts   CraftUserAmount[]
 }
 
+model MapRecipe {
+  id String @id @default(cuid())
+
+  mapRecipeComponents MapRecipeComponent[]
+}
+
+model MapRecipeComponent {
+  id     String @id @default(cuid())
+  amount Int
+
+  mapRecipeId String
+  mapRecipe   MapRecipe @relation(fields: [mapRecipeId], references: [id], onDelete: Cascade)
+
+  craftItemId String
+  craftItem   CraftItem @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
+}
+
 model RawUserAmount {
   id String @id @default(cuid())
 
@@ -156,9 +173,10 @@ model CraftItem {
   name  String
   price BigInt @default(3000)
 
-  craftStockPeriods CraftStockPeriod[]
-  craftUserAmounts  CraftUserAmount[]
-  craftRecipes      CraftRecipe[]
+  craftStockPeriods   CraftStockPeriod[]
+  craftUserAmounts    CraftUserAmount[]
+  craftRecipes        CraftRecipe[]
+  mapRecipeComponents MapRecipeComponent[]
 }
 
 model CraftRecipe {
