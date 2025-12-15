@@ -1,19 +1,13 @@
 'use server'
 
-import { checkUserRole } from "@/features/auth/utils";
 import { TradingData } from "@/generated/prisma/client";
-import { AdminTradingRole, BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
+import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { RawMaterial } from "../types/craft";
 
 
 export async function updateThunt(userId: string): Promise<ActionResult<TradingData>> {
-    // role check
-    const roleCheck = await checkUserRole([AdminTradingRole.THUNT, AdminTradingRole.SUPER]);
-    if (!roleCheck.success) {
-        return { success: false, error: roleCheck.error };
-    }
 
     const tradingData = await prisma.tradingData.findUnique({ where: { userId } });
     if (!tradingData) {
@@ -32,11 +26,6 @@ export async function updateThunt(userId: string): Promise<ActionResult<TradingD
 
 
 export async function addThuntItem(userId: string, rawItem: RawMaterial): Promise<ActionResult<TradingData>>{
-    // role check
-    const roleCheck = await checkUserRole([AdminTradingRole.THUNT, AdminTradingRole.SUPER]);
-    if (!roleCheck.success) {
-        return { success: false, error: roleCheck.error };
-    }
 
     const tradingData = await prisma.tradingData.findUnique({ where: { userId } });
     if (!tradingData) {

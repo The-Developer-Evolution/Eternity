@@ -50,8 +50,8 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
         const finalData = await prisma.tradingData.findUnique({
             where: { id: tradingData.id },
             include: {
-                rawItems: true,
-                craftItems: true,
+                rawUserAmounts: true,
+                craftUserAmounts: true,
                 balanceTradingLogs: true,
             },
         });
@@ -99,8 +99,8 @@ export async function givePitchingMoney(userId: string, amount: number): Promise
         const finalData = await prisma.tradingData.findUnique({
             where: { id: tradingData.id },
             include: {
-                rawItems: true,
-                craftItems: true,
+                rawUserAmounts: true,
+                craftUserAmounts: true,
                 balanceTradingLogs: true,
             },
         });

@@ -2,19 +2,12 @@
 
 import { ActionResult } from "@/types/actionResult";
 import prisma from "@/lib/prisma";
-import { checkUserRole } from "@/features/auth/utils";
-import { AdminTradingRole, GameStatus } from "@/generated/prisma/enums";
+import { GameStatus } from "@/generated/prisma/enums";
 import { BalanceTradingLog, MasterTrading } from "@/generated/prisma/client";
 import { getUserTradingById } from "@/features/user/trading.service";
 
 export async function getTransactionByUserId(userId: string): Promise<ActionResult<BalanceTradingLog[]>>{
-    // role check mustbe a super admin
     try {
-        const roleCheck = await checkUserRole([AdminTradingRole.SUPER]);
-        if (!roleCheck.success) {
-            return { success: false, error: roleCheck.error };
-        }
-
         const userResult = await getUserTradingById(userId);
         if (!userResult.success || !userResult.data?.tradingData) {
             return { success: false, error: "User or trading data not found" };
@@ -37,12 +30,7 @@ export async function getTransactionByUserId(userId: string): Promise<ActionResu
 }
 
 export async function setStatusTrading(status: GameStatus): Promise<ActionResult<MasterTrading>>{
-    // role check (super only)
     try {
-        const roleCheck = await checkUserRole([AdminTradingRole.SUPER]);
-        if (!roleCheck.success) {
-            return { success: false, error: roleCheck.error };
-        }
 
         const masterTrading = await prisma.masterTrading.findFirst();
         if (!masterTrading) {

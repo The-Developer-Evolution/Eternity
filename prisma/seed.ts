@@ -1,3 +1,4 @@
+import { RawStockPeriod } from "@/generated/prisma/browser";
 import { PrismaClient, Role } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
@@ -7,6 +8,39 @@ const adapter = new PrismaPg({
 });
 
 const prisma = new PrismaClient({ adapter });
+
+
+
+type RecipePattern = {
+  input: Record<string, number>; // e.g., { wood: 10 }
+  output: string;                // e.g., "brownPaper"
+};
+
+// 2. Your Recipe Data
+const RECIPES: RecipePattern[] = [
+  { input: { wood: 10, water: 5 }, output: "brownPaper" },
+  { input: { wood: 10, coal: 8 }, output: "pen" },
+  { input: { wood: 10, metal: 5, glass: 2 }, output: "magnifyingGlass" },
+  { input: { water: 7, coal: 4 }, output: "ink" },
+  { input: { wood: 15, metal: 5 }, output: "dividers" },
+];
+
+// 3. Helper Maps (Mapping your string keys to DB IDs)
+const RAW_ID_MAP: Record<string, string> = {
+  wood: "1",
+  glass: "2",
+  water: "3",
+  coal: "4",
+  metal: "5"
+};
+
+const CRAFT_ID_MAP: Record<string, string> = {
+  brownPaper: "1",       // "brown paper"
+  pen: "2",              // "pen"
+  magnifyingGlass: "3",  // "magnifying glass"
+  ink: "4",              // "ink"
+  dividers: "5"          // "dividers"
+};
 
 const passwords = [
   "Alpha123!",
@@ -18,8 +52,8 @@ const passwords = [
   "Golf246&",
   "Hotel135*",
   "India864(",
-  "Juliet753)",
-  "Kilo987!",
+  "Juliet753)", //pitching
+  "Kilo987!", // PITCHING GUARD
   "Lima246@",
   "Mike753#",
   "November468$",
@@ -30,13 +64,6 @@ async function main() {
   // =========================
   // Trading Master Data
   // =========================
-  const masterTrading = await prisma.masterTrading.upsert({
-    where: { id: "tradingMasterData@Eternity" },
-    update: {},
-    create: {
-      id: "tradingMasterData@Eternity",
-    },
-  });
 
   await prisma.periodeTrading.createMany({
     data: [
@@ -51,6 +78,135 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+
+  const masterTrading = await prisma.masterTrading.upsert({
+    where: { id: "tradingMasterData@Eternity" },
+    update: {},
+    create: {
+      id: "tradingMasterData@Eternity",
+    },
+  });
+
+  
+  // Seed RawItem
+  await prisma.rawItem.createMany({
+    data: [
+      { id: "1", name: "wood" },
+      { id: "2", name: "glass" },
+      { id: "3", name: "water" },
+      { id: "4", name: "coal" },
+      { id: "5", name: "metal" }
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.craftItem.createMany({
+    data: [
+      { id: "1", name: "brown paper" },
+      { id: "2", name: "pen" },
+      { id: "3", name: "magnifying glass" },
+      { id: "4", name: "ink" },
+      { id: "5", name: "dividers" }
+    ],
+    skipDuplicates: true,
+  });
+
+
+
+  // SEED BLACKMARKET STOCK FOR EACH PERIOD
+  // Define the periods you created (1 to 8)
+  const periods = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  // Define which items you want to stock (3 of each as requested)
+  // Using IDs "1" (wood), "3" (water), "5" (metal)
+  const targetRawIds = ["1", "3", "5"]; 
+
+  // Using IDs "2" (pen), "4" (ink), "1" (brown paper)
+  const targetCraftIds = ["2", "4", "1"]; 
+
+  const rawStockData = [];
+  const craftStockData = [];
+
+  for (const p of periods) {
+    // --- 1. Generate Raw Stock for this Period ---
+    targetRawIds.forEach((rawId) => {
+      rawStockData.push({
+        periode: p,
+        rawId: rawId,
+        stock: Math.floor(Math.random() * 100) + 50, // Random stock between 50-150
+        price: BigInt(Math.floor(Math.random() * 2000) + 1000), // Random price 1000-3000
+      });
+    });
+
+    // --- 2. Generate Craft Stock for this Period ---
+    targetCraftIds.forEach((craftId) => {
+      craftStockData.push({
+        periode: p,
+        craftId: craftId,
+        stock: Math.floor(Math.random() * 50) + 10, // Random stock between 10-60
+        price: BigInt(Math.floor(Math.random() * 5000) + 5000), // Random price 5000-10000
+      });
+    });
+  }
+
+  console.log(`Seeding ${rawStockData.length} Raw Stocks...`);
+  await prisma.rawStockPeriod.createMany({
+    data: rawStockData,
+    skipDuplicates: true,
+  });
+
+  console.log(`Seeding ${craftStockData.length} Craft Stocks...`);
+  await prisma.craftStockPeriod.createMany({
+    data: craftStockData,
+    skipDuplicates: true,
+  });
+
+
+
+
+  ///////////////////////////
+  // SEED CRAFT RECIPE
+  ///////////////////////////
+  // Prepare the data array for bulk insertion
+  const recipeData = [];
+
+  for (const recipe of RECIPES) {
+    // Get the ID for the output item (CraftItem)
+    const craftItemId = CRAFT_ID_MAP[recipe.output];
+
+    if (!craftItemId) {
+      console.warn(`Skipping unknown craft item: ${recipe.output}`);
+      continue;
+    }
+
+    // Loop through the inputs (RawItems)
+    for (const [rawName, amount] of Object.entries(recipe.input)) {
+      const rawItemId = RAW_ID_MAP[rawName];
+
+      if (!rawItemId) {
+        console.warn(`Skipping unknown raw material: ${rawName}`);
+        continue;
+      }
+
+      // Push to our data array
+      recipeData.push({
+        craftItemId: craftItemId,
+        rawItemId: rawItemId,
+        amount: amount // Requires the schema update mentioned above!
+      });
+    }
+  }
+
+  // Bulk create the recipes
+  if (recipeData.length > 0) {
+    await prisma.craftRecipe.createMany({
+      data: recipeData,
+      skipDuplicates: true,
+    });
+    console.log(`✅ Created ${recipeData.length} recipe ingredients.`);
+  }
+
+
 
   // =========================
   // Rally Master Data
@@ -81,6 +237,8 @@ async function main() {
     Role.THUNT,
     Role.UPGRADE,
   ];
+
+
 
   for (let i = 0; i < roles.length; i++) {
     const role = roles[i];

@@ -4,12 +4,14 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getActiveContest, getAllRallyPeriods } from "@/features/rally/services/timer";
 import { AdminDashboard } from "@/components/ui/AdminDashboard";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { getAllTradingPeriods } from "@/features/trading/services/timer";
 
 export default async function Page() {
   let initialContestStatus: RallyPeriodStatus | null = null;
   let activePeriodId: string | null = null;
 
-  const allPeriods = await getAllRallyPeriods();
+  const allRallyPeriods = await getAllRallyPeriods();
+  const allTradingPeriods = await getAllTradingPeriods();
 
   try {
     const contest = await getActiveContest();
@@ -45,7 +47,7 @@ export default async function Page() {
           
           <AdminDashboard 
             initialContestState={initialContestStatus} 
-            periods={allPeriods}
+            periods={allRallyPeriods}
             activePeriodId={activePeriodId}
           />
         </div>

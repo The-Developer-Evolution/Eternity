@@ -112,8 +112,8 @@ export async function convertCurrency(
     const finalData = await prisma.tradingData.findUnique({
         where: { id: tradingData.id },
          include: {
-            rawItems: true,
-            craftItems: true,
+            rawUserAmounts: true,
+            craftUserAmounts: true,
             balanceTradingLogs: true,
         },
     });
