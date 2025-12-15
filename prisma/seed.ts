@@ -1,5 +1,6 @@
 import { RawStockPeriod } from "@/generated/prisma/browser";
 import { PrismaClient, Role } from "@/generated/prisma/client";
+import { CraftStockPeriodCreateInput, CraftStockPeriodCreateManyInput, RawStockPeriodCreateManyInput } from "@/generated/prisma/models";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
@@ -15,6 +16,13 @@ type RecipePattern = {
   input: Record<string, number>; // e.g., { wood: 10 }
   output: string;                // e.g., "brownPaper"
 };
+type ItemConfig = { id: string; stock: number; price: number };
+
+type PeriodConfig = {
+  periode: number;
+  raw: ItemConfig[];
+  craft: ItemConfig[];
+};
 
 // 2. Your Recipe Data
 const RECIPES: RecipePattern[] = [
@@ -29,6 +37,50 @@ const MAP_RECIPES = [
   { brownPaper: 2, pen: 1 },
   { magnifyingGlass: 1, ink: 3 },
   { magnifyingGlass: 1, ink: 1, dividers: 1 }
+];
+
+// stock BlackMarket
+const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
+  {
+    periode: 1,
+    raw: [
+      { id: "1", stock: 100, price: 1000 }, // Wood
+      { id: "3", stock: 100, price: 1000 }, // Water
+      { id: "5", stock: 100, price: 1000 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 50, price: 5000 },  // Brown Paper
+      { id: "2", stock: 50, price: 5000 },  // Pen
+      { id: "4", stock: 50, price: 5000 },  // Ink
+    ],
+  },
+  {
+    periode: 2,
+    raw: [
+      { id: "1", stock: 90, price: 1200 }, // Wood (Price up, Stock down)
+      { id: "3", stock: 95, price: 1100 },
+      { id: "5", stock: 80, price: 1500 },
+    ],
+    craft: [
+      { id: "1", stock: 40, price: 5500 },
+      { id: "2", stock: 45, price: 5200 },
+      { id: "4", stock: 40, price: 5300 },
+    ],
+  },
+  {
+    periode: 3,
+    raw: [
+      { id: "1", stock: 50, price: 2000 }, // Scarcity event?
+      { id: "3", stock: 90, price: 1200 },
+      { id: "5", stock: 60, price: 1800 },
+    ],
+    craft: [
+      { id: "1", stock: 20, price: 7000 },
+      { id: "2", stock: 30, price: 6000 },
+      { id: "4", stock: 30, price: 6000 },
+    ],
+  },
+  // ... Copy/Paste for Period 4, 5, 6, 7, 8
 ];
 
 // 3. Helper Maps (Mapping your string keys to DB IDs)
@@ -47,6 +99,8 @@ const CRAFT_ID_MAP: Record<string, string> = {
   ink: "4",              // "ink"
   dividers: "5"          // "dividers"
 };
+
+
 
 const passwords = [
   "Alpha123!",
@@ -147,52 +201,49 @@ async function main() {
 
 
   // SEED BLACKMARKET STOCK FOR EACH PERIOD
-  // Define the periods you created (1 to 8)
-  const periods = [1, 2, 3, 4, 5, 6, 7, 8];
 
-  // Define which items you want to stock (3 of each as requested)
-  // Using IDs "1" (wood), "3" (water), "5" (metal)
-  const targetRawIds = ["1", "3", "5"]; 
+  const rawStockData: RawStockPeriodCreateManyInput[] = [];
+  const craftStockData: CraftStockPeriodCreateManyInput[] = [];
 
-  // Using IDs "2" (pen), "4" (ink), "1" (brown paper)
-  const targetCraftIds = ["2", "4", "1"]; 
-
-  const rawStockData = [];
-  const craftStockData = [];
-
-  for (const p of periods) {
-    // --- 1. Generate Raw Stock for this Period ---
-    targetRawIds.forEach((rawId) => {
+  for (const pData of CUSTOM_PERIOD_DATA) {
+    // Process Raw Items
+    for (const item of pData.raw) {
       rawStockData.push({
-        periode: p,
-        rawId: rawId,
-        stock: Math.floor(Math.random() * 100) + 50, // Random stock between 50-150
-        price: BigInt(Math.floor(Math.random() * 2000) + 1000), // Random price 1000-3000
+        periode: pData.periode,
+        rawId: item.id,
+        stock: item.stock,
+        price: BigInt(item.price), // TS requires BigInt() wrapper here
       });
-    });
+    }
 
-    // --- 2. Generate Craft Stock for this Period ---
-    targetCraftIds.forEach((craftId) => {
+    // Process Craft Items
+    for (const item of pData.craft) {
       craftStockData.push({
-        periode: p,
-        craftId: craftId,
-        stock: Math.floor(Math.random() * 50) + 10, // Random stock between 10-60
-        price: BigInt(Math.floor(Math.random() * 5000) + 5000), // Random price 5000-10000
+        periode: pData.periode,
+        craftId: item.id,
+        stock: item.stock,
+        price: BigInt(item.price), 
       });
+    }
+  }
+
+  // 5. Insert
+  if (rawStockData.length > 0) {
+    console.log(`Seeding ${rawStockData.length} Raw Stocks...`);
+    await prisma.rawStockPeriod.createMany({
+      data: rawStockData,
+      skipDuplicates: true,
     });
   }
 
-  console.log(`Seeding ${rawStockData.length} Raw Stocks...`);
-  await prisma.rawStockPeriod.createMany({
-    data: rawStockData,
-    skipDuplicates: true,
-  });
+  if (craftStockData.length > 0) {
+    console.log(`Seeding ${craftStockData.length} Craft Stocks...`);
+    await prisma.craftStockPeriod.createMany({
+      data: craftStockData,
+      skipDuplicates: true,
+    });
+  }
 
-  console.log(`Seeding ${craftStockData.length} Craft Stocks...`);
-  await prisma.craftStockPeriod.createMany({
-    data: craftStockData,
-    skipDuplicates: true,
-  });
 
 
 
