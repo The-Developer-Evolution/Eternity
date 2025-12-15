@@ -37,8 +37,12 @@ interface TradingAdminDashboardProps {
 
 export function TradingAdminDashboard({ initialContestState, periods, activePeriodId }: TradingAdminDashboardProps) {
   
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string>(
+    activePeriodId || periods[0]?.id || ""
+  );
+
   const { data: tradingData, mutate } = useSWR<TradingStatusResponse>(
-    "/api/trading/status",
+    selectedPeriodId ? `/api/trading/status?periodId=${selectedPeriodId}` : null,
     fetcher,
     {
       fallbackData: initialContestState ? { status: initialContestState } : undefined
@@ -47,9 +51,6 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
 
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string>(
-    activePeriodId || periods[0]?.id || ""
-  );
   const [duration, setDuration] = useState<number>(20);
 
 
