@@ -1,13 +1,13 @@
-
-
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import GachaItemPanel from "@/components/ui/GachaItemPanel";
+import CraftVaultPanel from "@/components/ui/CraftVaultPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/generated/prisma/enums";
 import { gachaItemAction } from "@/features/rally/actions/gacha-action";
+import { craftVaultAction } from "@/features/rally/actions/craft-item-action";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -34,6 +34,7 @@ export default async function Page() {
       rallyData: {
         select: {
           enonix: true,
+          vault: true,
         },
       },
     },
@@ -64,11 +65,15 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-4xl px-4">
+        <div className="relative z-10 w-full max-w-4xl px-4 space-y-6">
           <GachaItemPanel
             users={mappedUsers}
             smallItems={smallItems}
             onGacha={gachaItemAction}
+          />
+          <CraftVaultPanel
+            users={mappedUsers}
+            onCraftVault={craftVaultAction}
           />
         </div>
       </div>

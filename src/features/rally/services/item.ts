@@ -25,6 +25,31 @@ export async function getMyInventory(userId: string) {
     };  
 }
 
+export async function craftTheVault(user_id: string) {
+    const RallyData = await prisma.rallyData.update({
+        where: {
+            user_id: user_id,
+        },
+        data: {
+            vault: {
+                increment: 1,
+            }
+        }
+    });
+
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: user_id,
+            message: `Crafted The Vault`,
+        }
+    });
+
+    if (!RallyData) {
+        throw new Error("Rally data not found for user");
+    }
+    return RallyData;
+}
+
 export async function getAllBigItems() {
     const big_items = await prisma.rallyBigItemRecipe.findMany({
         include: {
