@@ -16,11 +16,11 @@ export default async function Page() {
   }
 
   const adminRoles = [
-    Role.SUPER,
-    Role.UPGRADE,
-    Role.MONSTER,
-    Role.EXCHANGE,
-    Role.POSTGUARD,
+    "SUPER",
+    "UPGRADE",
+    "MONSTER",
+    "EXCHANGE",
+    "POSTGUARD",
   ];
 
   if (!adminRoles.includes(session.user.role as Role)) {
@@ -44,6 +44,11 @@ export default async function Page() {
     },
   });
 
+  const mappedUsers = users.map(user => ({
+    ...user,
+    rallyData: user.rallyData || undefined,
+  }));
+
   return (
     <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-4 justify-center items-center px-4 py-8">
@@ -61,7 +66,7 @@ export default async function Page() {
         />
 
         <div className="relative z-20 w-full max-w-2xl">
-          <UpgradeAccessCardPanel users={users} />
+          <UpgradeAccessCardPanel users={mappedUsers} />
         </div>
       </div>
     </div>
