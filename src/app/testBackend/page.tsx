@@ -13,6 +13,9 @@ import { extractRawCraftAmounts } from "@/features/trading/utils";
 import { craftToMap } from "@/features/trading/services/map";
 import { convertCurrency } from "@/features/trading/services/currency";
 import { givePitchingMoney, payPitchingFee } from "@/features/trading/services/pitching";
+import { addThuntItem, updateThunt } from "@/features/trading/services/thunt";
+import { getTransactionByUserId, setStatusTrading } from "@/features/trading/services/super";
+import { GameStatus } from "@/generated/prisma/enums";
 
 export default function Home() {
     const { data: session} = useSession()
@@ -193,48 +196,71 @@ export default function Home() {
                             <div className="space-y-3">
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Raw Material Market</div>
-                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.wood)) }}>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj59yybz000bqghn1tclrqzz", RawMaterial.wood)) }}>
                                         Buy Wood
                                     </ActionButton>
-                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.coal)) }}>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj59yybz000bqghn1tclrqzz", RawMaterial.coal)) }}>
                                         Buy Coal
                                     </ActionButton>
-                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj56jol2000bv8hnvmu9m9yt", RawMaterial.water)) }}>
+                                    <ActionButton onClick={async () => { console.log(await buyMaterial("cmj59yybz000bqghn1tclrqzz", RawMaterial.water)) }}>
                                         Buy Water
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Crafting Station</div>
-                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj56jol2000bv8hnvmu9m9yt", "brownPaper")) }}>
+                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj59yybz000bqghn1tclrqzz", "brownPaper")) }}>
                                         Craft Brown Paper
                                     </ActionButton>
-                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj56jol2000bv8hnvmu9m9yt", "pen")) }}>
+                                    <ActionButton onClick={async () => { console.log(await itemToCraft("cmj59yybz000bqghn1tclrqzz", "pen")) }}>
                                         Craft Pen
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Map Workshop</div>
-                                     <ActionButton onClick={async () => { console.log(await craftToMap("cmj56jol2000bv8hnvmu9m9yt", ["brownPaper", "pen"])) }}>
+                                     <ActionButton onClick={async () => { console.log(await craftToMap("cmj59yybz000bqghn1tclrqzz", ["brownPaper", "pen"])) }}>
                                         Craft Map (2 BrownPaper + 1 Pen)
                                     </ActionButton>
                                 </div>
 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Currency Converter</div>
-                                     <ActionButton onClick={async () => { console.log(await convertCurrency("cmj56jol2000bv8hnvmu9m9yt", 16000, "IDR", "USD")) }}>
+                                     <ActionButton onClick={async () => { console.log(await convertCurrency("cmj59yybz000bqghn1tclrqzz", 16000, "IDR", "USD")) }}>
                                         Convert 16000 IDR to USD
                                     </ActionButton>
                                 </div>
                                 
                                 <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
                                     <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Pitching Station</div>
-                                     <ActionButton onClick={async () => { console.log(await payPitchingFee("cmj56jol2000bv8hnvmu9m9yt")) }}>
+                                     <ActionButton onClick={async () => { console.log(await payPitchingFee("cmj59yybz000bqghn1tclrqzz")) }}>
                                         Pay Pitching Fee
                                     </ActionButton>
-                                     <ActionButton onClick={async () => { console.log(await givePitchingMoney("cmj56jol2000bv8hnvmu9m9yt", 16000)) }}>
+                                     <ActionButton onClick={async () => { console.log(await givePitchingMoney("cmj59yybz000bqghn1tclrqzz", 16000)) }}>
                                         Give Pitching Money
+                                    </ActionButton>
+                                </div>
+                                
+                                <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                                    <div className="text-xs text-slate-400 mb-3 font-mono uppercase">THunt Station</div>
+                                     <ActionButton onClick={async () => { console.log(await updateThunt("cmj59yybz000bqghn1tclrqzz")) }}>
+                                        Update THunt
+                                    </ActionButton>
+                                     <ActionButton onClick={async () => { console.log(await addThuntItem("cmj59yybz000bqghn1tclrqzz", "water")) }}>
+                                        Add THunt Item
+                                    </ActionButton>
+                                </div>
+                                
+                                <div className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                                    <div className="text-xs text-slate-400 mb-3 font-mono uppercase">Super Access Station</div>
+                                     <ActionButton onClick={async () => { console.log(await getTransactionByUserId("cmj59yybz000bqghn1tclrqzz")) }}>
+                                        Get Transaction By User ID
+                                    </ActionButton>
+                                     <ActionButton onClick={async () => { console.log(await setStatusTrading(GameStatus.PAUSED)) }}>
+                                        Pause Game
+                                    </ActionButton>
+                                     <ActionButton onClick={async () => { console.log(await setStatusTrading(GameStatus.RUNNING)) }}>
+                                        Play Game
                                     </ActionButton>
                                 </div>
                             </div>

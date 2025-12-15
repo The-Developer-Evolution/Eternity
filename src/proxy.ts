@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 import { Role } from "@/generated/prisma/enums";
 
 const ROUTE_PERMISSIONS: Record<string, Role[]> = {
-  "/admin": [Role.SUPER],
   "/admin/talkshow": [Role.SUPER, Role.TALKSHOW],
   "/admin/trading/blackmarket": [Role.SUPER, Role.BLACKMARKET],
   "/admin/trading/convert": [Role.SUPER, Role.CURRENCY],
   "/admin/trading/pitching": [Role.SUPER, Role.PITCHING, Role.PITCHINGGUARD],
   "/admin/trading/pressure": [Role.SUPER, Role.PRESSURE],
   "/admin/trading/treasure": [Role.SUPER, Role.THUNT],
+  "/admin": [Role.SUPER],
 };
 
 export default withAuth(

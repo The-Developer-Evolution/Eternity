@@ -138,26 +138,92 @@ export default function NavigationBar() {
                   Admin Trading
                 </h3>
                 <Link
-                  href="/admin/trading"
+                  href="/admin/trading/super"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Talkshow
+                  Super Admin Trading
+                </Link>
+                
+                <Link
+                  href="/admin/trading/blackmarket"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Blackmarket Guard
+                </Link>
+
+                <Link
+                  href="/admin/trading/blackmarket/input"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Blackmarket
+                </Link>
+
+                <Link
+                  href="/admin/trading/shop"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Buy Raw Item
                 </Link>
                 <Link
-                  href="/admin/trading"
+                  href="/admin/trading/shop/sell"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Trading
+                  Sell
                 </Link>
+
                 <Link
-                  href="/admin/talkshow"
+                  href="/admin/trading/convert/currency"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Pressure
+                  Convert Currency
                 </Link>
+
+                <Link
+                  href="/admin/trading/convert/material"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Craft Item
+                </Link>
+                
+                <Link
+                  href="/admin/trading/convert/map"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Create Map
+                </Link>
+
+                <Link
+                  href="/admin/trading/pitching"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Pitching
+                </Link>
+
+                <Link
+                  href="/admin/trading/treasure"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Treasure Hunt Check
+                </Link>
+
+                <Link
+                  href="/admin/trading/treasure"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Treasure Hunt
+                </Link>
+
               </div>
             )}
 
