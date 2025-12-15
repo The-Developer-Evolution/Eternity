@@ -103,7 +103,12 @@ export async function upgradeAccessCard(userId: string) {
               });
           }
     }
-
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: userId,
+            message: `Upgraded Access Card to level ${updatedRallyData.access_card_level}, costing Eonix: ${upgradeCost.eonix_cost}`,
+        }
+    });
     return updatedRallyData;
   });
 }

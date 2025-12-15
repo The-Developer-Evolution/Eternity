@@ -39,6 +39,9 @@ export async function craftBigItem(userId: string, recipeId: string) {
     const recipe = await prisma.rallyBigItemRecipe.findUnique({
         where: {
             id: recipeId,
+        },
+        include: {
+            resultItem: true,
         }
     });
 
@@ -84,7 +87,7 @@ export async function craftBigItem(userId: string, recipeId: string) {
                 amount: {
                     increment: 1,
                 }
-            }
+            },
         });
     } else {
         await prisma.userBigItemInventory.create({
@@ -95,7 +98,12 @@ export async function craftBigItem(userId: string, recipeId: string) {
             }
         });
     }
-
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: userId,
+            message: `Crafted big item ${recipe.resultItem.name}`,
+        }
+    });
     return true;
 }
 
@@ -157,6 +165,13 @@ export async function gachaItem(userId: string) {
             }
         });
     }
+
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: userId,
+            message: `Gacha item ${selectedItem.name}, costing Eonix: 10`,
+        }
+    });
 
     return selectedItem;
 }
