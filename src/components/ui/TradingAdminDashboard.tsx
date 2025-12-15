@@ -61,6 +61,14 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   useEffect(() => {
     if (!tradingData) return;
 
+    // Calculate offset ONCE when data updates
+    let timeOffset = 0;
+    if (tradingData.serverTime) {
+      const serverNow = new Date(tradingData.serverTime).getTime();
+      const clientNow = Date.now();
+      timeOffset = serverNow - clientNow;
+    }
+
     const calculateTimeLeft = () => {
       if (status === "ENDED" || status === "NOT_STARTED") {
         return 0;
@@ -75,14 +83,10 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
         return timeLeft; // Keep current if data missing
       }
 
-      if (status === "ON_GOING" && tradingData.endTime && tradingData.serverTime) {
-        // Calculate offset between client and server to prevent drift
-        const serverNow = new Date(tradingData.serverTime).getTime();
-        const clientNow = Date.now();
-        const offset = serverNow - clientNow;
-        
+      if (status === "ON_GOING" && tradingData.endTime) {
         const end = new Date(tradingData.endTime).getTime();
-        const now = Date.now() + offset;
+        // Use the fixed offset to calculate current server time
+        const now = Date.now() + timeOffset;
         return Math.max(0, Math.floor((end - now) / 1000));
       }
 
