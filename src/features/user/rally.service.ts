@@ -17,15 +17,6 @@ export async function getUserRallyById(userId: string): Promise<ActionResult<Use
   try {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: { 
-            rallyData:{
-                include:{
-                    smallItems:true,
-                    bigItems:true,
-                    balanceRallyLogs:true
-                }
-            }
-        },
     });
 
     if (!user) {

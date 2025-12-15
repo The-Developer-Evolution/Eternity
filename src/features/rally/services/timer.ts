@@ -4,6 +4,57 @@ import prisma from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
 
+// Fungsi helper untuk initialize rally data
+async function initializeRallyDataForAllUsers() {
+  try {
+    // Get all users
+    const allUsers = await prisma.user.findMany({
+      select: { id: true },
+    });
+
+    // Get users yang sudah punya rally data
+    const usersWithRallyData = await prisma.rallyData.findMany({
+      select: { user_id: true },
+    });
+
+    const existingUserIds = new Set(usersWithRallyData.map(rd => rd.user_id));
+
+    // Filter users yang belum punya rally data
+    const usersNeedingRallyData = allUsers.filter(
+      user => !existingUserIds.has(user.id)
+    );
+
+    if (usersNeedingRallyData.length === 0) {
+      return { success: true, created: 0, message: "All users already have rally data" };
+    }
+
+    // Create rally data for users yang belum punya
+    const result = await prisma.rallyData.createMany({
+      data: usersNeedingRallyData.map(user => ({
+        user_id: user.id,
+        enonix: 15,
+        access_card_level: 1,
+        vault: 0,
+        point: 0,
+        minus_point: 0,
+      })),
+    });
+
+    return { 
+      success: true, 
+      created: result.count, 
+      message: `Created rally data for ${result.count} users` 
+    };
+  } catch (error) {
+    console.error("Error initializing rally data:", error);
+    return { 
+      success: false, 
+      created: 0, 
+      error: error instanceof Error ? error.message : "Failed to initialize rally data" 
+    };
+  }
+}
+
 export async function getAllRallyPeriods() {
   return await prisma.rallyPeriod.findMany({
     orderBy: {
@@ -23,6 +74,9 @@ export async function getActiveContest() {
 }
 
 export async function StartContestTimer(periodId: string, durationMinutes: number) {
+  // Initialize rally data untuk semua users jika belum ada
+  await initializeRallyDataForAllUsers();
+
   const activeContest = await prisma.rallyPeriod.findFirst({
     where: { status: "ON_GOING" },
   });

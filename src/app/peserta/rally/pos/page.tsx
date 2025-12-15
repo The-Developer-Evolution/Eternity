@@ -1,6 +1,12 @@
+import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
+import { getActiveContest, getAllRallyPeriods } from "@/features/rally/services/timer";
+import { AdminDashboard } from "@/components/ui/AdminDashboard";
+import { RallyPeriodStatus } from "@/generated/prisma/enums";
 import { getAllPos } from "@/features/rally/services/pos";
+
+export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const pos = await getAllPos();
@@ -10,7 +16,7 @@ export default async function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-       <div className="relative z-10 p-12 rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-center items-center gap-8 font-futura">
+        <div className="relative z-10 p-12 rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-center items-center gap-8 font-futura">
           <h1 className="text-3xl md:text-5xl mb-4 text-center font-impact text-white">Rally Pos</h1>
           {pos.length > 0 ? (
             pos.map((p) => (

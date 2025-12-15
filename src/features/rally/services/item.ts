@@ -25,6 +25,31 @@ export async function getMyInventory(userId: string) {
     };  
 }
 
+export async function craftTheVault(user_id: string) {
+    const RallyData = await prisma.rallyData.update({
+        where: {
+            user_id: user_id,
+        },
+        data: {
+            vault: {
+                increment: 1,
+            }
+        }
+    });
+
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: user_id,
+            message: `Crafted The Vault`,
+        }
+    });
+
+    if (!RallyData) {
+        throw new Error("Rally data not found for user");
+    }
+    return RallyData;
+}
+
 export async function getAllBigItems() {
     const big_items = await prisma.rallyBigItemRecipe.findMany({
         include: {
@@ -39,6 +64,9 @@ export async function craftBigItem(userId: string, recipeId: string) {
     const recipe = await prisma.rallyBigItemRecipe.findUnique({
         where: {
             id: recipeId,
+        },
+        include: {
+            resultItem: true,
         }
     });
 
@@ -84,7 +112,7 @@ export async function craftBigItem(userId: string, recipeId: string) {
                 amount: {
                     increment: 1,
                 }
-            }
+            },
         });
     } else {
         await prisma.userBigItemInventory.create({
@@ -95,6 +123,80 @@ export async function craftBigItem(userId: string, recipeId: string) {
             }
         });
     }
-
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: userId,
+            message: `Crafted big item ${recipe.resultItem.name}`,
+        }
+    });
     return true;
+}
+
+export async function gachaItem(userId: string) {
+    const smallItems = await prisma.rallySmallItem.findMany();
+
+    if (smallItems.length === 0) {
+        throw new Error("No small items available for gacha");
+    }
+
+    const rallyData = await prisma.rallyData.findUnique({
+        where: {
+            user_id: userId,
+        }
+    });
+
+    if (!rallyData || rallyData.enonix < 10) {
+        throw new Error("Not enough enonix for gacha");
+    }
+
+    await prisma.rallyData.update({
+        where: {
+            user_id: userId,
+        },
+        data: {
+            enonix: {
+                decrement: 10,
+            }
+        }
+    });
+
+    const randomIndex = Math.floor(Math.random() * smallItems.length);
+    const selectedItem = smallItems[randomIndex];
+
+    const userSmallItem = await prisma.userSmallItemInventory.findFirst({
+        where: {
+            user_id : userId,
+            small_item_id : selectedItem.id,
+        }
+    });
+
+    if (userSmallItem) {
+        await prisma.userSmallItemInventory.update({
+            where: {
+                id: userSmallItem.id,
+            },
+            data: {
+                amount: {
+                    increment: 1,
+                }
+            }
+        });
+    } else {
+        await prisma.userSmallItemInventory.create({
+            data: {
+                user_id: userId,
+                small_item_id: selectedItem.id,
+                amount: 1,
+            }
+        });
+    }
+
+    await prisma.rallyActivityLog.create({
+        data: {
+            user_id: userId,
+            message: `Gacha item ${selectedItem.name}, costing Eonix: 10`,
+        }
+    });
+
+    return selectedItem;
 }
