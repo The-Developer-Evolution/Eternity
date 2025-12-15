@@ -166,7 +166,14 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Shop
+                  Buy Raw Item
+                </Link>
+                <Link
+                  href="/admin/trading/shop/sell"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Sell
                 </Link>
 
                 <Link
