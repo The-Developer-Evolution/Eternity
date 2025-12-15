@@ -98,3 +98,65 @@ export async function craftBigItem(userId: string, recipeId: string) {
 
     return true;
 }
+
+export async function gachaItem(userId: string) {
+    const smallItems = await prisma.rallySmallItem.findMany();
+
+    if (smallItems.length === 0) {
+        throw new Error("No small items available for gacha");
+    }
+
+    const rallyData = await prisma.rallyData.findUnique({
+        where: {
+            user_id: userId,
+        }
+    });
+
+    if (!rallyData || rallyData.enonix < 10) {
+        throw new Error("Not enough enonix for gacha");
+    }
+
+    await prisma.rallyData.update({
+        where: {
+            user_id: userId,
+        },
+        data: {
+            enonix: {
+                decrement: 10,
+            }
+        }
+    });
+
+    const randomIndex = Math.floor(Math.random() * smallItems.length);
+    const selectedItem = smallItems[randomIndex];
+
+    const userSmallItem = await prisma.userSmallItemInventory.findFirst({
+        where: {
+            user_id : userId,
+            small_item_id : selectedItem.id,
+        }
+    });
+
+    if (userSmallItem) {
+        await prisma.userSmallItemInventory.update({
+            where: {
+                id: userSmallItem.id,
+            },
+            data: {
+                amount: {
+                    increment: 1,
+                }
+            }
+        });
+    } else {
+        await prisma.userSmallItemInventory.create({
+            data: {
+                user_id: userId,
+                small_item_id: selectedItem.id,
+                amount: 1,
+            }
+        });
+    }
+
+    return selectedItem;
+}

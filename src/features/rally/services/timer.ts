@@ -32,7 +32,7 @@ async function initializeRallyDataForAllUsers() {
     const result = await prisma.rallyData.createMany({
       data: usersNeedingRallyData.map(user => ({
         user_id: user.id,
-        enonix: 0,
+        enonix: 15,
         access_card_level: 1,
         vault: 0,
         point: 0,
