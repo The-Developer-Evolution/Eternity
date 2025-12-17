@@ -5,6 +5,7 @@ import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { getRunningTradingPeriod } from "../action";
 
 export type CraftRecipeDetail = {
   id: string; // CraftItem ID
@@ -40,6 +41,9 @@ export async function itemToCraft(
   userId: string,
   craftItemId: string
 ): Promise<ActionResult<TradingData>> {
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
+
   // 1. Get user trading data including inventory
   const userResult = await getUserTradingById(userId);
   if (!userResult.success || !userResult.data?.tradingData) {

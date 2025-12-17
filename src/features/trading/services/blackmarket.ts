@@ -6,6 +6,7 @@ import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { getActiveTradingPeriod } from "./timer";
+import { getRunningTradingPeriod } from "../action";
 
 export type BlackMarketItemDetail = {
   id: string; // The StockPeriod ID (Primary Key of StockPeriod tables)
@@ -18,6 +19,9 @@ export type BlackMarketItemDetail = {
 
 // function to pay cost blackmarket fee (for entering blackmarket station (ticket fee))
 export async function payBlackMarketFee(userId: string): Promise<ActionResult<TradingData>> {
+  const period = await getRunningTradingPeriod()
+  if (!period) return { success: false, error: "The game is PAUSED" };
+  
   const userResult = await getUserTradingById(userId);
   if (!userResult.success || !userResult.data?.tradingData) {
     return { success: false, error: "User not found." };

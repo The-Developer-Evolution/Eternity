@@ -4,6 +4,7 @@ import {  BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enum
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
+import { getRunningTradingPeriod } from "../action";
 
 const CURRENCY_RATE = {
     IDR: 1,
@@ -18,6 +19,8 @@ export async function convertCurrency(
     from: CurrencyType, 
     to: CurrencyType
 ): Promise<ActionResult<TradingData>> {
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
 
     // 2. Validate inputs
     if (amount <= 0) return { success: false, error: "Amount must be positive" };

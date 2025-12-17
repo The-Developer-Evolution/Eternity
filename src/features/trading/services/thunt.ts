@@ -4,8 +4,12 @@ import { TradingData } from "@/generated/prisma/client";
 import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
+import { getRunningTradingPeriod } from "../action";
 
 export async function updateThunt(userId: string): Promise<ActionResult<TradingData>> {
+    // Game Running Check
+    const period = await getRunningTradingPeriod();
+    if (!period) return { success: false, error: "The game is PAUSED" };
 
     const tradingData = await prisma.tradingData.findUnique({ where: { userId } });
     if (!tradingData) {
@@ -31,6 +35,9 @@ export async function getAllRawItems() {
 }
 
 export async function addThuntItem(userId: string, rawItemName: string, amount: number = 1): Promise<ActionResult<TradingData>>{
+    // Game Running Check
+    const period = await getRunningTradingPeriod();
+    if (!period) return { success: false, error: "The game is PAUSED" };
 
     const tradingData = await prisma.tradingData.findUnique({ 
         where: { userId },

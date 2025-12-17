@@ -5,6 +5,7 @@ import { RawMaterial } from "../types/craft";
 import { ActionResult } from "@/types/actionResult";
 import { getUserTradingById } from "@/features/user/trading.service";
 import prisma from "@/lib/prisma";
+import { getRunningTradingPeriod } from "../action";
 
 const MATERIAL_PRICE = 100;
 
@@ -15,6 +16,9 @@ export async function buyMaterial(
   rawItemId: string,
   amount: number
 ): Promise<ActionResult<TradingData>> {
+  const period = await getRunningTradingPeriod()
+  if (!period) return { success: false, error: "The game is PAUSED" };
+
   if (amount <= 0) {
       return { success: false, error: "Amount must be greater than 0" };
   }

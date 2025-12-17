@@ -256,12 +256,6 @@ export default function Home() {
                                      <ActionButton onClick={async () => { console.log(await getTransactionByUserId("cmj59yybz000bqghn1tclrqzz")) }}>
                                         Get Transaction By User ID
                                     </ActionButton>
-                                     <ActionButton onClick={async () => { console.log(await setStatusTrading(GameStatus.PAUSED)) }}>
-                                        Pause Game
-                                    </ActionButton>
-                                     <ActionButton onClick={async () => { console.log(await setStatusTrading(GameStatus.RUNNING)) }}>
-                                        Play Game
-                                    </ActionButton>
                                 </div>
                             </div>
                         </div>

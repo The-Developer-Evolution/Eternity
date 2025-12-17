@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import { UserTrading } from "../user/types";
 import { CraftAmountMap, CraftItem, RawAmountMap, RawMaterial, Recipe, RECIPES, TradingAmounts } from "./types/craft";
 
@@ -47,3 +48,5 @@ export function extractRawCraftAmounts(
 
   return { raw, craft };
 }
+
+

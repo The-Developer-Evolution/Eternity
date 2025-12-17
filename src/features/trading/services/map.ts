@@ -5,6 +5,7 @@ import {  BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enum
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
+import { getRunningTradingPeriod } from "../action";
 
 export async function getAllMapRecipes() {
     return await prisma.mapRecipe.findMany({
@@ -23,6 +24,9 @@ export async function craftToMap(
   mapRecipeId: string,
   amount: number = 1
 ): Promise<ActionResult<TradingData>> {
+
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
 
   if (amount <= 0) return { success: false, error: "Amount must be positive" };
 

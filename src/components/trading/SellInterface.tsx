@@ -6,6 +6,8 @@ import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { sellItem } from "@/features/trading/services/sell";
 import { Loader2, CheckCircle, AlertCircle, User, Coins, Package, Layers, Map as MapIcon, DollarSign } from "lucide-react";
 import { RawItem, CraftItem } from "@/generated/prisma/client";
+import { getRunningTradingPeriod } from "@/features/trading/action";
+
 
 type InventoryItem = {
     id: string; // itemId or 'MAP'
@@ -62,6 +64,9 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
   
 
   const handleSell = async () => {
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
+
     if (!selectedUser || !selectedItem) return;
 
     const qty = parseInt(amount);

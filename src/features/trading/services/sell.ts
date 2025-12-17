@@ -15,6 +15,7 @@ export async function getSellableItems() {
 }
 
 import { getActiveTradingPeriod } from "./timer";
+import { getRunningTradingPeriod } from "../action";
 
 export async function getMapPrice() {
     const activePeriod = await getActiveTradingPeriod();
@@ -40,6 +41,9 @@ export async function sellItem(
   itemId: string | null, // null for MAP
   amount: number
 ): Promise<ActionResult<TradingData>> {
+
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
 
     if (amount <= 0) return { success: false, error: "Amount must be positive." };
 

@@ -5,9 +5,13 @@ import { ActionResult } from "@/types/actionResult"
 import { handlePrismaError } from "@/utils/prisma"
 import { revalidatePath } from "next/cache"
 import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums"
+import { getRunningTradingPeriod } from "../action"
 
 // For Talkshow: add trading point to user
 export async function addTradingPointToUser(userId: string, points: number): Promise<ActionResult<number>> {
+    // Game Running Check
+    const period = await getRunningTradingPeriod();
+    if (!period) return { success: false, error: "The game is PAUSED" };
     
     try {
         const updatedTradingData = await prisma.tradingData.update({

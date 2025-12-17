@@ -24,6 +24,8 @@ export async function getActiveTradingPeriod() {
   });
 }
 
+
+
 export async function StartTradingTimer(periodId: string, durationMinutes: number) {
   const activeTrading = await prisma.periodeTrading.findFirst({
     where: { status: "ON_GOING" },
