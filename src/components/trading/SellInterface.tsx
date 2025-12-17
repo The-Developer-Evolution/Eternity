@@ -7,6 +7,7 @@ import { sellItem } from "@/features/trading/services/sell";
 import { Loader2, CheckCircle, AlertCircle, User, Coins, Package, Layers, Map as MapIcon, DollarSign } from "lucide-react";
 import { RawItem, CraftItem } from "@/generated/prisma/client";
 import { getRunningTradingPeriod } from "@/features/trading/action";
+import { AllTradingData } from "@/features/user/types";
 
 
 type InventoryItem = {
@@ -86,10 +87,10 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
     try {
       const result = await sellItem(selectedUser.id, selectedItem.type, selectedItem.id === 'MAP' ? null : selectedItem.id, qty);
       
-      if (result.success) {
+      if (result.success && result.data) {
         setMessage({ type: "success", text: result.message || "Sold successfully!" });
         // Update local inventory from result
-        const date = result.data;
+        const tradingData = result.data as unknown as AllTradingData;
         // Re-construct inventory
         // This logic mimics the "Load" logic I need to implement.
         // I will extract this mapping logic.
@@ -97,18 +98,18 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
             // Map
             {
                 id: 'MAP', name: 'Treasure Map', type: 'MAP', 
-                owned: date.map, price: mapPrice, currency: 'IDR'
+                owned: tradingData.map, price: mapPrice, currency: 'IDR'
             },
             // Raw
             ...rawItems.map(r => ({
                 id: r.id, name: r.name, type: 'RAW' as const,
-                owned: Number(date.rawUserAmounts.find(ua => ua.rawItemId === r.id)?.amount || 0),
+                owned: Number(tradingData.rawUserAmounts.find(ua => ua.rawItemId === r.id)?.amount || 0),
                 price: Number(r.price), currency: 'ETERNITES' as const
             })),
              // Craft
             ...craftItems.map(c => ({
                 id: c.id, name: c.name, type: 'CRAFT' as const,
-                owned: Number(date.craftUserAmounts.find(ua => ua.craftItemId === c.id)?.amount || 0),
+                owned: Number(tradingData.craftUserAmounts.find(ua => ua.craftItemId === c.id)?.amount || 0),
                 price: Number(c.price), currency: 'ETERNITES' as const
             })),
         ];

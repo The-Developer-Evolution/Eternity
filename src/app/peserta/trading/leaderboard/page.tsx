@@ -1,27 +1,23 @@
 import Image from "next/image";
-import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
-import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
-import LeaderboardTrading from "@/components/ui/LeaderboardTrading";
+import BackgroundAssetsDesktop from "../../../../components/common/BackgroundAssetsDesktop";
+import BackgroundAssetsMobile from "../../../../components/common/BackgroundAssetsMobile";
+import LeaderboardTrading from "../../../../components/ui/LeaderboardTrading";
+import { getTradingLeaderboard } from "../../../../features/trading/services/leaderboard";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../lib/auth";
 
-// Dummy data - replace dengan data dari database
-const dummyData = Array.from({ length: 25 }, (_, i) => ({
-  rank: i + 1,
-  name: `Team ${i + 1}`,
-  team: `Group ${String.fromCharCode(65 + (i % 5))}`,
-  idr: Math.floor(Math.random() * 500000) + 100000,
-  usd: Math.floor(Math.random() * 5000) + 1000,
-  eternites: Math.floor(Math.random() * 100000) + 10000
-})).sort((a, b) => {
-  // Sort by total value (convert to IDR equivalent)
-  const totalA = a.idr + (a.usd * 16000) + (a.eternites * 1000000);
-  const totalB = b.idr + (b.usd * 16000) + (b.eternites * 1000000);
-  return totalB - totalA;
-}).map((item, index) => ({
-  ...item,
-  rank: index + 1
-}));
+export const dynamic = 'force-dynamic';
 
-export default function Page() {
+export default async function Page() {
+  const session = await getServerSession(authOptions);
+  const data = await getTradingLeaderboard();
+  
+  // Transform data to match component interface and mark current user
+  const leaderboardData = data.map(({ userId, ...item }) => ({
+    ...item,
+    isCurrentUser: session?.user?.id === userId
+  }));
+
   return (
     <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-8 justify-center items-center py-12 px-4">
@@ -40,8 +36,9 @@ export default function Page() {
           />
           
           <LeaderboardTrading 
-            data={dummyData}
+            data={leaderboardData}
             title="Trading Leaderboard"
+            currentUserId={session?.user?.id}
           />
         </div>
       </div>
