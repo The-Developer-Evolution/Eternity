@@ -11,7 +11,7 @@ export async function upgradeAccessCard(userId: string) {
     throw new Error("User rally data not found");
   }
 
-  const { rallyData } = user;
+  const rallyData = user.rallyData;
   const nextCostId = rallyData.level_upgrade_cost_id;
 
   // 2. Get Upgrade Cost
@@ -20,7 +20,7 @@ export async function upgradeAccessCard(userId: string) {
   });
 
   if (!upgradeCost) {
-    throw new Error("Max level reached or upgrade cost not found");
+    throw new Error("Upgrade cost not found");
   }
 
   // 3. Verify Resources
