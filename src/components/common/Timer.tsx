@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import useSWR, { useSWRConfig } from "swr";
-// Pastikan path ini sesuai dengan struktur project Anda
 import { pusherClient } from "@/lib/pusher"; 
-// Jika Enum ini tidak ditemukan, bisa diganti string biasa atau dihapus typenya sementara
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 
 interface ContestState {
-  status: RallyPeriodStatus | string; // Fallback string jika enum bermasalah
+  status: RallyPeriodStatus | string;
   startTime: string;
   endTime: string;
   serverTime: string;
@@ -23,20 +21,21 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
   </div>
 );
 
-// PERBAIKAN 1: Gunakan 'export default' agar import di CardPanel tidak error
 export default function ContestTimer() {
-  const { data, error } = useSWR<ContestState>("/api/contest/status", fetcher);
+  const { data, error } = useSWR<ContestState>("/api/contest/status", fetcher, {
+    refreshInterval: 1000, // Refresh every second for accuracy
+  });
   const { mutate } = useSWRConfig();
   const [timeLeft, setTimeLeft] = useState(0);
+  const [hasAutoEnded, setHasAutoEnded] = useState(false);
 
-  // PERBAIKAN 2: Gunakan pusherClient singleton (konsisten dengan file Leaderboard)
   useEffect(() => {
-    // Subscribe
     const channel = pusherClient.subscribe("contest-channel");
     
     const handleStatusUpdate = (updatedContest: ContestState) => {
       console.log("Timer update received:", updatedContest);
       mutate("/api/contest/status", updatedContest, false);
+      setHasAutoEnded(false); // Reset auto-end flag on status update
     };
 
     channel.bind("status-update", handleStatusUpdate);
@@ -69,16 +68,29 @@ export default function ContestTimer() {
 
         const now = new Date(Date.now() + timeOffset);
         const remaining = Math.round((endTime - now.getTime()) / 1000);
-        setTimeLeft(Math.max(0, remaining));
+        const newTimeLeft = Math.max(0, remaining);
+        
+        setTimeLeft(newTimeLeft);
+
+        // Auto-end when timer reaches 0
+        if (newTimeLeft === 0 && !hasAutoEnded) {
+          setHasAutoEnded(true);
+          fetch('/api/contest/auto-end', { method: 'POST' })
+            .then(() => {
+              console.log("Contest auto-ended");
+              mutate("/api/contest/status");
+            })
+            .catch(err => console.error("Failed to auto-end:", err));
+        }
       } else if (data.status === "PAUSED") {
-        // Do nothing / keep state
+        // Keep current time when paused
       } else {
         setTimeLeft(0);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [data]);
+  }, [data, hasAutoEnded, mutate]);
 
   const h = Math.floor(timeLeft / 3600).toString().padStart(2, "0");
   const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, "0");
@@ -89,16 +101,15 @@ export default function ContestTimer() {
     if (!data) return "Loading...";
     
     switch (data.status) {
-      case "NOT_STARTED": // Asumsi ada status ini
+      case "NOT_STARTED": 
         return "Contest Starting Soon";
       case "ON_GOING":
-        return null; // PERBAIKAN 3: Return null agar TimerBox dirender!
+        return null;
       case "PAUSED":
         return "Contest Paused";
       case "ENDED":
         return "Contest Finished";
       default:
-        // Jika status on_going tapi masuk default, pastikan return null
         return data.status === "ON_GOING" ? null : "Standby";
     }
   };

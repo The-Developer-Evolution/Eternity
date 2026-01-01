@@ -13,7 +13,7 @@ export default function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-full h-full top-0 left-0"></div>
-        <CardPanel title="RALLY GAMES" period="Spring" extraClass="my-[10%]">
+        <CardPanel title="RALLY GAMES" extraClass="my-[10%]">
           <RallyLevelUpgradeRecipe levelWhatToWhat="Level 1 → Level 2">
             <li>1 Token bebas (Sigil/Chrono/Fragment Token)</li>
             <li>1 Material bebas (Shard/Rune/Flux)</li>

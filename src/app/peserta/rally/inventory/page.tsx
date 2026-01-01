@@ -3,6 +3,7 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getMyInventory } from "@/features/rally/services/item";
 import { getServerSession } from "next-auth";
+import CardPanel from "@/components/ui/CardPanel";
 
 export default async function Page() {
   const session = await getServerSession();
@@ -14,8 +15,7 @@ export default async function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 p-12 rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-center items-center gap-8 font-futura">
-          <h1 className="text-2xl font-bold mb-4 text-center text-white">Rally Inventory</h1>
+         <CardPanel title="RALLY GAMES - INVENTORY" extraClass="">
           {inventory.big_items.length === 0 && inventory.small_items.length === 0 ? (
             <p>No items in inventory.</p>
           ) : (
@@ -39,7 +39,7 @@ export default async function Page() {
               </ul>
             </>
           )}
-        </div>
+        </CardPanel>
       </div>
     </div>
   );

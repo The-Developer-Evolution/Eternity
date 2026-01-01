@@ -238,9 +238,11 @@ enum RallyPeriodStatus {
 }
 
 model RallyMaster {
-  id                   String @id @default(cuid())
-  current_period_id    Int    @default(1)
-  special_ticket_stock Int    @default(5)
+  id                   String      @id @default(cuid())
+  current_period_id    String 
+  total_period    Int         @default(0)
+  special_ticket_stock Int         @default(5)
+  rallyPeriod          RallyPeriod @relation(fields: [current_period_id], references: [id], onDelete: Cascade)
 }
 
 model access_card_upgrade_cost {
@@ -276,6 +278,7 @@ model RallyPeriod {
   totalPausedDuration Int               @default(0)
   status              RallyPeriodStatus @default(NOT_STARTED)
   RallyPos            RallyPos[]
+  rallyMasters        RallyMaster[]
 }
 
 model RallyZone {

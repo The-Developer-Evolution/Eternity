@@ -292,17 +292,6 @@ async function main() {
 
 
 
-  // =========================
-  // Rally Master Data
-  // =========================
-  const masterRally = await prisma.rallyMaster.upsert({
-    where: { id: "rallyMasterData@Eternity" },
-    update: {},
-    create: {
-      id: "rallyMasterData@Eternity",
-    },
-  });
-
   // create Admin user for each role
   const roles: Role[] = [
     Role.SUPER,
@@ -364,7 +353,7 @@ async function main() {
     where: { name: "team1" },
     update: {},
     create: {
-      name: "Dummy User One",
+      name: "001_Santorini",
       password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
@@ -376,7 +365,7 @@ async function main() {
     where: { name: "team2" },
     update: {},
     create: {
-      name: "Dummy User Two",
+      name: "046_Gozo",
       password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
@@ -384,7 +373,7 @@ async function main() {
     },
   });
 
-  console.log({ masterTrading, masterRally, user1, user2 });
+  console.log({ masterTrading, user1, user2 });
 
   // Rally Datas
   await prisma.rallyPeriod.createMany({
@@ -965,9 +954,9 @@ async function main() {
       { id: "1", name: "Sigil Token" },
       { id: "2", name: "Chrono Token" },
       { id: "3", name: "Fragment Token" },
-      { id: "4", name: "Rune" },
-      { id: "5", name: "Shard" },
-      { id: "6", name: "Flux" },
+      { id: "4", name: "Rune Material" },
+      { id: "5", name: "Shard Material" },
+      { id: "6", name: "Flux Material" },
     ],
   });
 

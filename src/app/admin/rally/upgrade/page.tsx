@@ -55,19 +55,7 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-screen top-0 left-0"></div>
-
-        <Image
-          src="/assets/eternity-logo.svg"
-          alt="eternity-logo"
-          draggable={false}
-          width={1920}
-          height={1080}
-          className="relative z-10 w-1/3 h-auto mb-4"
-        />
-
-        <div className="relative z-20 w-full max-w-2xl">
-          <UpgradeAccessCardPanel users={mappedUsers} />
-        </div>
+        <UpgradeAccessCardPanel users={mappedUsers} />
       </div>
     </div>
   );

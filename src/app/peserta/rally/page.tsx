@@ -20,8 +20,7 @@ export default function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-4xl px-4 py-48">
-          <CardPanel title="RALLY GAMES" period="Spring">
+        <CardPanel title="RALLY GAMES">
             <div className="flex flex-col gap-2 h-full w-full justify-center items-center">
               <LinkButton
                 link="/peserta/rally/leaderboard"
@@ -60,7 +59,6 @@ export default function Page() {
               icon={<FaBook />}
             ></LinkButton>
           </CardPanel>
-        </div>
       </div>
     </div>
   );

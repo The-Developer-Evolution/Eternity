@@ -1,11 +1,16 @@
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getMyRallyHistory } from "@/features/rally/services/history";
+import CardPanel from "@/components/ui/CardPanel";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export default async function Page() {
-  const session = await getServerSession();
-  const history = await getMyRallyHistory(session?.user?.id!);
+   const session = await getServerSession(authOptions);
+  if(!session || !session.user?.id){
+    return
+  }
+  const history = await getMyRallyHistory(session.user.id);
 
   if(!history){
     return <p>No history found.</p>;
@@ -16,8 +21,7 @@ export default async function Page() {
         <BackgroundAssetsDesktop></BackgroundAssetsDesktop>
         <BackgroundAssetsMobile></BackgroundAssetsMobile>
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 p-12 rounded-lg bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-center items-center gap-8 font-futura">
-          <h1 className="text-4xl font-impact mb-6">Rally Activity Log</h1>
+        <CardPanel title="RALLY GAMES - LOGS" extraClass="">
           {history.length === 0 ? (
               <p>No activity found.</p>
             ) : (
@@ -32,7 +36,7 @@ export default async function Page() {
                 ))}
               </ul>
             )}
-        </div>
+        </CardPanel>
       </div>
     </div>
   );
