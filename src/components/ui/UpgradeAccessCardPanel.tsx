@@ -106,7 +106,7 @@ export default function UpgradeAccessCardPanel({
   return (
     <CardPanel title="RALLY GAMES - UPGRADE" extraClass="">
       <div className="w-full">
-        <label className="block text-[#78CCEE] font-bold text-sm mb-2 uppercase tracking-wide">
+        <label className="block text-white font-bold text-sm mb-2 uppercase tracking-wide">
           Search User
         </label>
         <input
@@ -114,7 +114,7 @@ export default function UpgradeAccessCardPanel({
           placeholder="Enter username..."
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="w-full px-4 py-3 bg-[#23328C]/50 border-2 border-[#78CCEE] rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-[#41FFA3] transition-colors"
+          className="w-full px-4 py-3 bg-black/50 border-2 border-[#78CCEE] rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-[#41FFA3] transition-colors"
         />
       </div>
 
@@ -134,11 +134,11 @@ export default function UpgradeAccessCardPanel({
 
       {/* User Selection List */}
       <div className="w-full">
-        <label className="block text-[#78CCEE] font-bold text-sm mb-3 uppercase tracking-wide">
+        <label className="block text-white font-bold text-sm mb-3 uppercase tracking-wide">
           Select User ({filteredUsers.length})
         </label>
 
-        <div className="max-h-64 overflow-y-auto bg-[#23328C]/30 border-2 border-[#684095] rounded-lg">
+        <div className="max-h-64 overflow-y-auto bg-black/50 border-2 border-[#78CCEE] rounded-lg">
           {filteredUsers.length === 0 ? (
             <div className="p-4 text-center text-slate-400">
               No users found
@@ -148,8 +148,8 @@ export default function UpgradeAccessCardPanel({
               <button
                 key={user.id}
                 onClick={() => setSelectedUser(user)}
-                className={`w-full p-4 text-left border-b border-[#684095]/30 transition-all hover:bg-[#78CCEE]/10 ${selectedUser?.id === user.id
-                    ? "bg-[#78CCEE]/30 border-l-4 border-l-[#78CCEE]"
+                className={`w-full p-4 text-left border-b border-[#684095]/30 transition-all hover:bg-black/10 ${selectedUser?.id === user.id
+                    ? "bg-black/20 border-l-4 border-l-[#78CCEE]"
                     : ""
                   }`}
               >

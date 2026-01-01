@@ -7,7 +7,9 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/generated/prisma/enums";
 import { gachaItemAction } from "@/features/rally/actions/gacha-action";
-import { craftVaultAction } from "@/features/rally/actions/craft-item-action";
+import { craftItemAction, craftVaultAction, buyItemAction } from "@/features/rally/actions/craft-item-action";
+import CardPanel from "@/components/ui/CardPanel"
+import CraftMaterialPanel from "@/components/ui/CraftMaterialPanel";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -54,6 +56,23 @@ export default async function Page() {
     },
   });
 
+  const bigItems = await prisma.rallyBigItem.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  const bigItemsRecipe = await prisma.rallyBigItemRecipe.findMany({
+    include: {
+      resultItem: true,
+      smallItem: true,
+    }
+  });
+
   const mappedUsers = users.map((user) => ({
     ...user,
     rallyData: user.rallyData || undefined,
@@ -65,18 +84,26 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-4xl px-4 space-y-6">
-          <GachaItemPanel
+        <CardPanel title="RALLY GAMES - POS EXCHANGE" extraClass="">
+          <CraftMaterialPanel
             users={mappedUsers}
             smallItems={smallItems}
-            onGacha={gachaItemAction}
+            bigItems={bigItems}
+            bigItemsRecipe={bigItemsRecipe}
+            onBuyMaterial={buyItemAction} // Buat action baru untuk ini
+            onCraftBigItem={craftItemAction} // Gunakan action craftItemAction yang sudah ada
           />
           <CraftVaultPanel
             users={mappedUsers}
             onCraftVault={craftVaultAction}
           />
-        </div>
+          <GachaItemPanel
+            users={mappedUsers}
+            smallItems={smallItems}
+            onGacha={gachaItemAction}
+          />
+        </CardPanel>
       </div>
-    </div>
+    </div >
   );
 }

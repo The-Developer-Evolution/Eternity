@@ -58,13 +58,11 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-4xl px-4 py-48">
-          <MinusPointPanel 
-            users={mappedUsers}
-            onMinusPoint={minusPointAction}
-            onNeutralizePoint={neutralizePointAction}
-          />
-        </div>
+        <MinusPointPanel
+          users={mappedUsers}
+          onMinusPoint={minusPointAction}
+          onNeutralizePoint={neutralizePointAction}
+        />
       </div>
     </div>
   );

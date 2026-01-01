@@ -3,7 +3,7 @@
 import { craftBigItem } from "@/features/rally/services/item";
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
-import { craftTheVault } from "@/features/rally/services/item";
+import { craftTheVault, buySmallItem } from "@/features/rally/services/item";
 
 export async function craftItemAction(userId: string, recipeId: string) {
   try {
@@ -32,6 +32,20 @@ export async function craftVaultAction(userId: string) {
       success: true,
       newVaultCount: updatedData?.vault || 0
     };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
+  }
+}
+
+
+export async function buyItemAction(userId: string, itemId: string) {
+  try {
+    await buySmallItem(userId, itemId);
+    revalidatePath("/admin/rally"); // Sesuaikan path revalidate Anda
+    return { success: true };
   } catch (error) {
     return { 
       success: false, 
