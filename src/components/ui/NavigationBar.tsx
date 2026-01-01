@@ -70,9 +70,7 @@ export default function NavigationBar() {
               Login
             </Link>
           ) : (
-            <ActionButton onClick={() => signOut()}>
-              Logout
-            </ActionButton>
+            <ActionButton onClick={() => signOut()}>Logout</ActionButton>
           )}
           <button
             onClick={toggleMenu}
@@ -80,27 +78,30 @@ export default function NavigationBar() {
             aria-label="Toggle menu"
           >
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "rotate-45 translate-y-2" : ""
-                }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${
+                isOpen ? "rotate-45 translate-y-2" : ""
+              }`}
             ></div>
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "opacity-0" : ""
-                }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${
+                isOpen ? "opacity-0" : ""
+              }`}
             ></div>
             <div
-              className={`bg-black h-1 w-6 transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-2" : ""
-                }`}
+              className={`bg-black h-1 w-6 transition-all duration-300 ${
+                isOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
             ></div>
           </button>
         </div>
 
         {/* Menu Overlay */}
         <div
-          className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center overflow-y-auto pt-28 pb-10 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+          className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center overflow-y-auto pt-28 pb-10 transition-transform duration-300 ease-in-out ${
+            isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         >
           <div className="flex flex-col gap-8 text-center">
-            
             {!session && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
@@ -112,21 +113,6 @@ export default function NavigationBar() {
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Login
-                </Link>
-              </div>
-            )}
-
-            {session?.user.role == "SUPER" && (
-              <div className="flex flex-col gap-4">
-                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
-                 Admin Super
-                </h3>
-                <Link
-                  href="/admin/super"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Super Admin Dashboard
                 </Link>
               </div>
             )}
@@ -144,7 +130,7 @@ export default function NavigationBar() {
                 >
                   Super Admin Trading
                 </Link>
-                
+
                 <Link
                   href="/admin/trading/blackmarket"
                   onClick={closeMenu}
@@ -191,7 +177,7 @@ export default function NavigationBar() {
                 >
                   Craft Item
                 </Link>
-                
+
                 <Link
                   href="/admin/trading/convert/map"
                   onClick={closeMenu}
@@ -223,7 +209,6 @@ export default function NavigationBar() {
                 >
                   Treasure Hunt
                 </Link>
-
               </div>
             )}
 
@@ -233,6 +218,19 @@ export default function NavigationBar() {
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
                   Admin Rally
                 </h3>
+
+                {session?.user.role == "SUPER" && (
+                  <div className="flex flex-col gap-4">
+                    <Link
+                      href="/admin/super"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      Super Admin Rally
+                    </Link>
+                  </div>
+                )}
+
                 <Link
                   href="/admin/rally/minus-point"
                   onClick={closeMenu}
