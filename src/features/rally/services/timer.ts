@@ -75,7 +75,7 @@ export async function addEonixToAllUsers(amount: number) {
   });
 
   const logs = users.map((u) => ({
-    message: `+${amount} Eonix From Period`,
+    message: `+${amount} PERIOD EONIX`,
     user_id: u.user_id,
   }));
 

@@ -171,15 +171,42 @@ export async function POST(request: Request) {
       }
 
       // Create activity log
-      const itemsUsed = [
-        ...(bigItems || []).map((i: { id: string; amount: number }) => `Big Item ID ${i.id}: ${i.amount}x`),
-        ...(smallItems || []).map((i: { id: string; amount: number }) => `Small Item ID ${i.id}: ${i.amount}x`),
-      ].join(", ");
+      const itemUsedNames: string[] = [];
+      
+      // Get Big Item names
+      if (bigItems && bigItems.length > 0) {
+        for (const item of bigItems) {
+          const bigItemData = await tx.rallyBigItem.findUnique({
+            where: { id: item.id },
+            select: { name: true }
+          });
+          if (bigItemData) {
+            itemUsedNames.push(`-${item.amount} ${bigItemData.name}`);
+          }
+        }
+      }
 
+      // Get Small Item names
+      if (smallItems && smallItems.length > 0) {
+        for (const item of smallItems) {
+          const smallItemData = await tx.rallySmallItem.findUnique({
+            where: { id: item.id },
+            select: { name: true }
+          });
+          if (smallItemData) {
+            itemUsedNames.push(`-${item.amount} ${smallItemData.name}`);
+          }
+        }
+      }
+      
+      const itemsUsedMessage = itemUsedNames.length > 0 
+        ? `\n${itemUsedNames.join('\n')}` 
+        : '';
+      
       await tx.rallyActivityLog.create({
         data: {
           user_id: userId,
-          message: `Upgraded Access Card to level ${updatedRallyData.access_card_level}. Cost: ${eonixCost} Eonix${itemsUsed ? `, Items: ${itemsUsed}` : ''}`,
+          message: `UPGRADED ACC CARD (LVL ${updatedRallyData.access_card_level - 1} -> ${updatedRallyData.access_card_level})\n-${eonixCost} EONIX${itemsUsedMessage}`,
         },
       });
 

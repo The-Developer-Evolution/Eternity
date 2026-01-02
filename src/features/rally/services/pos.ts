@@ -90,7 +90,7 @@ export async function payPosPrice(pos_name: string, zone_id: string, target_user
     await prisma.rallyActivityLog.create({
         data: {
             user_id: target_user,
-            message: `Payment for POS ${pos_name}, costing Eonix: ${posPrice.eonix_cost}`,
+            message: `PAID POS ${pos_name}\n -${posPrice.eonix_cost} EONIX`,
         }
     });
     

@@ -100,7 +100,7 @@ export async function craftTheVault(user_id: string) {
     await tx.rallyActivityLog.create({
       data: {
         user_id: user_id,
-        message: `CRAFT The Vault`,
+        message: `CRAFTED The Vault \n -1 Eternia Sigil\n -1 Chrono Key\n -1 Core Fragment`,
       },
     });
 
@@ -131,6 +131,7 @@ export async function craftBigItem(userId: string, recipeId: string) {
     },
     include: {
       resultItem: true,
+      smallItem: true, // Pastikan ini ada
     },
   });
 
@@ -187,10 +188,11 @@ export async function craftBigItem(userId: string, recipeId: string) {
       },
     });
   }
+  
   await prisma.rallyActivityLog.create({
     data: {
       user_id: userId,
-      message: `CRAFT ${recipe.resultItem.name}`,
+      message: `CRAFTED ${recipe.resultItem.name}\n-${recipe.quantity}x ${recipe.smallItem.name}`,
     },
   });
   return true;
@@ -258,7 +260,7 @@ export async function gachaItem(userId: string) {
   await prisma.rallyActivityLog.create({
     data: {
       user_id: userId,
-      message: `GACHA ITEM (+${selectedItem.name}) -3 EONIX`,
+      message: `GACHA (+${selectedItem.name})\n -3 EONIX`,
     },
   });
 

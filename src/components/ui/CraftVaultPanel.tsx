@@ -73,7 +73,7 @@ export default function CraftVaultPanel({
 
       if (result.success) {
         setSuccess(
-          `Successfully crafted The Vault for ${selectedUser.name}! Total Vault: ${result.newVaultCount}`
+          `CRAFTED VAULT ${selectedUser.name}! \nCURRENT VAULT: ${result.newVaultCount}`
         );
         
         // Update local state
