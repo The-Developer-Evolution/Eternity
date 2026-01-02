@@ -5,14 +5,21 @@ import { getMyInventory } from "@/features/rally/services/item";
 import { getServerSession } from "next-auth";
 import CardPanel from "@/components/ui/CardPanel";
 import Link from "next/link";
+import { getRallyDataByUserId } from "@/features/rally/services/user";
+import { authOptions } from "@/lib/auth";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: { page?: string };
 }) {
-  const session = await getServerSession();
-  const inventory = await getMyInventory(session?.user?.id!);
+  const session = await getServerSession(authOptions);
+  if(!session?.user?.id){
+    return null;
+  }
+  const inventory = await getMyInventory(session.user.id);
+
+  const rallyData = await getRallyDataByUserId(session.user.id);
 
   const bigItemsNormalized = inventory.big_items
     .filter((item) => item.amount >= 1)
@@ -37,7 +44,7 @@ export default async function Page({
   const itemsPerPage = 8;
   const currentPage = Number(searchParams.page) || 1;
   const totalPages = Math.ceil(allItems.length / itemsPerPage) || 1;
-  
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedItems = allItems.slice(startIndex, startIndex + itemsPerPage);
 
@@ -50,22 +57,28 @@ export default async function Page({
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        
+
         <CardPanel title="RALLY GAMES - INVENTORY" extraClass="">
           <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 justify-center items-center gap-4">
+              <div className="bg-[#3E344A]/60 border-3 border-white/40 rounded-lg px-4 py-2">
+                <h3>VAULT: {rallyData?.vault || 0}</h3>
+              </div>
+              <div className="bg-[#3E344A]/60 border-3 border-white/40 rounded-lg px-4 py-2">
+                <h3>EONIX: {rallyData?.enonix || 0}</h3>
+              </div>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
               {displayedItems.map((item) => (
-                <div 
-                  key={item.id} 
-                  className={`relative p-4 h-32 rounded-xl backdrop-blur-lg border-2 flex flex-col justify-center items-center text-center shadow-lg transition-all ${
-                    item.isBig 
-                    ? "bg-[#23328C]/60 border-[#78CCEE]" 
+                <div
+                  key={item.id}
+                  className={`relative p-4 h-32 rounded-xl backdrop-blur-lg border-2 flex flex-col justify-center items-center text-center shadow-lg transition-all ${item.isBig
+                    ? "bg-[#23328C]/60 border-[#78CCEE]"
                     : "bg-[#3E344A]/60 border-white/40"
-                  }`}
+                    }`}
                 >
-                  <div className={`absolute -top-2 -right-2 font-impact px-2 py-0.5 rounded-md text-sm border-2 ${
-                    item.isBig ? "bg-[#41FFA3] text-[#3E344A] border-[#23328C]" : "bg-white text-[#3E344A] border-[#3E344A]"
-                  }`}>
+                  <div className={`absolute -top-2 -right-2 font-impact px-2 py-0.5 rounded-md text-sm border-2 ${item.isBig ? "bg-[#41FFA3] text-[#3E344A] border-[#23328C]" : "bg-white text-[#3E344A] border-[#3E344A]"
+                    }`}>
                     x{item.amount}
                   </div>
                   <h2 className={`text-sm font-impact uppercase leading-tight ${item.isBig ? "text-[#78CCEE]" : "text-white"}`}>
@@ -75,8 +88,8 @@ export default async function Page({
               ))}
 
               {emptySlots.map((_, index) => (
-                <div 
-                  key={`empty-${index}`} 
+                <div
+                  key={`empty-${index}`}
                   className="h-32 rounded-xl bg-black/20 border-white/10 border-2 border-dashed flex items-center justify-center"
                 >
                   <span className="text-white/10 font-impact text-xs uppercase tracking-widest">Empty Slot</span>

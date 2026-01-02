@@ -256,3 +256,13 @@ export async function upgradeAccessCard(userId: string) {
 
   return updatedData;
 }
+
+export async function getRallyDataByUserId(userId: string) {
+  const rallyData = await prisma.rallyData.findUnique({
+    where: {
+      user_id: userId
+    }
+  });
+
+  return rallyData;
+} 
