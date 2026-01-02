@@ -10,12 +10,27 @@ import CardPanel from "@/components/ui/CardPanel";
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
-  // Redirect jika tidak ada session atau user ID
   if (!session || !session.user?.id) {
     redirect("/login");
   }
 
   const recipes = await getAllBigItems();
+
+  // Gabungkan recipe berdasarkan resultItem.id
+  const groupedRecipes = recipes.reduce((acc, recipe) => {
+    const key = recipe.resultItem.id;
+    if (!acc[key]) {
+      acc[key] = {
+        resultItem: recipe.resultItem,
+        materials: [],
+      };
+    }
+    acc[key].materials.push({
+      name: recipe.smallItem.name,
+      quantity: recipe.quantity,
+    });
+    return acc;
+  }, {} as Record<string, { resultItem: any; materials: { name: string; quantity: number }[] }>);
 
   return (
     <div className="overflow-hidden">
@@ -31,15 +46,18 @@ export default async function Page() {
             <p className="text-white">No crafting recipes available.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-              {recipes.map((recipe) => (
-                <div className="p-4 rounded-lg bg-black/50 backdrop-blur-lg border-white border-3 flex flex-col gap-4 justify-center items-center" key={recipe.id}>
-                  <h2 className="text-xl font-impact text-white">{recipe.resultItem.name}</h2>
+              {Object.values(groupedRecipes).map((item) => (
+                <div className="p-4 rounded-lg bg-black/50 backdrop-blur-lg border-white border-3 flex flex-col gap-4 justify-center items-center" key={item.resultItem.id}>
+                  <h2 className="text-xl font-impact text-white">{item.resultItem.name}</h2>
                   <div className="text-xl font-futura text-slate-300 text-center w-[80%]">
-                    Required item:<br></br> {recipe.smallItem.name} x {recipe.quantity}
+                    Required items:<br />
+                    {item.materials.map((mat, idx) => (
+                      <div key={idx}>{mat.name} x {mat.quantity}</div>
+                    ))}
                   </div>
                   <CraftButton
                     userId={session.user.id}
-                    recipeId={recipe.id}
+                    recipeId={item.resultItem.id}
                   />
                 </div>
               ))}

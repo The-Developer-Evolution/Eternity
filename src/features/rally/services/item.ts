@@ -124,77 +124,76 @@ export async function getAllBigItems() {
   return big_items;
 }
 
-export async function craftBigItem(userId: string, recipeId: string) {
-  const recipe = await prisma.rallyBigItemRecipe.findUnique({
-    where: {
-      id: recipeId,
-    },
-    include: {
-      resultItem: true,
-      smallItem: true, // Pastikan ini ada
-    },
+export async function craftBigItem(userId: string, resultItemId: string) {
+  // Ambil semua bahan untuk item besar ini
+  const recipes = await prisma.rallyBigItemRecipe.findMany({
+    where: { result_item_id: resultItemId },
+    include: { resultItem: true, smallItem: true },
   });
 
-  if (!recipe) {
+  if (!recipes || recipes.length === 0) {
     throw new Error("Recipe not found");
   }
 
-  const userSmallItem = await prisma.userSmallItemInventory.findFirst({
-    where: {
-      user_id: userId,
-      small_item_id: recipe.small_item_id,
-    },
-  });
-
-  if (!userSmallItem || userSmallItem.amount < recipe.quantity) {
-    throw new Error("Not enough materials");
-  }
-
-  await prisma.userSmallItemInventory.update({
-    where: {
-      id: userSmallItem.id,
-    },
-    data: {
-      amount: {
-        decrement: recipe.quantity,
-      },
-    },
-  });
-
-  const userBigItem = await prisma.userBigItemInventory.findFirst({
-    where: {
-      user_id: userId,
-      big_item_id: recipe.result_item_id,
-    },
-  });
-
-  if (userBigItem) {
-    await prisma.userBigItemInventory.update({
+  // Cek semua bahan
+  for (const recipe of recipes) {
+    const userSmallItem = await prisma.userSmallItemInventory.findFirst({
       where: {
-        id: userBigItem.id,
-      },
-      data: {
-        amount: {
-          increment: 1,
-        },
+        user_id: userId,
+        small_item_id: recipe.small_item_id,
       },
     });
-  } else {
-    await prisma.userBigItemInventory.create({
+    if (!userSmallItem || userSmallItem.amount < recipe.quantity) {
+      throw new Error(`Not enough ${recipe.smallItem.name}`);
+    }
+  }
+
+  // Transaction: Kurangi semua bahan dan tambahkan item besar
+  await prisma.$transaction(async (tx) => {
+    for (const recipe of recipes) {
+      const userSmallItem = await tx.userSmallItemInventory.findFirst({
+        where: {
+          user_id: userId,
+          small_item_id: recipe.small_item_id,
+        },
+      });
+      await tx.userSmallItemInventory.update({
+        where: { id: userSmallItem!!.id },
+        data: { amount: { decrement: recipe.quantity } },
+      });
+    }
+
+    const userBigItem = await tx.userBigItemInventory.findFirst({
+      where: {
+        user_id: userId,
+        big_item_id: resultItemId,
+      },
+    });
+
+    if (userBigItem) {
+      await tx.userBigItemInventory.update({
+        where: { id: userBigItem.id },
+        data: { amount: { increment: 1 } },
+      });
+    } else {
+      await tx.userBigItemInventory.create({
+        data: {
+          user_id: userId,
+          big_item_id: resultItemId,
+          amount: 1,
+        },
+      });
+    }
+
+    await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        big_item_id: recipe.result_item_id,
-        amount: 1,
+        message: `CRAFTED ${recipes[0].resultItem.name}\n` +
+          recipes.map(r => `-${r.quantity}x ${r.smallItem.name}`).join("\n"),
       },
     });
-  }
-  
-  await prisma.rallyActivityLog.create({
-    data: {
-      user_id: userId,
-      message: `CRAFTED ${recipe.resultItem.name}\n-${recipe.quantity}x ${recipe.smallItem.name}`,
-    },
   });
+
   return true;
 }
 
@@ -313,6 +312,38 @@ export async function buySmallItem(userId: string, itemId: string) {
       data: {
         user_id: userId,
         message: `BOUGHT (${item.name}) -5 EONIX`,
+      },
+    });
+
+    return true;
+  });
+}
+
+export async function buyZoneCard(userId: string, eonixAMT: number) {
+  return await prisma.$transaction(async (tx) => {
+    const rallyData = await tx.rallyData.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!rallyData) {
+      throw new Error("RALLY DATA NOT FOUND");
+    }
+
+    if (rallyData.enonix < eonixAMT) {
+      throw new Error(`ENONIX NOT ENOUGH (NEED ${eonixAMT})`);
+    }
+
+    await tx.rallyData.update({
+      where: { user_id: userId },
+      data: {
+        enonix: { decrement: eonixAMT },
+      },
+    });
+
+    await tx.rallyActivityLog.create({
+      data: {
+        user_id: userId,
+        message: `BOUGHT Zone Card -10 EONIX`,
       },
     });
 
