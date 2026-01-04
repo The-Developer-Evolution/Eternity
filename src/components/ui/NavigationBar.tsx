@@ -152,7 +152,7 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Buy Raw Item
+                  Buy Raw Material
                 </Link>
                 <Link
                   href="/admin/trading/shop/sell"
@@ -183,7 +183,7 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Create Map
+                  Forbidden Map
                 </Link>
 
                 <Link

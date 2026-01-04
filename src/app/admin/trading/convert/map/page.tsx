@@ -2,10 +2,10 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import MapCraftInterface from "@/components/trading/MapCraftInterface";
-import { getAllMapRecipes } from "@/features/trading/services/map";
+import { getAllCraftRecipes } from "@/features/trading/services/craft";
 
 export default async function Page() {
-  const recipes = await getAllMapRecipes();
+  const craftItems = await getAllCraftRecipes();
 
   return (
     <div className="overflow-hidden">
@@ -22,7 +22,7 @@ export default async function Page() {
           className="relative z-1 w-1/2 h-auto"
         />
         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
-             <MapCraftInterface recipes={recipes} />
+             <MapCraftInterface craftItems={craftItems} />
         </div>
       </div>
     </div>
