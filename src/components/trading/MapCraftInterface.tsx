@@ -224,6 +224,7 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
             />
         </div>
 
+
         {/* 3. RECIPE CREATOR */}
         <div className="flex flex-col gap-2 flex-grow h-auto">
             <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
