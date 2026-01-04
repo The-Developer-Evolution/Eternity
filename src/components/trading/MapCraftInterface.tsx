@@ -228,7 +228,7 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
         {/* 3. RECIPE CREATOR */}
         <div className="flex flex-col gap-2 flex-grow h-auto">
             <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
-                <Hammer size={16} /> RECIPE MATERIALS (Select Items)
+                <Hammer size={16} /> RECIPE (Select Craft Items)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto pr-1">
                 {craftItems.map((item) => {
