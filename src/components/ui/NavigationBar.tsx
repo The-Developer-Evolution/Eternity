@@ -159,7 +159,7 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Sell
+                  Ancient Market
                 </Link>
 
                 <Link
@@ -167,7 +167,7 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Convert Currency
+                  Money Changer
                 </Link>
 
                 <Link
@@ -195,15 +195,7 @@ export default function NavigationBar() {
                 </Link>
 
                 <Link
-                  href="/admin/trading/treasure"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Treasure Hunt Check
-                </Link>
-
-                <Link
-                  href="/admin/trading/treasure"
+                  href="/admin/trading/treasure/"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
