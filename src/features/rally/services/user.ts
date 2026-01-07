@@ -256,3 +256,101 @@ export async function upgradeAccessCard(userId: string) {
 
   return updatedData;
 }
+
+export async function getRallyDataByUserId(userId: string) {
+  const rallyData = await prisma.rallyData.findUnique({
+    where: {
+      user_id: userId
+    }
+  });
+
+  return rallyData;
+} 
+
+export async function giveItemsToUser(
+  userId: string,
+  items: { id: string; type: 'big' | 'small'; amount: number }[],
+  eonix?: number
+) {
+  await prisma.$transaction(async (tx) => {
+    const logMessages: string[] = [];
+
+    // Give Eonix if specified
+    if (eonix && eonix > 0) {
+      await tx.rallyData.update({
+        where: { user_id: userId },
+        data: { enonix: { increment: eonix } },
+      });
+      logMessages.push(`+${eonix} EONIX`);
+    }
+
+    // Give items
+    for (const item of items) {
+      if (item.type === 'big') {
+        const existingItem = await tx.userBigItemInventory.findFirst({
+          where: {
+            user_id: userId,
+            big_item_id: item.id,
+          },
+        });
+
+        if (existingItem) {
+          await tx.userBigItemInventory.update({
+            where: { id: existingItem.id },
+            data: { amount: { increment: item.amount } },
+          });
+        } else {
+          await tx.userBigItemInventory.create({
+            data: {
+              user_id: userId,
+              big_item_id: item.id,
+              amount: item.amount,
+            },
+          });
+        }
+
+        const bigItemData = await tx.rallyBigItem.findUnique({
+          where: { id: item.id },
+        });
+        logMessages.push(`+${item.amount} ${bigItemData?.name}`);
+      } else {
+        const existingItem = await tx.userSmallItemInventory.findFirst({
+          where: {
+            user_id: userId,
+            small_item_id: item.id,
+          },
+        });
+
+        if (existingItem) {
+          await tx.userSmallItemInventory.update({
+            where: { id: existingItem.id },
+            data: { amount: { increment: item.amount } },
+          });
+        } else {
+          await tx.userSmallItemInventory.create({
+            data: {
+              user_id: userId,
+              small_item_id: item.id,
+              amount: item.amount,
+            },
+          });
+        }
+
+        const smallItemData = await tx.rallySmallItem.findUnique({
+          where: { id: item.id },
+        });
+        logMessages.push(`+${item.amount} ${smallItemData?.name}`);
+      }
+    }
+
+    // Create activity log
+    await tx.rallyActivityLog.create({
+      data: {
+        user_id: userId,
+        message: `RECEIVED FROM POSTGUARD\n${logMessages.join('\n')}`,
+      },
+    });
+  });
+
+  return true;
+}

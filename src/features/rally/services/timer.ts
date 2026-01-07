@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
 
-// Fungsi helper untuk initialize rally data
 async function initializeRallyDataForAllUsers() {
   try {
     // Get all users
@@ -17,20 +16,24 @@ async function initializeRallyDataForAllUsers() {
       select: { user_id: true },
     });
 
-    const existingUserIds = new Set(usersWithRallyData.map(rd => rd.user_id));
+    const existingUserIds = new Set(usersWithRallyData.map((rd) => rd.user_id));
 
     // Filter users yang belum punya rally data
     const usersNeedingRallyData = allUsers.filter(
-      user => !existingUserIds.has(user.id)
+      (user) => !existingUserIds.has(user.id)
     );
 
     if (usersNeedingRallyData.length === 0) {
-      return { success: true, created: 0, message: "All users already have rally data" };
+      return {
+        success: true,
+        created: 0,
+        message: "All users already have rally data",
+      };
     }
 
     // Create rally data for users yang belum punya
     const result = await prisma.rallyData.createMany({
-      data: usersNeedingRallyData.map(user => ({
+      data: usersNeedingRallyData.map((user) => ({
         user_id: user.id,
         enonix: 15,
         access_card_level: 1,
@@ -40,19 +43,48 @@ async function initializeRallyDataForAllUsers() {
       })),
     });
 
-    return { 
-      success: true, 
-      created: result.count, 
-      message: `Created rally data for ${result.count} users` 
+    return {
+      success: true,
+      created: result.count,
+      message: `Created rally data for ${result.count} users`,
     };
   } catch (error) {
     console.error("Error initializing rally data:", error);
-    return { 
-      success: false, 
-      created: 0, 
-      error: error instanceof Error ? error.message : "Failed to initialize rally data" 
+    return {
+      success: false,
+      created: 0,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to initialize rally data",
     };
   }
+}
+
+export async function addEonixToAllUsers(amount: number) {
+  const users = await prisma.rallyData.findMany({ select: { user_id: true } });
+
+  if (users.length === 0) {
+    return { success: false, message: "No users with rally data found" };
+  }
+
+  const updated = await prisma.rallyData.updateMany({
+    data: {
+      enonix: { increment: amount },
+    },
+  });
+
+  const logs = users.map((u) => ({
+    message: `+${amount} PERIOD EONIX`,
+    user_id: u.user_id,
+  }));
+
+  await prisma.rallyActivityLog.createMany({
+    data: logs,
+    skipDuplicates: true,
+  });
+
+  return { success: true, updatedCount: updated.count, createdLogs: logs.length };
 }
 
 export async function getAllRallyPeriods() {
@@ -67,13 +99,16 @@ export async function getActiveContest() {
   return await prisma.rallyPeriod.findFirst({
     where: {
       status: {
-        in: ["ON_GOING", "PAUSED", "ENDED"],
+        in: ["ON_GOING", "PAUSED"],
       },
     },
   });
 }
 
-export async function StartContestTimer(periodId: string, durationMinutes: number) {
+export async function StartContestTimer(
+  periodId: string,
+  durationMinutes: number
+) {
   // Initialize rally data untuk semua users jika belum ada
   await initializeRallyDataForAllUsers();
 
@@ -82,7 +117,9 @@ export async function StartContestTimer(periodId: string, durationMinutes: numbe
   });
 
   if (activeContest && activeContest.id !== periodId) {
-    throw new Error(`Contest ${activeContest.name} is currently running.`);
+    throw new Error(
+      `Contest ${activeContest.name} is currently running. Stop it before starting a new one.`
+    );
   }
 
   const targetPeriod = await prisma.rallyPeriod.findUnique({
@@ -93,6 +130,47 @@ export async function StartContestTimer(periodId: string, durationMinutes: numbe
 
   const startTime = new Date();
   const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
+
+  const rallyMaster = await prisma.rallyMaster.findFirst();
+  if (!rallyMaster) {
+    await prisma.rallyMaster.create({
+      data: { current_period_id: targetPeriod.id, total_period: 1 },
+    });
+  } else {
+    const updated = await prisma.rallyMaster.update({
+      where: { id: rallyMaster.id },
+      data: {
+        current_period_id: targetPeriod.id,
+        total_period: { increment: 1 },
+      },
+    });
+    if (!updated) throw new Error("Failed to update rally master");
+    switch (rallyMaster.total_period) {
+      case 2:
+        await addEonixToAllUsers(2);
+        break;
+      case 3:
+        await addEonixToAllUsers(4);
+        break;
+      case 4:
+        await addEonixToAllUsers(3);
+        break;
+      case 5:
+        await addEonixToAllUsers(2);
+        break;
+      case 6:
+        await addEonixToAllUsers(4);
+        break;
+      case 7:
+        await addEonixToAllUsers(5);
+        break;
+      case 8:
+        await addEonixToAllUsers(4);
+        break;
+      default:
+        break;
+    }
+  }
 
   const updatedPeriod = await prisma.rallyPeriod.update({
     where: { id: periodId },
@@ -105,19 +183,17 @@ export async function StartContestTimer(periodId: string, durationMinutes: numbe
     },
   });
 
-  await prisma.rallyMaster.updateMany({
-    data: {
-      current_period_id: parseInt(periodId), 
-    },
-  });
-
+  // Trigger Pusher dengan period name
   await pusherServer.trigger("contest-channel", "status-update", {
     status: "ON_GOING",
     startTime: startTime.toISOString(),
     endTime: endTime.toISOString(),
+    periodName: updatedPeriod.name,
+    periodId: updatedPeriod.id,
   });
 
   revalidatePath("/admin/super");
+  revalidatePath("/peserta/rally");
   return updatedPeriod;
 }
 
@@ -197,7 +273,10 @@ export async function endContest() {
 
   await pusherServer.trigger("contest-channel", "status-update", {
     status: "ENDED",
+    periodName: activeContest.name,
+    periodId: activeContest.id,
   });
 
   revalidatePath("/admin/super");
+  revalidatePath("/peserta/rally");
 }

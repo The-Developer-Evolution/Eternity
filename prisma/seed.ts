@@ -292,17 +292,6 @@ async function main() {
 
 
 
-  // =========================
-  // Rally Master Data
-  // =========================
-  const masterRally = await prisma.rallyMaster.upsert({
-    where: { id: "rallyMasterData@Eternity" },
-    update: {},
-    create: {
-      id: "rallyMasterData@Eternity",
-    },
-  });
-
   // create Admin user for each role
   const roles: Role[] = [
     Role.SUPER,
@@ -364,7 +353,7 @@ async function main() {
     where: { name: "team1" },
     update: {},
     create: {
-      name: "Dummy User One",
+      name: "001_Santorini",
       password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
@@ -376,7 +365,7 @@ async function main() {
     where: { name: "team2" },
     update: {},
     create: {
-      name: "Dummy User Two",
+      name: "046_Gozo",
       password: await bcrypt.hash("password123", 10),
       tradingData: {
         create: {},
@@ -384,19 +373,19 @@ async function main() {
     },
   });
 
-  console.log({ masterTrading, masterRally, user1, user2 });
+  console.log({ masterTrading, user1, user2 });
 
   // Rally Datas
   await prisma.rallyPeriod.createMany({
     data: [
-      { id: "1", name: "Pasang Surut", duration: 20 },
-      { id: "2", name: "Musim Kemarau", duration: 20 },
-      { id: "3", name: "Musim Salju", duration: 20 },
-      { id: "4", name: "Banjir", duration: 20 },
-      { id: "5", name: "Bulan Merah", duration: 20 },
-      { id: "6", name: "Cuaca Cerah", duration: 20 },
-      { id: "7", name: "Hujan Asam", duration: 20 },
-      { id: "8", name: "Tornado", duration: 20 },
+      { id: "1", name: "Pasang Surut", duration: 20, special_ticket_name: "Special Ticket Pasang Surut", special_ticket_stock: 5 },
+      { id: "2", name: "Musim Kemarau", duration: 20, special_ticket_name: "Special Ticket Musim Kemarau", special_ticket_stock: 5 },
+      { id: "3", name: "Musim Salju", duration: 20, special_ticket_name: "Special Ticket Musim Salju", special_ticket_stock: 5 },
+      { id: "4", name: "Banjir", duration: 20, special_ticket_name: "Special Ticket Banjir", special_ticket_stock: 5 },
+      { id: "5", name: "Bulan Merah", duration: 20, special_ticket_name: "Special Ticket Bulan Merah", special_ticket_stock: 5 },
+      { id: "6", name: "Cuaca Cerah", duration: 20, special_ticket_name: "Special Ticket Cuaca Cerah", special_ticket_stock: 5 },
+      { id: "7", name: "Hujan Asam", duration: 20, special_ticket_name: "Special Ticket Hujan Asam", special_ticket_stock: 5 },
+      { id: "8", name: "Tornado", duration: 20, special_ticket_name: "Special Ticket Tornado", special_ticket_stock: 5 },
     ],
   });
 
@@ -962,12 +951,13 @@ async function main() {
 
   await prisma.rallySmallItem.createMany({
     data: [
-      { id: "1", name: "Sigil Token" },
-      { id: "2", name: "Chrono Token" },
-      { id: "3", name: "Fragment Token" },
-      { id: "4", name: "Rune" },
-      { id: "5", name: "Shard" },
-      { id: "6", name: "Flux" },
+      { id: "1", name: "Sigil Token", price: 5, show_in_inventory: true },
+      { id: "2", name: "Chrono Token", price: 5, show_in_inventory: true },
+      { id: "3", name: "Fragment Token", price: 5, show_in_inventory: true },
+      { id: "4", name: "Rune Material", price: 5, show_in_inventory: true },
+      { id: "5", name: "Shard Material", price: 5, show_in_inventory: true },
+      { id: "6", name: "Flux Material", price: 5, show_in_inventory: true },
+      {id: "7", name: "Kartu Zona", price: 25, show_in_inventory: false},
     ],
   });
 

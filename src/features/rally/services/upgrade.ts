@@ -11,7 +11,7 @@ export async function upgradeAccessCard(userId: string) {
     throw new Error("User rally data not found");
   }
 
-  const { rallyData } = user;
+  const rallyData = user.rallyData;
   const nextCostId = rallyData.level_upgrade_cost_id;
 
   // 2. Get Upgrade Cost
@@ -20,7 +20,7 @@ export async function upgradeAccessCard(userId: string) {
   });
 
   if (!upgradeCost) {
-    throw new Error("Max level reached or upgrade cost not found");
+    throw new Error("Upgrade cost not found");
   }
 
   // 3. Verify Resources
@@ -106,7 +106,7 @@ export async function upgradeAccessCard(userId: string) {
     await prisma.rallyActivityLog.create({
         data: {
             user_id: userId,
-            message: `Upgraded Access Card to level ${updatedRallyData.access_card_level}, costing Eonix: ${upgradeCost.eonix_cost}`,
+            message: `UPGRADED ACC CARD (LVL ${updatedRallyData.access_card_level - 1} -> ${updatedRallyData.access_card_level})\n-${upgradeCost.eonix_cost} EONIX${upgradeCost.big_item_id ? `\n-${upgradeCost.big_item_amount_required} Big Item` : ''}${upgradeCost.small_item_id ? `\n-${upgradeCost.small_item_amount_required} Small Item` : ''}`,
         }
     });
     return updatedRallyData;

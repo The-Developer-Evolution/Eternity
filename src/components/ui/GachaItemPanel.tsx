@@ -35,6 +35,8 @@ export default function GachaItemPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [gachaResult, setGachaResult] = useState<SmallItem | null>(null);
+  
+  const possibleGachaItems = smallItems.slice(3, 6);
 
   useEffect(() => {
     setAllUsers(users);
@@ -71,8 +73,8 @@ export default function GachaItemPanel({
     }
 
     const currentEnonix = selectedUser.rallyData?.enonix || 0;
-    if (currentEnonix < 10) {
-      setError("User doesn't have enough Eonix (Required: 10)");
+    if (currentEnonix < 3) {
+      setError("User doesn't have enough Eonix (Required: 3)");
       return;
     }
 
@@ -98,7 +100,7 @@ export default function GachaItemPanel({
                   ...u,
                   rallyData: {
                     ...u.rallyData!,
-                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 10),
+                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
                   },
                 }
               : u
@@ -111,7 +113,7 @@ export default function GachaItemPanel({
                   ...u,
                   rallyData: {
                     ...u.rallyData!,
-                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 10),
+                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
                   },
                 }
               : u
@@ -123,7 +125,7 @@ export default function GachaItemPanel({
                 ...prev,
                 rallyData: {
                   ...prev.rallyData!,
-                  enonix: Math.max(0, (prev.rallyData?.enonix || 0) - 10),
+                  enonix: Math.max(0, (prev.rallyData?.enonix || 0) - 3),
                 },
               }
             : null
@@ -141,7 +143,7 @@ export default function GachaItemPanel({
   };
 
   return (
-    <div className="w-full max-w-4xl bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
+    <div className="w-full bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
       <h2 className="text-3xl font-impact text-[#78CCEE] mb-6 text-center">
         GACHA ITEM MANAGEMENT
       </h2>
@@ -218,7 +220,7 @@ export default function GachaItemPanel({
         <div className="mb-6 p-4 bg-[#3E344A]/50 rounded-lg border-2 border-[#684095]">
           <h3 className="text-[#78CCEE] font-bold mb-3">Possible Items:</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {smallItems.map((item) => (
+            {possibleGachaItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-[#3E344A] px-3 py-2 rounded-lg border border-[#684095] text-center"
@@ -228,7 +230,7 @@ export default function GachaItemPanel({
             ))}
           </div>
           <p className="text-slate-400 text-xs mt-3 text-center">
-            Cost: 10 Eonix per gacha
+            Cost: 3 Eonix per gacha
           </p>
         </div>
       )}
@@ -251,11 +253,11 @@ export default function GachaItemPanel({
         <div className="mb-6">
           <button
             onClick={handleGacha}
-            disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < 10}
+            disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < 3}
             className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             <FaDice className="text-2xl" />
-            {isLoading ? "SPINNING..." : "PERFORM GACHA (10 EONIX)"}
+            {isLoading ? "SPINNING..." : "PERFORM GACHA (3 EONIX)"}
           </button>
         </div>
       )}

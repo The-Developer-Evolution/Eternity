@@ -130,7 +130,7 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
         // We can just rely on the result data or re-fetch.
         // result.data contains fresh tradingData.
         if (result.data) {
-             setUserInventory(result.data.craftUserAmounts as unknown as UserInventoryItem[]);
+             setUserInventory((result.data as any).craftUserAmounts as unknown as UserInventoryItem[]);
         }
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;

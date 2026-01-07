@@ -31,7 +31,7 @@ interface LeaderboardRallyProps {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function LeaderboardRally({ 
+export default function LeaderboardRally({
   title = "Rally Leaderboard",
   currentUserId
 }: LeaderboardRallyProps) {
@@ -46,7 +46,7 @@ export default function LeaderboardRally({
   const { data: apiResponse, error, isLoading } = useSWR<LeaderboardResponse>(
     `/api/leaderboard?page=${currentPage}&limit=${limit}`,
     fetcher,
-    { 
+    {
       refreshInterval: 5000,
       keepPreviousData: true // UX agar tidak flickering saat ganti halaman
     }
@@ -87,7 +87,7 @@ export default function LeaderboardRally({
   }
 
   const getRankColor = (rank: number) => {
-    switch(rank) {
+    switch (rank) {
       case 1: return "bg-yellow-500/20 border-yellow-500/50"
       case 2: return "bg-gray-400/20 border-gray-400/50"
       case 3: return "bg-amber-600/20 border-amber-600/50"
@@ -100,20 +100,18 @@ export default function LeaderboardRally({
     // Cek apakah row ini milik user yang sedang login (opsional logic)
     // Jika backend sudah mengirim flag 'isCurrentUser', gunakan itu.
     // Jika tidak, kita cek manual via props currentUserId (jika ada field id di entry)
-    const isUserRow = entry.isCurrentUser; 
+    const isUserRow = entry.isCurrentUser;
 
     return (
       <tr
         key={entry.rank} // Sebaiknya gunakan entry.id jika ada, rank bisa duplikat kalau bug
-        className={`border-b border-[#684095]/30 transition-colors hover:bg-[#3E344A]/30 ${
-          isUserRow ? 'bg-[#78CCEE]/20' : ''
-        }`}
+        className={`border-b border-[#684095]/30 transition-colors hover:bg-[#3E344A]/30 ${isUserRow ? 'bg-[#78CCEE]/20' : ''
+          }`}
       >
         <td className="px-4 py-4">
           <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg border-2 ${getRankColor(entry.rank)}`}>
-            <span className={`font-impact text-lg ${
-              entry.rank <= 3 ? 'text-white' : 'text-[#78CCEE]'
-            }`}>
+            <span className={`font-impact text-lg ${entry.rank <= 3 ? 'text-white' : 'text-[#78CCEE]'
+              }`}>
               {entry.rank}
             </span>
           </div>
@@ -150,8 +148,8 @@ export default function LeaderboardRally({
   // 6. MAIN RENDER
   if (error) {
     return (
-      <div className="bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl overflow-hidden p-4 w-[80%] h-[400px] text-2xl font-impact flex items-center justify-center">
-       No Player Earned Or Made Something Yet
+      <div className="bg-black/40 backdrop-blur-md text-center rounded-2xl border-3 border-[#684095] shadow-2xl overflow-hidden p-4 w-[80%] h-[400px] text-2xl font-impact flex items-center justify-center">
+        No Player Earned Or Made Something Yet
       </div>
     );
   }
@@ -159,7 +157,7 @@ export default function LeaderboardRally({
   return (
     <div className="w-full max-w-7xl mx-auto">
       <div className="bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl overflow-hidden">
-        
+
         <div className="bg-[#04043A] p-6 border-b-3 border-[#684095]">
           <h2 className="text-4xl font-impact text-center text-white">
             {title}
@@ -168,9 +166,9 @@ export default function LeaderboardRally({
 
         <div className="overflow-x-auto min-h-[400px]">
           {isLoading && !leaderboardData.length ? (
-             <div className="w-full h-64 flex items-center justify-center text-[#75E8F0] [text-shadow:_0_0_20px_rgba(0,255,255,1)] text-xl">
-               Loading data...
-             </div>
+            <div className="w-full h-64 flex items-center justify-center text-[#75E8F0] [text-shadow:_0_0_20px_rgba(0,255,255,1)] text-xl">
+              Loading data...
+            </div>
           ) : (
             <table className="w-full">
               <thead>
@@ -213,9 +211,9 @@ export default function LeaderboardRally({
 
             <div className="flex gap-2">
               {/* Simple Pagination: Show current page info */}
-               <span className="text-white font-impact flex items-center px-4">
-                 Page {currentPage} of {totalPages}
-               </span>
+              <span className="text-white font-impact flex items-center px-4">
+                Page {currentPage} of {totalPages}
+              </span>
             </div>
 
             <button
