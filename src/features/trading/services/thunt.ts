@@ -121,3 +121,57 @@ export async function addThuntItem(userId: string, rawItemName: string, amount: 
         return { success: false, error: "Failed to add item" };
     }
 }
+
+
+export async function giveEternityRewards(userId: string, amount: number): Promise<ActionResult<TradingData>> {
+    // Game Running Check
+    const period = await getRunningTradingPeriod();
+    if (!period) return { success: false, error: "The game is PAUSED" };
+
+    const tradingData = await prisma.tradingData.findUnique({ where: { userId } });
+    if (!tradingData) {
+        return { success: false, error: 'Trading data not found' };
+    }
+
+    try {
+        const ops: any[] = [];
+        
+        // 1. Update eternites
+        ops.push(prisma.tradingData.update({
+            where: { id: tradingData.id },
+            data: {
+                eternites: { increment: amount }
+            }
+        }));
+
+        // 2. Log
+        ops.push(prisma.balanceTradingLog.create({
+            data: {
+                tradingDataId: tradingData.id,
+                amount: BigInt(amount),
+                type: BalanceLogType.CREDIT,
+                resource: BalanceTradingResource.ETERNITES,
+                message: `Thunt reward: ${amount} Eternities`
+            }
+        }));
+
+        await prisma.$transaction(ops);
+
+        // Return updated data
+        const finalData = await prisma.tradingData.findUnique({
+            where: { id: tradingData.id },
+            include: {
+                rawUserAmounts: { include: { rawItem: true } },
+                craftUserAmounts: { include: { craftItem: true } },
+                balanceTradingLogs: true,
+            },
+        });
+        
+        return { success: true, data: finalData! };
+
+    } catch (e) {
+        console.error(e);
+        return { success: false, error: "Failed to add eternities" };
+    }
+}
+

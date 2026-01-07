@@ -9,6 +9,8 @@ const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin/trading/pitching": [Role.SUPER, Role.PITCHING, Role.PITCHINGGUARD],
   "/admin/trading/pressure": [Role.SUPER, Role.PRESSURE],
   "/admin/trading/treasure": [Role.SUPER, Role.THUNT],
+  "/admin/trading/treasure/rewards": [Role.SUPER, Role.THUNT],
+  "admin/trading/news": [Role.SUPER],
   "/admin": [Role.SUPER],
 };
 
