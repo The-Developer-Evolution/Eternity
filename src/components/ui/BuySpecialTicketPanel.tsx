@@ -12,10 +12,14 @@ interface User {
   };
 }
 
-interface InventoryItem {
+interface BigItem {
   id: string;
   name: string;
-  type: 'big' | 'small';
+}
+
+interface SmallItem {
+  id: string;
+  name: string;
 }
 
 interface SelectedItem {
@@ -27,8 +31,8 @@ interface SelectedItem {
 
 interface BuySpecialTicketPanelProps {
   users?: User[];
-  bigItems: InventoryItem[];
-  smallItems: InventoryItem[];
+  bigItems: BigItem[];
+  smallItems: SmallItem[];
   ticketName: string;
   ticketStock: number;
   onBuyTicket: (userId: string, items: { id: string; type: 'big' | 'small'; amount: number }[]) => Promise<any>;
@@ -84,7 +88,7 @@ export default function BuySpecialTicketPanel({
     setSelectedItems([]);
   };
 
-  const addItem = (item: InventoryItem, type: 'big' | 'small') => {
+  const addItem = (item: BigItem | SmallItem, type: 'big' | 'small') => {
     if (selectedItems.length >= 2) {
       setError("Maksimal 2 item saja");
       return;

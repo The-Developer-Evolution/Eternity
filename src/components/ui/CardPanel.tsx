@@ -66,7 +66,7 @@ export default function CardPanel({
           {period}
         </h3>
       </div>
-      <{showTimer && <Timer></Timer>}
+      {showTimer && <Timer />}
       {children}
     </section>
   )
