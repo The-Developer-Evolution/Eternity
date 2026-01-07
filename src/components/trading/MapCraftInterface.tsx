@@ -135,7 +135,7 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Crafting failed." });
-      }pnpm
+      }
     } catch (error) {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
