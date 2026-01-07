@@ -1,12 +1,15 @@
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import BuyPosPanel from "@/components/ui/BuyPosPanel";
+import GiveItemsPanel from "@/components/ui/GiveItemsPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/generated/prisma/enums";
 import { buyPosAccessAction } from "@/features/rally/actions/pos-access-action";
+import { giveItemsAction } from "@/features/rally/actions/craft-item-action";
 import { getAllPosForAdmin } from "@/features/rally/services/pos";
+import CardPanel from "@/components/ui/CardPanel";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -43,7 +46,7 @@ export default async function Page() {
 
   // Fetch all POS options
   const posData = await getAllPosForAdmin();
-  
+
   const posOptions = posData.map(pos => ({
     id: pos.id,
     name: pos.name,
@@ -51,6 +54,27 @@ export default async function Page() {
     zoneName: pos.rally_zone.name,
     eonix_cost: pos.eonix_cost,
   }));
+
+  // Fetch all items
+  const bigItems = await prisma.rallyBigItem.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  const smallItems = await prisma.rallySmallItem.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 
   const mappedUsers = users.map((user) => ({
     ...user,
@@ -63,13 +87,19 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
-        <div className="relative z-10 w-full max-w-4xl px-4">
+        <CardPanel title="RALLY GAMES - POSTGUARD" extraClass="">
+          <GiveItemsPanel
+            users={mappedUsers}
+            bigItems={bigItems}
+            smallItems={smallItems}
+            onGiveItems={giveItemsAction}
+          />
           <BuyPosPanel
             users={mappedUsers}
             posOptions={posOptions}
             onBuyAccess={buyPosAccessAction}
           />
-        </div>
+        </CardPanel>
       </div>
     </div>
   );

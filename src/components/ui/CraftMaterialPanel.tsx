@@ -15,6 +15,7 @@ interface User {
 interface SmallItem {
   id: string;
   name: string;
+  price: number;
 }
 
 interface BigItem {
@@ -197,14 +198,14 @@ export default function CraftMaterialPanel({
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <h3 className="text-[#41FFA3] font-impact text-lg flex items-center gap-2 border-b border-[#684095] pb-2 tracking-widest uppercase">
-              <ShoppingCart size={18} /> Beli Material (5 E)
+              <ShoppingCart size={18} /> Beli Material
             </h3>
             <div className="space-y-2">
               {smallItems.map((item) => (
                 <div key={item.id} className="bg-[#3E344A] border-2 border-[#684095] p-3 rounded-xl flex justify-between items-center hover:border-[#41FFA3]/50 transition-colors">
                   <span className="text-white font-bold text-sm uppercase tracking-tight">{item.name}</span>
                   <button
-                    disabled={isLoading !== null || (selectedUser.rallyData?.enonix || 0) < 5}
+                    disabled={isLoading !== null || (selectedUser.rallyData?.enonix || 0) < item.price}
                     onClick={() => handleAction("Pembelian", item.name, item.id, onBuyMaterial, true)}
                     className="bg-[#41FFA3] hover:bg-[#2ee089] text-[#3E344A] font-impact px-4 py-2 rounded-lg text-xs transition-all active:scale-95 disabled:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-green-500/10"
                   >

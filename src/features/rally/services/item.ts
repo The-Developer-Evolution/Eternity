@@ -350,3 +350,82 @@ export async function buyZoneCard(userId: string, eonixAMT: number) {
     return true;
   });
 }
+
+export async function buySpecialTicket(
+  userId: string,
+  items: { id: string; type: 'big' | 'small'; amount: number }[]
+) {
+  // Get active period
+  const activePeriod = await prisma.rallyPeriod.findFirst({
+    where: { status: "ON_GOING" },
+  });
+
+  if (!activePeriod) {
+    throw new Error("No active rally period");
+  }
+
+  if (!activePeriod.special_ticket_stock || activePeriod.special_ticket_stock <= 0) {
+    throw new Error("Special ticket out of stock");
+  }
+
+  // Validate items (max 2)
+  if (items.length === 0 || items.length > 2) {
+    throw new Error("Must select 1-2 items");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    // Check and deduct items from user inventory
+    for (const item of items) {
+      if (item.type === 'big') {
+        const userBigItem = await tx.userBigItemInventory.findFirst({
+          where: {
+            user_id: userId,
+            big_item_id: item.id,
+          },
+        });
+
+        if (!userBigItem || userBigItem.amount < item.amount) {
+          throw new Error(`Not enough ${item.type} item with id ${item.id}`);
+        }
+
+        await tx.userBigItemInventory.update({
+          where: { id: userBigItem.id },
+          data: { amount: { decrement: item.amount } },
+        });
+      } else {
+        const userSmallItem = await tx.userSmallItemInventory.findFirst({
+          where: {
+            user_id: userId,
+            small_item_id: item.id,
+          },
+        });
+
+        if (!userSmallItem || userSmallItem.amount < item.amount) {
+          throw new Error(`Not enough ${item.type} item with id ${item.id}`);
+        }
+
+        await tx.userSmallItemInventory.update({
+          where: { id: userSmallItem.id },
+          data: { amount: { decrement: item.amount } },
+        });
+      }
+    }
+
+    // Decrement special ticket stock
+    await tx.rallyPeriod.update({
+      where: { id: activePeriod.id },
+      data: { special_ticket_stock: { decrement: 1 } },
+    });
+
+    // Log activity
+    await tx.rallyActivityLog.create({
+      data: {
+        user_id: userId,
+        message: `BOUGHT ${activePeriod.special_ticket_name}\n` +
+          items.map(i => `-${i.amount}x ${i.type} item`).join("\n"),
+      },
+    });
+  });
+
+  return true;
+}

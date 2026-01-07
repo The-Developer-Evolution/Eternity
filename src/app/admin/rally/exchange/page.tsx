@@ -2,12 +2,13 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import GachaItemPanel from "@/components/ui/GachaItemPanel";
 import CraftVaultPanel from "@/components/ui/CraftVaultPanel";
+import BuySpecialTicketPanel from "@/components/ui/BuySpecialTicketPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/generated/prisma/enums";
 import { gachaItemAction } from "@/features/rally/actions/gacha-action";
-import { craftItemAction, craftVaultAction, buyItemAction } from "@/features/rally/actions/craft-item-action";
+import { craftItemAction, craftVaultAction, buyItemAction, buySpecialTicketAction } from "@/features/rally/actions/craft-item-action";
 import CardPanel from "@/components/ui/CardPanel"
 import CraftMaterialPanel from "@/components/ui/CraftMaterialPanel";
 
@@ -45,11 +46,23 @@ export default async function Page() {
     },
   });
 
+  const currentSpecialTicket = await prisma.rallyPeriod.findFirst({
+    where: {
+      status: "ON_GOING",
+    },
+    select: {
+      special_ticket_name: true,
+      special_ticket_stock: true,
+      name: true,
+    }
+  });
+
   // Fetch all small items for display
   const smallItems = await prisma.rallySmallItem.findMany({
     select: {
       id: true,
       name: true,
+      price: true,
     },
     orderBy: {
       name: "asc",
@@ -85,6 +98,14 @@ export default async function Page() {
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
         <CardPanel title="RALLY GAMES - POS EXCHANGE" extraClass="">
+          <BuySpecialTicketPanel
+            users={mappedUsers}
+            bigItems={bigItems}
+            smallItems={smallItems}
+            ticketName={currentSpecialTicket?.special_ticket_name || "No ticket"}
+            ticketStock={currentSpecialTicket?.special_ticket_stock || 0}
+            onBuyTicket={buySpecialTicketAction}
+          />
           <CraftMaterialPanel
             users={mappedUsers}
             smallItems={smallItems}

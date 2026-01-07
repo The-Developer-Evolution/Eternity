@@ -7,11 +7,267 @@ datasource db {
   provider = "postgresql"
 }
 
-/////////////////////////////////////////////////
-// TRADING TABLE
-/////////////////////////////////////////////////
+model PeriodeTrading {
+  id                  String             @id @default(cuid())
+  periode             Int                @unique
+  cost_map            Int
+  price_map           Int
+  duration            Int
+  endTime             DateTime?
+  pausedTime          DateTime?
+  startTime           DateTime?
+  status              RallyPeriodStatus  @default(NOT_STARTED)
+  totalPausedDuration Int                @default(0)
+  craftStockPeriods   CraftStockPeriod[]
+  masterTradings      MasterTrading[]
+  rawStockPeriods     RawStockPeriod[]
+}
 
-// ENUMS
+model MasterTrading {
+  id              String         @id @default(cuid())
+  current_periode Int            @default(1)
+  periodeTrading  PeriodeTrading @relation(fields: [current_periode], references: [periode], onDelete: Cascade)
+}
+
+model User {
+  id                     String                   @id @default(cuid())
+  name                   String                   @unique
+  password               String
+  role                   Role                     @default(PARTICIPANT)
+  rallyActivityLog       RallyActivityLog[]
+  rallyData              RallyData?
+  tradingData            TradingData?
+  userBigItemInventory   UserBigItemInventory[]
+  userSmallItemInventory UserSmallItemInventory[]
+}
+
+model TradingData {
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  idr                BigInt              @default(-10000000000)
+  usd                BigInt              @default(0)
+  eternites          Int                 @default(0)
+  map                Int                 @default(0)
+  point              Int                 @default(0)
+  isPlayedThunt      Boolean             @default(false)
+  itemFromThunt      Int                 @default(0)
+  balanceTradingLogs BalanceTradingLog[]
+  craftUserAmounts   CraftUserAmount[]
+  rawUserAmounts     RawUserAmount[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MapRecipe {
+  id                  String               @id @default(cuid())
+  mapRecipeComponents MapRecipeComponent[]
+}
+
+model MapRecipeComponent {
+  id          String    @id @default(cuid())
+  amount      Int
+  mapRecipeId String
+  craftItemId String
+  craftItem   CraftItem @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
+  mapRecipe   MapRecipe @relation(fields: [mapRecipeId], references: [id], onDelete: Cascade)
+}
+
+model RawUserAmount {
+  id            String      @id @default(cuid())
+  tradingDataId String
+  rawItemId     String
+  amount        BigInt
+  rawItem       RawItem     @relation(fields: [rawItemId], references: [id], onDelete: Cascade)
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model CraftUserAmount {
+  id            String      @id @default(cuid())
+  tradingDataId String
+  craftItemId   String
+  amount        BigInt
+  craftItem     CraftItem   @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
+  tradingData   TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model RawItem {
+  id              String           @id @default(cuid())
+  name            String
+  price           BigInt           @default(3000)
+  craftRecipes    CraftRecipe[]
+  rawStockPeriods RawStockPeriod[]
+  rawUserAmounts  RawUserAmount[]
+}
+
+model CraftItem {
+  id                  String               @id @default(cuid())
+  name                String
+  price               BigInt               @default(3000)
+  craftRecipes        CraftRecipe[]
+  craftStockPeriods   CraftStockPeriod[]
+  craftUserAmounts    CraftUserAmount[]
+  mapRecipeComponents MapRecipeComponent[]
+}
+
+model CraftRecipe {
+  id          String    @id @default(cuid())
+  craftItemId String
+  rawItemId   String
+  amount      Int
+  craftItem   CraftItem @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
+  rawItem     RawItem   @relation(fields: [rawItemId], references: [id], onDelete: Cascade)
+}
+
+model CraftStockPeriod {
+  id             String         @id @default(cuid())
+  craftId        String
+  stock          Int
+  periode        Int
+  price          BigInt
+  craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
+  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
+}
+
+model RawStockPeriod {
+  id             String         @id @default(cuid())
+  rawId          String
+  stock          Int
+  periode        Int
+  price          BigInt
+  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
+  rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
+}
+
+model BalanceTradingLog {
+  id            String                 @id @default(cuid())
+  tradingDataId String
+  amount        BigInt
+  message       String
+  type          BalanceLogType
+  resource      BalanceTradingResource
+  createdAt     DateTime               @default(now())
+  tradingData   TradingData            @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
+}
+
+model RallyMaster {
+  id                   String      @id @default(cuid())
+  current_period_id    String
+  special_ticket_stock Int         @default(5)
+  total_period         Int         @default(0)
+  rallyPeriod          RallyPeriod @relation(fields: [current_period_id], references: [id], onDelete: Cascade)
+}
+
+model access_card_upgrade_cost {
+  id                         Int             @id @default(autoincrement())
+  eonix_cost                 Int
+  big_item_id                String?
+  small_item_id              String?
+  big_item_amount_required   Int             @default(0)
+  small_item_amount_required Int             @default(0)
+  bigItem                    RallyBigItem?   @relation(fields: [big_item_id], references: [id], onDelete: Cascade)
+  smallItem                  RallySmallItem? @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
+}
+
+model RallyPos {
+  id           String      @id @default(cuid())
+  period_id    String
+  zone_id      String
+  eonix_cost   Int         @default(0)
+  name         String
+  rally_period RallyPeriod @relation(fields: [period_id], references: [id], onDelete: Cascade)
+  rally_zone   RallyZone   @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+}
+
+model RallyPeriod {
+  id                   String            @id @default(cuid())
+  name                 String            @unique
+  duration             Int
+  status               RallyPeriodStatus @default(NOT_STARTED)
+  endTime              DateTime?
+  pausedTime           DateTime?
+  startTime            DateTime?
+  totalPausedDuration  Int               @default(0)
+  special_ticket_name  String
+  special_ticket_stock Int               @default(5)
+  rallyMasters         RallyMaster[]
+  RallyPos             RallyPos[]
+}
+
+model RallyZone {
+  id       String     @id @default(cuid())
+  name     String
+  RallyPos RallyPos[]
+}
+
+model RallyData {
+  id                    String @id @default(cuid())
+  point                 Int    @default(0)
+  vault                 Int    @default(0)
+  ticket                Int    @default(0)
+  access_card_level     Int    @default(0)
+  enonix                Int    @default(0)
+  minus_point           Int    @default(0)
+  special_ticket        Int    @default(0)
+  user_id               String @unique
+  level_upgrade_cost_id Int    @default(1)
+  pos_visited_count     Int    @default(0)
+  user                  User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model RallyBigItem {
+  id                   String                     @id @default(cuid())
+  name                 String
+  recipes              RallyBigItemRecipe[]
+  userBigItemInventory UserBigItemInventory[]
+  access_card_costs    access_card_upgrade_cost[]
+  smallItems           RallySmallItem[]           @relation("RallyBigItemToRallySmallItem")
+}
+
+model RallySmallItem {
+  id                     String                     @id @default(cuid())
+  name                   String
+  price                  Int                        @default(5)
+  show_in_inventory      Boolean                    @default(true)
+  recipes                RallyBigItemRecipe[]
+  userSmallItemInventory UserSmallItemInventory[]
+  access_card_costs      access_card_upgrade_cost[]
+  bigItems               RallyBigItem[]             @relation("RallyBigItemToRallySmallItem")
+}
+
+model RallyBigItemRecipe {
+  id             String         @id @default(cuid())
+  result_item_id String
+  small_item_id  String
+  quantity       Int
+  resultItem     RallyBigItem   @relation(fields: [result_item_id], references: [id], onDelete: Cascade)
+  smallItem      RallySmallItem @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
+}
+
+model UserBigItemInventory {
+  id          String       @id @default(cuid())
+  user_id     String
+  big_item_id String
+  amount      Int          @default(0)
+  bigItem     RallyBigItem @relation(fields: [big_item_id], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model UserSmallItemInventory {
+  id            String         @id @default(cuid())
+  user_id       String
+  small_item_id String
+  amount        Int            @default(0)
+  smallItem     RallySmallItem @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model RallyActivityLog {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
 enum GameStatus {
   PENDING
   PAUSED
@@ -36,8 +292,6 @@ enum BalanceTradingResource {
 enum Role {
   PARTICIPANT
   SUPER
-
-  //trading
   TALKSHOW
   SELL
   BUYRAW
@@ -48,315 +302,16 @@ enum Role {
   PITCHING
   CURRENCY
   THUNT
-  PRESSURE
-
-  // RALLY
   EXCHANGE
   UPGRADE
   POSTGUARD
   MONSTER
+  PRESSURE
 }
 
-// MASTER MODELS
-model PeriodeTrading {
-  id        String @id @default(cuid())
-  periode   Int    @unique
-  cost_map  Int
-  price_map Int
-  duration  Int
-
-  startTime           DateTime?
-  endTime             DateTime?
-  pausedTime          DateTime?
-  totalPausedDuration Int                @default(0)
-  status              RallyPeriodStatus  @default(NOT_STARTED)
-  masterTradings      MasterTrading[]
-  craftStockPeriods   CraftStockPeriod[]
-  rawStockPeriods     RawStockPeriod[]
-}
-
-model MasterTrading {
-  id              String @id @default(cuid())
-  current_periode Int    @default(1)
-
-  periodeTrading PeriodeTrading @relation(fields: [current_periode], references: [periode], onDelete: Cascade)
-}
-
-// MODELS
-model User {
-  id       String @id @default(cuid())
-  name     String @unique
-  password String
-
-  tradingData            TradingData?
-  rallyData              RallyData?
-  userBigItemInventory   UserBigItemInventory[]
-  userSmallItemInventory UserSmallItemInventory[]
-  rallyActivityLog       RallyActivityLog[]
-
-  role Role @default(PARTICIPANT)
-}
-
-model TradingData {
-  id     String @id @default(cuid())
-  userId String @unique
-
-  idr           BigInt  @default(-10000000000)
-  usd           BigInt  @default(0)
-  eternites     Int     @default(0)
-  map           Int     @default(0)
-  point         Int     @default(0)
-  isPlayedThunt Boolean @default(false)
-  itemFromThunt Int     @default(0)
-
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  balanceTradingLogs BalanceTradingLog[]
-  rawUserAmounts     RawUserAmount[]
-  craftUserAmounts   CraftUserAmount[]
-}
-
-model MapRecipe {
-  id String @id @default(cuid())
-
-  mapRecipeComponents MapRecipeComponent[]
-}
-
-model MapRecipeComponent {
-  id     String @id @default(cuid())
-  amount Int
-
-  mapRecipeId String
-  mapRecipe   MapRecipe @relation(fields: [mapRecipeId], references: [id], onDelete: Cascade)
-
-  craftItemId String
-  craftItem   CraftItem @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
-}
-
-model RawUserAmount {
-  id String @id @default(cuid())
-
-  tradingDataId String
-  rawItemId     String
-
-  amount BigInt
-
-  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
-  rawItem     RawItem     @relation(fields: [rawItemId], references: [id], onDelete: Cascade)
-}
-
-model CraftUserAmount {
-  id String @id @default(cuid())
-
-  tradingDataId String
-  craftItemId   String
-
-  amount BigInt
-
-  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
-  craftItem   CraftItem   @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
-}
-
-model RawItem {
-  id String @id @default(cuid())
-
-  name  String
-  price BigInt @default(3000)
-
-  rawStockPeriods RawStockPeriod[]
-  rawUserAmounts  RawUserAmount[]
-  craftRecipes    CraftRecipe[]
-}
-
-model CraftItem {
-  id String @id @default(cuid())
-
-  name  String
-  price BigInt @default(3000)
-
-  craftStockPeriods   CraftStockPeriod[]
-  craftUserAmounts    CraftUserAmount[]
-  craftRecipes        CraftRecipe[]
-  mapRecipeComponents MapRecipeComponent[]
-}
-
-model CraftRecipe {
-  id String @id @default(cuid())
-
-  craftItemId String
-  rawItemId   String
-  amount      Int
-
-  craftItem CraftItem @relation(fields: [craftItemId], references: [id], onDelete: Cascade)
-  rawItem   RawItem   @relation(fields: [rawItemId], references: [id], onDelete: Cascade)
-}
-
-model CraftStockPeriod {
-  id      String @id @default(cuid())
-  craftId String
-  stock   Int
-  periode Int
-  price   BigInt
-
-  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
-  craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
-}
-
-model RawStockPeriod {
-  id      String @id @default(cuid())
-  rawId   String
-  stock   Int
-  periode Int
-  price   BigInt
-
-  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
-  rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
-}
-
-model BalanceTradingLog {
-  id            String @id @default(cuid())
-  tradingDataId String
-
-  amount    BigInt
-  message   String
-  type      BalanceLogType
-  resource  BalanceTradingResource
-  createdAt DateTime               @default(now())
-
-  tradingData TradingData @relation(fields: [tradingDataId], references: [id], onDelete: Cascade)
-}
-
-/////////////////////////////////////////////////
-// RALLY TABLE
-/////////////////////////////////////////////////
-
-// MASTER MODELS
 enum RallyPeriodStatus {
   NOT_STARTED
   ON_GOING
-  PAUSED
   ENDED
-}
-
-model RallyMaster {
-  id                   String      @id @default(cuid())
-  current_period_id    String 
-  total_period    Int         @default(0)
-  special_ticket_stock Int         @default(5)
-  rallyPeriod          RallyPeriod @relation(fields: [current_period_id], references: [id], onDelete: Cascade)
-}
-
-model access_card_upgrade_cost {
-  id                         Int     @id @default(autoincrement())
-  eonix_cost                 Int
-  big_item_id                String?
-  small_item_id              String?
-  big_item_amount_required   Int     @default(0)
-  small_item_amount_required Int     @default(0)
-
-  bigItem   RallyBigItem?   @relation(fields: [big_item_id], references: [id], onDelete: Cascade)
-  smallItem RallySmallItem? @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
-}
-
-model RallyPos {
-  id           String      @id @default(cuid())
-  name         String
-  period_id    String
-  zone_id      String
-  eonix_cost   Int         @default(0)
-  rally_zone   RallyZone   @relation(fields: [zone_id], references: [id], onDelete: Cascade)
-  rally_period RallyPeriod @relation(fields: [period_id], references: [id], onDelete: Cascade)
-}
-
-model RallyPeriod {
-  id   String @id @default(cuid())
-  name String @unique
-
-  duration            Int
-  startTime           DateTime?
-  endTime             DateTime?
-  pausedTime          DateTime?
-  totalPausedDuration Int               @default(0)
-  status              RallyPeriodStatus @default(NOT_STARTED)
-  RallyPos            RallyPos[]
-  rallyMasters        RallyMaster[]
-}
-
-model RallyZone {
-  id       String     @id @default(cuid())
-  name     String
-  RallyPos RallyPos[]
-}
-
-model RallyData {
-  id                    String @id @default(cuid())
-  user_id               String @unique
-  point                 Int    @default(0)
-  minus_point           Int    @default(0)
-  pos_visited_count     Int    @default(0)
-  access_card_level     Int    @default(0)
-  enonix                Int    @default(0)
-  vault                 Int    @default(0)
-  ticket                Int    @default(0)
-  special_ticket        Int    @default(0)
-  level_upgrade_cost_id Int    @default(1)
-  user                  User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-}
-
-model RallyBigItem {
-  id                   String                 @id @default(cuid())
-  name                 String
-  smallItems           RallySmallItem[]
-  recipes              RallyBigItemRecipe[]
-  userBigItemInventory UserBigItemInventory[]
-
-  // VVV PERBAIKAN DI SINI VVV
-  access_card_costs access_card_upgrade_cost[]
-}
-
-model RallySmallItem {
-  id                     String                   @id @default(cuid())
-  name                   String
-  bigItems               RallyBigItem[]
-  recipes                RallyBigItemRecipe[]
-  userSmallItemInventory UserSmallItemInventory[]
-
-  // VVV PERBAIKAN DI SINI VVV
-  access_card_costs access_card_upgrade_cost[]
-}
-
-model RallyBigItemRecipe {
-  id             String         @id @default(cuid())
-  result_item_id String
-  small_item_id  String
-  quantity       Int
-  resultItem     RallyBigItem   @relation(fields: [result_item_id], references: [id], onDelete: Cascade)
-  smallItem      RallySmallItem @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
-}
-
-model UserBigItemInventory {
-  id          String @id @default(cuid())
-  user_id     String
-  big_item_id String
-  amount      Int    @default(0)
-
-  user    User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  bigItem RallyBigItem @relation(fields: [big_item_id], references: [id], onDelete: Cascade)
-}
-
-model UserSmallItemInventory {
-  id            String @id @default(cuid())
-  user_id       String
-  small_item_id String
-  amount        Int    @default(0)
-
-  user      User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  smallItem RallySmallItem @relation(fields: [small_item_id], references: [id], onDelete: Cascade)
-}
-
-model RallyActivityLog {
-  id        String   @id @default(cuid())
-  user_id   String
-  message   String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  PAUSED
 }
