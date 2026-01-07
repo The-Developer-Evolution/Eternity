@@ -80,7 +80,7 @@ export default function CurrencyConvertInterface() {
       {/* LEFT COLUMN: INTERFACE */}
       <div className="bg-gray-900/80 backdrop-blur-md border border-[#AE00DE] p-6 rounded-xl flex flex-col gap-6 shadow-2xl">
         <h2 className="text-2xl font-impact text-[#75E8F0] tracking-wider border-b border-gray-700 pb-2">
-          CURRENCY EXCHANGE
+          MONEY CHANGER
         </h2>
 
         {/* 1. USER SEARCH */}

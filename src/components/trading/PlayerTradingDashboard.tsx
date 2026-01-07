@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 import { pusherClient } from "@/lib/pusher";
 import Link from "next/link";
+import LinkButton from "@/components/common/LinkButton";
+import { FaBox, FaChartBar } from "react-icons/fa";
 // import { formatCurrency } from "@/utils/format"; // Removed unused import
 
 interface TradingStatusResponse {
@@ -109,7 +111,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
   }, [mutate]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 p-4">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 p-4" suppressHydrationWarning>
       {/* Timer Section */}
       <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl text-center">
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">Trading Status</p>
@@ -117,12 +119,12 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
           status === "ON_GOING" ? "text-green-400" : 
           status === "PAUSED" ? "text-yellow-400" : 
           status === "ENDED" ? "text-red-400" : "text-white"
-        }`}>
+        }`} suppressHydrationWarning>
             {status ? status.replace(/_/g, " ") : "WAITING..."}
         </p>
         
         {(status === "ON_GOING" || status === "PAUSED") && (
-             <div className="mt-2 text-6xl font-mono text-white font-bold tabular-nums tracking-widest text-shadow-glow">
+             <div className="mt-2 text-6xl font-mono text-white font-bold tabular-nums tracking-widest text-shadow-glow" suppressHydrationWarning>
                 {formatTime(timeLeft)}
              </div>
         )}
@@ -131,61 +133,56 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Currencies */}
-        <div className="bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl border border-blue-500/30 flex flex-col gap-4">
+        <div className="bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 p-6 rounded-xl flex flex-col gap-4">
             <h3 className="text-xl font-bold text-blue-200 border-b border-blue-500/30 pb-2">Wallet</h3>
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="text-xs text-blue-300">USD</p>
-                    <p className="text-2xl font-bold text-white">${stats.usd}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>${stats.usd}</p>
                 </div>
                 <div>
                     <p className="text-xs text-blue-300">IDR</p>
-                    <p className="text-2xl font-bold text-white">Rp {stats.idr}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>Rp {stats.idr}</p>
                 </div>
                 <div className="col-span-2">
                     <p className="text-xs text-blue-300">Eternities</p>
-                    <p className="text-2xl font-bold text-[#AE00DE]">{stats.eternites}</p>
+                    <p className="text-2xl font-bold text-[#AE00DE]" suppressHydrationWarning>{stats.eternites}</p>
                 </div>
             </div>
         </div>
 
         {/* Inventory Counts */}
-        <div className="bg-purple-900/40 backdrop-blur-sm p-6 rounded-xl border border-purple-500/30 flex flex-col gap-4">
+        <div className="bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 p-6 rounded-xl flex flex-col gap-4">
             <h3 className="text-xl font-bold text-purple-200 border-b border-purple-500/30 pb-2">Inventory Stats</h3>
              <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-black/30 p-2 rounded">
                     <p className="text-xs text-purple-300">Raw Items</p>
-                    <p className="text-2xl font-bold text-white">{stats.rawItemAmount}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>{stats.rawItemAmount}</p>
                 </div>
                  <div className="bg-black/30 p-2 rounded">
                     <p className="text-xs text-purple-300">Craft Items</p>
-                    <p className="text-2xl font-bold text-white">{stats.craftItemAmount}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>{stats.craftItemAmount}</p>
                 </div>
                  <div className="bg-black/30 p-2 rounded">
                     <p className="text-xs text-purple-300">Maps</p>
-                    <p className="text-2xl font-bold text-white">{stats.mapAmount}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>{stats.mapAmount}</p>
                 </div>
             </div>
         </div>
       </div>
 
       {/* Navigation Buttons */}
-      <div className="grid grid-cols-2 gap-4">
-        <Link 
-            href="/peserta/trading/inventory"
-            className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 p-4 rounded-xl text-center shadow-lg hover:shadow-cyan-500/20 transition-all hover:scale-[1.02]"
-        >
-            <span className="relative z-10 font-bold text-white text-xl tracking-wider">📦 INVENTORY</span>
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-        </Link>
-
-        <Link 
-            href="/peserta/trading/leaderboard"
-             className="group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-center shadow-lg hover:shadow-purple-500/20 transition-all hover:scale-[1.02]"
-        >
-             <span className="relative z-10 font-bold text-white text-xl tracking-wider">🏆 LEADERBOARD</span>
-             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-        </Link>
+      <div className="flex flex-col gap-2 w-full">
+        <LinkButton 
+            link="/peserta/trading/inventory"
+            text="INVENTORY"
+            icon={<FaBox />}
+        />
+        <LinkButton 
+            link="/peserta/trading/leaderboard"
+            text="LEADERBOARD"
+            icon={<FaChartBar />}
+        />
       </div>
     </div>
   );

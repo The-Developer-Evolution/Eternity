@@ -16,11 +16,13 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function CardPanel({ 
   title = "title", 
   children, 
-  extraClass = "" 
+  extraClass = "",
+  showTimer = true 
 }: { 
   title: string, 
   children: React.ReactNode, 
   extraClass?: string 
+  showTimer?: boolean
 }) {
   const { data: periodData, mutate } = useSWR<PeriodData>(
     '/api/rally/period',
@@ -64,7 +66,7 @@ export default function CardPanel({
           {period}
         </h3>
       </div>
-      <Timer />
+      <{showTimer && <Timer></Timer>}
       {children}
     </section>
   )

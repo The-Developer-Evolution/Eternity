@@ -3,33 +3,37 @@
 import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
-import { craftToMap } from "@/features/trading/services/map";
-import { Loader2, CheckCircle, AlertCircle, User, Map as MapIcon, Hammer } from "lucide-react";
+import { craftMapWithCustomRecipe } from "@/features/trading/services/map";
+import { getUserInventory } from "@/features/trading/services/sell";
+import { Loader2, CheckCircle, AlertCircle, User, Map as MapIcon, Hammer, Plus, Minus, Coins } from "lucide-react";
 
-// Types based on what getAllMapRecipes returns
-type MapRecipe = {
+// Helper type from craft.ts return type (approximate for UI)
+interface CraftItemUI {
   id: string;
-  mapRecipeComponents: {
-    id: string;
-    amount: number;
-    craftItem: {
-      name: string;
-    };
-  }[];
-};
-
-interface MapCraftInterfaceProps {
-    recipes: MapRecipe[];
+  name: string;
+  // recipes: ... (we don't need recipe details here, just the item info)
 }
 
-export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
+interface MapCraftInterfaceProps {
+    craftItems: CraftItemUI[];
+}
+
+export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps) {
   const [userQuery, setUserQuery] = useState("");
   const [matchingUsers, setMatchingUsers] = useState<ShopUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
   
-  const [selectedRecipe, setSelectedRecipe] = useState<MapRecipe | null>(null);
-  const [amount, setAmount] = useState<string>("1");
+  // Custom Recipe State
+  // Map<craftItemId, amount>
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
+  const [cost, setCost] = useState<string>("0");
+  const [amount, setAmount] = useState<string>("1"); // Map quantity
   
+  // User Inventory State
+  interface UserInventoryItem { craftItemId: string; amount: bigint; }
+  const [userInventory, setUserInventory] = useState<UserInventoryItem[]>([]);
+  const [isLoadingInventory, setIsLoadingInventory] = useState(false);
+
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -58,23 +62,76 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
     performSearch(userQuery);
   }, [userQuery, performSearch]);
 
-  const handleCraft = async () => {
-    if (!selectedUser || !selectedRecipe) return;
+  // Fetch Inventory when user is selected
+  useEffect(() => {
+      if (selectedUser) {
+          setIsLoadingInventory(true);
+          getUserInventory(selectedUser.id)
+              .then((data) => {
+                  if (data) {
+                      // Map BigInt to simpler structure if needed, or keep as is.
+                      setUserInventory(data.craftUserAmounts as unknown as UserInventoryItem[]);
+                  }
+              })
+              .catch(err => console.error("Inventory fetch failed", err))
+              .finally(() => setIsLoadingInventory(false));
+      } else {
+          setUserInventory([]);
+      }
+  }, [selectedUser]);
 
-    const qty = parseInt(amount);
-    if (isNaN(qty) || qty <= 0) {
-         setMessage({ type: "error", text: "Invalid amount." });
+  const toggleItem = (itemId: string) => {
+      setSelectedItems(prev => {
+          const next = { ...prev };
+          if (next[itemId]) {
+              delete next[itemId];
+          } else {
+              next[itemId] = 1;
+          }
+          return next;
+      });
+  };
+
+  const updateItemAmount = (itemId: string, val: number) => {
+      if (val < 1) return;
+      setSelectedItems(prev => ({ ...prev, [itemId]: val }));
+  };
+
+  const handleCraft = async () => {
+    if (!selectedUser) return;
+
+    const mapQty = parseInt(amount);
+    const costVal = parseInt(cost);
+    
+    if (isNaN(mapQty) || mapQty <= 0) {
+         setMessage({ type: "error", text: "Invalid map quantity." });
          return;
+    }
+    if (isNaN(costVal) || costVal < 0) {
+        setMessage({ type: "error", text: "Invalid cost." });
+        return;
+   }
+
+    const components = Object.entries(selectedItems).filter(([_, qty]) => qty > 0);
+    if (components.length === 0) {
+        setMessage({ type: "error", text: "Please select at least one material." });
+        return;
     }
 
     setIsTransacting(true);
     setMessage(null);
 
     try {
-      const result = await craftToMap(selectedUser.id, selectedRecipe.id, qty);
+      const result = await craftMapWithCustomRecipe(selectedUser.id, components, costVal, mapQty);
       
       if (result.success) {
         setMessage({ type: "success", text: result.message || "Map crafted successfully!" });
+        // Refresh inventory? 
+        // We can just rely on the result data or re-fetch.
+        // result.data contains fresh tradingData.
+        if (result.data) {
+             setUserInventory(result.data.craftUserAmounts as unknown as UserInventoryItem[]);
+        }
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Crafting failed." });
@@ -86,12 +143,17 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
     }
   };
 
+  const getOwnedAmount = (craftItemId: string) => {
+      const item = userInventory.find(i => i.craftItemId === craftItemId);
+      return item ? item.amount.toString() : "0";
+  };
+
   return (
-    <div className="relative z-10 w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
+    <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
       {/* LEFT COLUMN: INTERFACE */}
       <div className="bg-gray-900/80 backdrop-blur-md border border-amber-600 p-6 rounded-xl flex flex-col gap-6 shadow-2xl">
         <h2 className="text-2xl font-impact text-amber-500 tracking-wider border-b border-gray-700 pb-2 flex items-center gap-2">
-          <MapIcon className="text-amber-500" /> MAP CREATION
+          <MapIcon className="text-amber-500" /> FORBIDDEN MAP
         </h2>
 
         {/* 1. USER SEARCH */}
@@ -119,7 +181,6 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
             )}
           </div>
           
-          {/* USER RESULTS DROPDOWN */}
           {matchingUsers.length > 0 && !selectedUser && (
             <div className="absolute top-full mt-1 w-full bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
               {matchingUsers.map((u) => (
@@ -140,49 +201,91 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
           )}
 
            {selectedUser && (
-            <div className="bg-green-900/30 border border-green-500/50 p-2 rounded flex items-center gap-2 text-green-300 text-sm">
-              <CheckCircle size={16} /> Selected: <span className="font-bold">{selectedUser.name}</span>
+            <div className="bg-green-900/30 border border-green-500/50 p-2 rounded flex items-center justify-between text-green-300 text-sm">
+              <div className="flex items-center gap-2">
+                  <CheckCircle size={16} /> Selected: <span className="font-bold">{selectedUser.name}</span>
+              </div>
+              {isLoadingInventory && <Loader2 size={14} className="animate-spin" />}
             </div>
            )}
         </div>
 
-        {/* 2. RECIPE SELECTOR */}
+        {/* 2. COST INT */}
         <div className="flex flex-col gap-2">
             <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
-                <Hammer size={16} /> MAP RECIPES
+                <Coins size={16} /> COST (ETERNITES)
             </label>
-            <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
-                {recipes.map((recipe) => (
-                    <button
-                        key={recipe.id}
-                        onClick={() => setSelectedRecipe(recipe)}
-                        className={`p-4 rounded-lg text-sm text-left transition-all border ${
-                            selectedRecipe?.id === recipe.id
-                            ? "bg-amber-900/60 border-amber-500 text-white" 
-                            : "bg-gray-800 text-gray-300 border-gray-600 hover:border-amber-500"
-                        }`}
-                    >
-                        <div className="font-bold text-amber-100 mb-1">Recipe #{recipe.id.slice(-4)}</div>
-                        <div className="flex flex-wrap gap-2">
-                            {recipe.mapRecipeComponents.map((comp) => (
-                                <span key={comp.id} className="bg-black/40 px-2 py-1 rounded text-xs text-gray-300 border border-gray-700">
-                                    {comp.amount}x <span className="text-amber-400">{comp.craftItem.name}</span>
-                                </span>
-                            ))}
-                        </div>
-                    </button>
-                ))}
-            </div>
-             {recipes.length === 0 && <div className="text-gray-500 italic text-sm">No map recipes available.</div>}
+            <input 
+                type="number"
+                min="0"
+                className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 focus:border-amber-500 outline-none"
+                value={cost}
+                onChange={(e) => setCost(e.target.value)}
+            />
         </div>
 
-        {/* 3. QUANTITY */}
+
+        {/* 3. RECIPE CREATOR */}
+        <div className="flex flex-col gap-2 flex-grow h-auto">
+            <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
+                <Hammer size={16} /> RECIPE (Select Craft Items)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto pr-1">
+                {craftItems.map((item) => {
+                    const isSelected = !!selectedItems[item.id];
+                    const owned = getOwnedAmount(item.id);
+                    return (
+                        <div 
+                            key={item.id}
+                            className={`p-3 rounded border transition-all ${
+                                isSelected 
+                                ? "bg-amber-900/40 border-amber-500" 
+                                : "bg-gray-800 border-gray-700 hover:border-gray-500"
+                            }`}
+                        >
+                            <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => toggleItem(item.id)}>
+                                <span className={`font-bold ${isSelected ? "text-amber-200" : "text-gray-300"}`}>{item.name}</span>
+                                <div className="text-xs text-gray-400 flex flex-col items-end">
+                                    <span>Owned</span>
+                                    <span className={`font-mono ${parseInt(owned) > 0 ? "text-white" : "text-red-400"}`}>{owned}</span>
+                                </div>
+                            </div>
+                            
+                            {isSelected && (
+                                <div className="flex items-center gap-2 mt-2 bg-black/20 p-1 rounded">
+                                    <button 
+                                        className="p-1 hover:bg-white/10 rounded"
+                                        onClick={() => updateItemAmount(item.id, selectedItems[item.id] - 1)}
+                                    >
+                                        <Minus size={14} className="text-gray-400" />
+                                    </button>
+                                    <input 
+                                        type="number" 
+                                        className="w-full bg-transparent text-center text-sm font-bold text-white outline-none"
+                                        value={selectedItems[item.id]}
+                                        onChange={(e) => updateItemAmount(item.id, parseInt(e.target.value) || 0)}
+                                    />
+                                    <button 
+                                        className="p-1 hover:bg-white/10 rounded"
+                                        onClick={() => updateItemAmount(item.id, selectedItems[item.id] + 1)}
+                                    >
+                                        <Plus size={14} className="text-gray-400" />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+
+        {/* 4. QUANTITY */}
          <div className="flex flex-col gap-2">
-             <label className="text-gray-400 text-sm font-bold">MAP QUANTITY</label>
+             <label className="text-gray-400 text-sm font-bold">MAP OUTPUT QUANTITY</label>
              <input 
                 type="number" 
                 min="1"
-                className="bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-amber-500 outline-none"
+                className="bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-amber-500 outline-none font-bold text-lg"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
              />
@@ -191,9 +294,9 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
         {/* ACTION BUTTON */}
         <button
           onClick={handleCraft}
-          disabled={!selectedUser || !selectedRecipe || isTransacting}
+          disabled={!selectedUser || Object.keys(selectedItems).length === 0 || isTransacting}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-            !selectedUser || !selectedRecipe || isTransacting
+            !selectedUser || Object.keys(selectedItems).length === 0 || isTransacting
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-[#AE00DE] to-[#7116C9] text-white hover:scale-[1.02] hover:shadow-[#AE00DE]/50"
           }`}
@@ -204,7 +307,7 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
             </>
           ) : (
             <>
-              <MapIcon size={20} /> CREATE MAP
+              <MapIcon size={20} /> CRAFT FORBIDDEN MAP
             </>
           )}
         </button>
@@ -223,41 +326,52 @@ export default function MapCraftInterface({ recipes }: MapCraftInterfaceProps) {
       </div>
 
       {/* RIGHT COLUMN: PREVIEW */}
-      <div className="hidden md:flex flex-col justify-center gap-6 text-white bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-amber-500/30 sticky top-4">
-        <h3 className="text-xl font-impact text-gray-300">CRAFTING SUMMARY</h3>
-        
-        <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
-                <span className="text-gray-400 text-sm">CRAFTER</span>
-                <span className="font-bold text-lg">{selectedUser?.name || "---"}</span>
-            </div>
-             <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
-                <span className="text-gray-400 text-sm">OUTPUT</span>
-                <span className="font-bold text-lg text-amber-400">MAP</span>
-            </div>
-             <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-amber-500/30">
-                <span className="text-gray-400 text-sm">QUANTITY</span>
-                <span className="font-bold text-2xl text-green-400">+ {amount}</span>
-            </div>
-        </div>
+      <div className="hidden md:flex flex-col gap-6 text-white sticky top-4 h-fit">
+        <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-amber-500/30">
+            <h3 className="text-xl font-impact text-gray-300 mb-4">RECIPE SUMMARY</h3>
+            
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
+                    <span className="text-gray-400 text-sm">CRAFTER</span>
+                    <span className="font-bold text-lg">{selectedUser?.name || "---"}</span>
+                </div>
+                
+                <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
+                    <span className="text-gray-400 text-sm flex items-center gap-2"><Coins size={14}/> COST</span>
+                    <span className="font-bold text-lg text-red-300">- {cost} Eternites</span>
+                </div>
 
-        {selectedRecipe && !isNaN(parseInt(amount)) && (
-            <div className="bg-black/30 p-4 rounded border border-amber-500/30 mt-4">
-                 <div className="text-xs text-gray-400 mb-2 font-bold uppercase">Required Materials</div>
-                 <div className="flex flex-col gap-2">
-                    {selectedRecipe.mapRecipeComponents.map((comp) => (
-                         <div key={comp.id} className="flex justify-between text-sm">
-                            <span className="text-gray-300">{comp.craftItem.name}</span>
-                            <span className="text-red-400 font-bold">- {comp.amount * parseInt(amount)}</span>
-                         </div>
-                    ))}
-                 </div>
+                <div className="bg-black/30 p-4 rounded border border-amber-500/30">
+                    <div className="text-xs text-gray-400 mb-2 font-bold uppercase border-b border-gray-700 pb-1">Materials Required</div>
+                    <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                        {Object.entries(selectedItems).length === 0 ? (
+                            <div className="text-gray-500 italic text-sm">No items selected</div> 
+                        ) : (
+                            Object.entries(selectedItems).map(([id, qty]) => {
+                                const item = craftItems.find(i => i.id === id);
+                                const totalReq = qty * parseInt(amount || "0");
+                                const owned = parseInt(getOwnedAmount(id));
+                                const hasEnough = owned >= totalReq;
+                                
+                                return (
+                                    <div key={id} className="flex justify-between text-sm items-center">
+                                        <span className="text-gray-300">{item?.name || id}</span>
+                                        <div className="text-right">
+                                            <div className="font-bold text-amber-400">{qty} x {amount} = {totalReq}</div>
+                                            {!hasEnough && <div className="text-xs text-red-500 font-bold">Insufficient (Has: {owned})</div>}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-green-500/30">
+                    <span className="text-gray-400 text-sm">OUTPUT</span>
+                    <span className="font-bold text-2xl text-green-400">+ {amount} MAP</span>
+                </div>
             </div>
-        )}
-        
-        <div className="mt-4 text-xs text-gray-500 text-center">
-            Materials will be deducted from user inventory. 
-            Map count will be updated.
         </div>
       </div>
     </div>
