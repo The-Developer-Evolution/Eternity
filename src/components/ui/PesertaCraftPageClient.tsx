@@ -10,9 +10,44 @@ import CardPanel from "@/components/ui/CardPanel";
 import ModalTriggerButton from "@/components/common/ModalTriggerButton";
 import InventoryModal from "@/components/ui/InventoryModal";
 
+// Define types based on your Prisma schema
+interface SmallItem {
+  id: string;
+  name: string;
+  price: number;
+  show_in_inventory: boolean;
+}
+
+interface ResultItem {
+  id: string;
+  name: string;
+}
+
+interface Recipe {
+  id: string;
+  result_item_id: string;
+  small_item_id: string;
+  quantity: number;
+  resultItem: ResultItem;
+  smallItem: SmallItem;
+}
+
+interface Material {
+  name: string;
+  quantity: number;
+}
+
+interface GroupedRecipe {
+  resultItem: ResultItem;
+  materials: Material[];
+}
+
 interface PageProps {
-  recipes: any[];
-  inventory: any;
+  recipes: Recipe[];
+  inventory: {
+    big_items: Array<{ id: string; big_item_id: string; amount: number }>;
+    small_items: Array<{ id: string; small_item_id: string; amount: number }>;
+  };
   userId: string;
 }
 
@@ -20,7 +55,7 @@ export default function CraftPageClient({ recipes, inventory, userId }: PageProp
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
 
   // Gabungkan recipe berdasarkan resultItem.id
-  const groupedRecipes = recipes.reduce((acc, recipe) => {
+  const groupedRecipes = recipes.reduce<Record<string, GroupedRecipe>>((acc, recipe) => {
     const key = recipe.resultItem.id;
     if (!acc[key]) {
       acc[key] = {
@@ -33,7 +68,7 @@ export default function CraftPageClient({ recipes, inventory, userId }: PageProp
       quantity: recipe.quantity,
     });
     return acc;
-  }, {} as Record<string, { resultItem: any; materials: { name: string; quantity: number }[] }>);
+  }, {});
 
   return (
     <div className="overflow-hidden">
