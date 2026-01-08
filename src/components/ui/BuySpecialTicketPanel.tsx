@@ -64,7 +64,7 @@ export default function BuySpecialTicketPanel({
       if (updated) setSelectedUser(updated);
     }
   }, [users]);
-
+``
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {

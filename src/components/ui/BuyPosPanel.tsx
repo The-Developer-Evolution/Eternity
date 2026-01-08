@@ -161,7 +161,7 @@ export default function BuyPosPanel({
   };
 
   return (
-    <div className="w-full max-w-4xl bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
+    <div className="w-full relative z-50 max-w-4xl bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
       <h2 className="text-3xl font-impact text-[#78CCEE] mb-6 text-center">
         BUY POS ACCESS
       </h2>
