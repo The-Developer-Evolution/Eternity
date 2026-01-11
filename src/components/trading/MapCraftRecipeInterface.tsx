@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers, getUserCraftInventory } from "@/features/trading/services/shop";
 import { craftToMap } from "@/features/trading/services/map";
@@ -125,17 +125,32 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
     }
   };
 
-  const checkInventory = (recipe: MapRecipe, qty: number) => {
-      let enough = true;
-      const details = recipe.mapRecipeComponents.map(comp => {
-          const required = BigInt(Math.floor(typeof comp.amount === 'string' ? parseFloat(comp.amount) : comp.amount)) * BigInt(qty);
-          const inInventory = userInventory.find(i => i.craftItemId === comp.craftItem.id)?.amount || 0;
-          const isEnough = BigInt(inInventory) >= required;
-          if (!isEnough) enough = false;
-          return { ...comp, required, inInventory, isEnough };
-      });
-      return { enough, details };
-  };
+  // Memoized user inventory lookup
+  const userInventoryMap = useMemo(() => {
+    return new Map(userInventory.map(i => [i.craftItemId, i.amount]));
+  }, [userInventory]);
+
+  // Memoized calculations for recipes to avoid re-calc on every render
+  const recipeStatus = useMemo(() => {
+    return mapRecipes.map(r => {
+        const qtyInt = parseInt(amount) || 0;
+        let enough = true;
+        const details = r.mapRecipeComponents.map(comp => {
+            const required = BigInt(Math.floor(typeof comp.amount === 'string' ? parseFloat(comp.amount) : comp.amount)) * BigInt(qtyInt);
+            // Use Map for O(1) lookup
+            const inInventory = userInventoryMap.get(comp.craftItem.id) || 0;
+            const isEnough = BigInt(inInventory) >= required;
+            if (!isEnough) enough = false;
+            return { ...comp, required, inInventory, isEnough };
+        });
+        return { recipeId: r.id, enough, details };
+    });
+  }, [mapRecipes, amount, userInventoryMap]);
+
+  // Helper to get status quickly
+  const getRecipeStatus = useCallback((id: string) => {
+    return recipeStatus.find(s => s.recipeId === id);
+  }, [recipeStatus]);
 
   const qtyInt = parseInt(amount) || 0;
   
@@ -238,8 +253,8 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
              <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-1">
                  {mapRecipes.map(r => {
                      const isSelected = selectedRecipeId === r.id;
-                     const validation = checkInventory(r, qtyInt);
-                     const isEnough = !selectedUser || validation.enough; // Only fail if user selected AND not enough
+                     const status = getRecipeStatus(r.id);
+                     if (!status) return null;
 
                      return (
                          <div 
@@ -259,7 +274,7 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
                              </div>
 
                              <div className="flex flex-wrap gap-2 mt-1 w-full">
-                                 {validation.details.map((d, idx) => (
+                                 {status.details.map((d, idx) => (
                                      <div key={idx} className={`text-xs px-2 py-1 rounded border flex items-center gap-1 ${
                                          selectedUser
                                             ? (d.isEnough 
@@ -345,7 +360,7 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
                 <div className="p-4 bg-gray-800 rounded border border-gray-700">
                     <h4 className="text-sm font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">RESOURCE CHECK</h4>
                     <div className="space-y-3">
-                        {checkInventory(selectedRecipe, qtyInt).details.map((comp, idx) => (
+                        {getRecipeStatus(selectedRecipe.id)?.details.map((comp, idx) => (
                             <div key={idx} className="flex justify-between items-center text-sm">
                                 <span className="text-gray-300">{comp.craftItem.name}</span>
                                 <div className="flex items-center gap-2">
@@ -366,11 +381,11 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
 
                 {selectedUser ? (
                      <div className={`mt-2 p-3 rounded border text-sm flex items-center gap-2 ${
-                         checkInventory(selectedRecipe, qtyInt).enough
+                         getRecipeStatus(selectedRecipe.id)?.enough
                             ? "bg-green-900/20 border-green-500/30 text-green-300"
                             : "bg-red-900/20 border-red-500/30 text-red-300"
                      }`}>
-                         {checkInventory(selectedRecipe, qtyInt).enough 
+                         {getRecipeStatus(selectedRecipe.id)?.enough 
                             ? <><CheckCircle size={16}/> Resources Available</>
                             : <><AlertCircle size={16}/> Insufficient Resources</>
                          }

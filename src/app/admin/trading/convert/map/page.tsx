@@ -14,7 +14,11 @@ export default async function Page() {
       ...r,
       mapRecipeComponents: r.mapRecipeComponents.map(c => ({
           ...c,
-          amount: c.amount.toString()
+          amount: c.amount.toString(),
+          craftItem: {
+              ...c.craftItem,
+              price: c.craftItem.price.toString()
+          }
       }))
   }));
 
