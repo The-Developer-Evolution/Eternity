@@ -6,7 +6,12 @@ import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { convertCurrency, CurrencyType } from "@/features/trading/services/currency";
 import { Loader2, CheckCircle, AlertCircle, ArrowRightLeft, User, DollarSign, Wallet } from "lucide-react";
 
-export default function CurrencyConvertInterface() {
+
+interface CurrencyConvertInterfaceProps {
+  usdidrRate: number;
+}
+
+export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvertInterfaceProps) {
   const [userQuery, setUserQuery] = useState("");
   const [matchingUsers, setMatchingUsers] = useState<ShopUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
@@ -19,7 +24,7 @@ export default function CurrencyConvertInterface() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const toCurrency: CurrencyType = fromCurrency === "IDR" ? "USD" : "IDR";
-  const exchangeRate = fromCurrency === "IDR" ? (1 / 16000) : 16000;
+  const exchangeRate = fromCurrency === "IDR" ? (1 / usdidrRate) : usdidrRate;
   // Note: Pure display estimation. Actual calculation happens on server.
 
   // Debounced search
@@ -158,24 +163,45 @@ export default function CurrencyConvertInterface() {
             </div>
           </div>
           <div className="text-xs text-center text-gray-500 mt-1">
-             Rate: 1 USD = 16,000 IDR
+             Rate: 1 USD = {usdidrRate.toLocaleString()} IDR
           </div>
         </div>
 
         {/* 3. AMOUNT INPUT */}
         <div className="flex flex-col gap-2">
-          <label className="text-gray-400 text-sm font-bold">SOURCE AMOUNT ({fromCurrency})</label>
+           <div className="flex justify-between items-end">
+            <label className="text-gray-400 text-sm font-bold">SOURCE AMOUNT ({fromCurrency})</label>
+            {selectedUser && (
+              <span className="text-xs text-[#75E8F0] font-mono">
+                Balance: {fromCurrency === "IDR" 
+                  ? selectedUser.idr.toLocaleString() 
+                  : selectedUser.usd.toLocaleString()
+                }
+              </span>
+            )}
+          </div>
           <div className="relative">
             <input
               type="number"
               min="0"
               value={amount || ""}
               onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 pl-12 focus:border-[#75E8F0] outline-none text-xl font-mono"
+              className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 pl-12 pr-16 focus:border-[#75E8F0] outline-none text-xl font-mono"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                 {fromCurrency === "USD" ? <DollarSign size={20} /> : "Rp"}
             </div>
+             {selectedUser && (
+              <button
+                onClick={() => {
+                  const maxBalance = fromCurrency === "IDR" ? selectedUser.idr : selectedUser.usd;
+                  setAmount(maxBalance);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#AE00DE] hover:bg-[#AE00DE]/80 text-white text-xs font-bold px-2 py-1 rounded transition-colors"
+              >
+                MAX
+              </button>
+            )}
           </div>
         </div>
 

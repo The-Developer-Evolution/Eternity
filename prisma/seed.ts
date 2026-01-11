@@ -129,14 +129,14 @@ async function main() {
 
   await prisma.periodeTrading.createMany({
     data: [
-      { periode: 1, cost_map: 2000, price_map: 14700, duration: 30 },
-      { periode: 2, cost_map: 2150, price_map: 12190, duration: 20 },
-      { periode: 3, cost_map: 2300, price_map: 11550, duration: 20 },
-      { periode: 4, cost_map: 2800, price_map: 10330, duration: 20 },
-      { periode: 5, cost_map: 3300, price_map: 9335, duration: 20 },
-      { periode: 6, cost_map: 3800, price_map: 8285, duration: 20 },
-      { periode: 7, cost_map: 4000, price_map: 6450, duration: 20 },
-      { periode: 8, cost_map: 4700, price_map: 5065, duration: 20 },
+      { periode: 1, cost_map: 1000, price_map: 120000, duration: 30, usdidr_rate: 16500 },
+      { periode: 2, cost_map: 1300, price_map: 118000, duration: 20, usdidr_rate: 16830 },
+      { periode: 3, cost_map: 1600, price_map: 116000, duration: 20, usdidr_rate: 15989 },
+      { periode: 4, cost_map: 1900, price_map: 114000, duration: 20, usdidr_rate: 16628 },
+      { periode: 5, cost_map: 2200, price_map: 112000, duration: 20, usdidr_rate: 17293 },
+      { periode: 6, cost_map: 2500, price_map: 110000, duration: 20, usdidr_rate: 18677 },
+      { periode: 7, cost_map: 2800, price_map: 108000, duration: 20, usdidr_rate: 17743 },
+      { periode: 8, cost_map: 3100, price_map: 106000, duration: 20, usdidr_rate: 15969 },
     ],
     skipDuplicates: true,
   });

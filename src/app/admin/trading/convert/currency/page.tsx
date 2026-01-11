@@ -3,7 +3,12 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import CurrencyConvertInterface from "@/components/trading/CurrencyConvertInterface";
 
-export default function Page() {
+import { getRunningTradingPeriod } from "@/features/trading/action";
+
+export default async function Page() {
+  const period = await getRunningTradingPeriod();
+  const currentRate = period?.usdidr_rate ?? 16000;
+
   return (
     <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-4 justify-center items-center">
@@ -17,8 +22,9 @@ export default function Page() {
             width={1920}
             height={1080}
             className="relative z-1 w-1/2 h-auto"
+            priority
           />
-          <CurrencyConvertInterface />
+          <CurrencyConvertInterface usdidrRate={currentRate} />
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ export interface ShopUser {
   name: string;
   tradingDataId: string;
   isPlayedThunt: boolean;
+  usd: number;
+  idr: number;
 }
 
 export interface ShopRawItem {
@@ -35,6 +37,8 @@ export async function searchUsers(query: string): Promise<ShopUser[]> {
         select: {
           id: true,
           isPlayedThunt: true,
+          usd: true,
+          idr: true,
         },
       },
     },
@@ -46,6 +50,8 @@ export async function searchUsers(query: string): Promise<ShopUser[]> {
     name: user.name,
     tradingDataId: user.tradingData?.id || "",
     isPlayedThunt: user.tradingData?.isPlayedThunt || false,
+    usd: Number(user.tradingData?.usd || 0),
+    idr: Number(user.tradingData?.idr || 0),
   }));
 }
 

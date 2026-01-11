@@ -12,6 +12,7 @@ model PeriodeTrading {
   periode             Int                @unique
   cost_map            Int
   price_map           Int
+  usdidr_rate         Int
   duration            Int
   endTime             DateTime?
   pausedTime          DateTime?

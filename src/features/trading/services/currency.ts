@@ -26,8 +26,15 @@ export async function convertCurrency(
     if (amount <= 0) return { success: false, error: "Amount must be positive" };
     if (from === to) return { success: false, error: "Cannot convert to same currency" };
 
-    const fromRate = CURRENCY_RATE[from];
-    const toRate = CURRENCY_RATE[to];
+
+    const rates = {
+        IDR: 1,
+        USD: period.usdidr_rate,
+        ETERNITE: 1000000
+    };
+
+    const fromRate = rates[from];
+    const toRate = rates[to];
     
     // 3. Calculate conversion
     // Formula: Amount * (ValueFrom / ValueTo)
