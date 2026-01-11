@@ -7,10 +7,14 @@ import { ActionResult } from "@/types/actionResult";
 import prisma from "@/lib/prisma";
 import { getRunningTradingPeriod } from "../action";
 
-// admin bayar biaya masuk (15000 eternites)
-export async function payPitchingFee(userId: string): Promise<ActionResult<TradingData>> {
+// admin bayar biaya masuk (variable amount)
+export async function payPitchingFee(userId: string, amount: number): Promise<ActionResult<TradingData>> {
     const period = await getRunningTradingPeriod()
     if (!period) return { success: false, error: "The game is PAUSED" };
+
+    if (amount <= 0) {
+        return { success: false, error: "Fee amount must be positive" };
+    }
 
     const userResult = await getUserTradingById(userId);
     if (!userResult.success || !userResult.data?.tradingData) {
@@ -18,7 +22,7 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
     }
 
     const tradingData = userResult.data.tradingData;
-    const FEE = 15000;
+    const FEE = amount;
 
     if (tradingData.eternites < FEE) {
         return { success: false, error: "Insufficient Eternites" };
@@ -32,7 +36,7 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
                     amount: BigInt(FEE), 
                     type: BalanceLogType.DEBIT, 
                     resource: BalanceTradingResource.ETERNITES, 
-                    message: "Pay Pitching Fee"
+                    message: `Pay Pitching Fee (${FEE})`
                 }
             }),
             prisma.tradingData.update({
@@ -42,14 +46,6 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
                 }
             })
         ]);
-        
-        // Re-fetch to match return type structure if needed or just return updatedTradingData 
-        // But transaction returns the result of the operation. 
-        // tradingData.update returns the updated object.
-        
-        // However, usually we want to return the full object with relations if needed. 
-        // But for now let's return what update returns, or refetch. 
-        // Let's refetch to be safe and consistent with other services.
         
         const finalData = await prisma.tradingData.findUnique({
             where: { id: tradingData.id },
@@ -68,8 +64,8 @@ export async function payPitchingFee(userId: string): Promise<ActionResult<Tradi
     }
 }
 
-// admin beri uang dari pitching (IDR)
-export async function givePitchingMoney(userId: string, amount: number): Promise<ActionResult<TradingData>> {
+// admin beri uang dari pitching (IDR or USD)
+export async function givePitchingMoney(userId: string, amount: number, currency: 'IDR' | 'USD' = 'IDR'): Promise<ActionResult<TradingData>> {
     const period = await getRunningTradingPeriod()
     if (!period) return { success: false, error: "The game is PAUSED" };
 
@@ -85,21 +81,22 @@ export async function givePitchingMoney(userId: string, amount: number): Promise
     const tradingData = userResult.data.tradingData;
 
     try {
+        const resourceFn = currency === 'IDR' ? BalanceTradingResource.IDR : BalanceTradingResource.USD;
+        const updateData = currency === 'IDR' ? { idr: { increment: BigInt(amount) } } : { usd: { increment: BigInt(amount) } };
+
         await prisma.$transaction([
             prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
                     amount: BigInt(amount),
                     type: BalanceLogType.CREDIT,
-                    resource: BalanceTradingResource.IDR,
-                    message: "Pitching Reward"
+                    resource: resourceFn,
+                    message: `Pitching Reward (${currency})`
                 }
             }),
             prisma.tradingData.update({
                 where: { id: tradingData.id },
-                data: {
-                    idr: { increment: BigInt(amount) }
-                }
+                data: updateData
             })
         ]);
 

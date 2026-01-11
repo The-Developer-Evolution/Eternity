@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { givePitchingMoney } from "@/features/trading/services/pitching";
-import { Loader2, CheckCircle, AlertCircle, User, Award, DollarSign } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Award, DollarSign, Wallet } from "lucide-react";
 
 export default function PitchingRewardInterface() {
   const [userQuery, setUserQuery] = useState("");
@@ -12,6 +12,7 @@ export default function PitchingRewardInterface() {
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
   
   const [amount, setAmount] = useState<number>(0);
+  const [currency, setCurrency] = useState<'IDR' | 'USD'>('IDR');
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
@@ -48,7 +49,7 @@ export default function PitchingRewardInterface() {
     setMessage(null);
 
     try {
-      const result = await givePitchingMoney(selectedUser.id, amount);
+      const result = await givePitchingMoney(selectedUser.id, amount, currency);
       
       if (result.success) {
         setMessage({ type: "success", text: "Reward sent successfully!" });
@@ -124,9 +125,38 @@ export default function PitchingRewardInterface() {
            )}
         </div>
 
-        {/* 2. AMOUNT INPUT */}
+        {/* 2. CURRENCY SELECTION */}
         <div className="flex flex-col gap-2">
-          <label className="text-gray-400 text-sm font-bold">REWARD AMOUNT (IDR)</label>
+            <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
+                <Wallet size={16} /> CURRENCY
+            </label>
+            <div className="flex gap-4">
+                <button 
+                    onClick={() => setCurrency('IDR')}
+                    className={`flex-1 py-3 rounded border font-bold transition-all ${
+                        currency === 'IDR' 
+                        ? "bg-[#F0A500] border-[#F0A500] text-black" 
+                        : "bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700"
+                    }`}
+                >
+                    IDR (Rp)
+                </button>
+                <button 
+                    onClick={() => setCurrency('USD')}
+                    className={`flex-1 py-3 rounded border font-bold transition-all ${
+                        currency === 'USD' 
+                        ? "bg-green-500 border-green-500 text-white" 
+                        : "bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700"
+                    }`}
+                >
+                    USD ($)
+                </button>
+            </div>
+        </div>
+
+        {/* 3. AMOUNT INPUT */}
+        <div className="flex flex-col gap-2">
+          <label className="text-gray-400 text-sm font-bold">REWARD AMOUNT ({currency})</label>
           <div className="relative">
             <input
               type="number"
@@ -136,7 +166,9 @@ export default function PitchingRewardInterface() {
               className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 pl-12 focus:border-[#F0A500] outline-none text-xl font-mono"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <span className="font-bold text-[#F0A500]">Rp</span>
+                <span className={`font-bold ${currency === 'IDR' ? 'text-[#F0A500]' : 'text-green-500'}`}>
+                    {currency === 'IDR' ? 'Rp' : '$'}
+                </span>
             </div>
           </div>
         </div>
@@ -189,14 +221,16 @@ export default function PitchingRewardInterface() {
                 <span className="font-bold text-lg uppercase text-[#F0A500]">PITCHING REWARD</span>
             </div>
             
-             <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-[#F0A500]/30">
+             <div className={`flex justify-between items-center bg-gray-800/80 p-4 rounded border ${currency === 'IDR' ? 'border-[#F0A500]/30' : 'border-green-500/30'}`}>
                 <span className="text-gray-400 text-sm">AMOUNT</span>
-                <span className="font-bold text-2xl text-green-400">+ Rp {amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</span>
+                <span className={`font-bold text-2xl ${currency === 'IDR' ? 'text-yellow-400' : 'text-green-400'}`}>
+                    + {currency === 'IDR' ? 'Rp' : '$'} {amount.toLocaleString('id-ID')}
+                </span>
             </div>
         </div>
         
         <div className="mt-8 text-xs text-gray-500 text-center">
-            Funds will be credited to user's IDR balance immediately.
+            Funds will be credited to user's {currency} balance immediately.
         </div>
       </div>
     </div>

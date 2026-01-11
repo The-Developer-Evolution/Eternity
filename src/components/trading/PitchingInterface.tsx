@@ -4,18 +4,23 @@ import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { payPitchingFee } from "@/features/trading/services/pitching";
-import { Loader2, CheckCircle, AlertCircle, User, Gavel, FileText } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Gavel, FileText, Globe, MapPin } from "lucide-react";
+
+const FEE_OPTIONS = [
+    { label: "LOCAL PITCHING", amount: 9000, icon: MapPin },
+    { label: "GLOBAL PITCHING", amount: 15000, icon: Globe },
+];
 
 export default function PitchingInterface() {
   const [userQuery, setUserQuery] = useState("");
   const [matchingUsers, setMatchingUsers] = useState<ShopUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
   
+  const [selectedFee, setSelectedFee] = useState(FEE_OPTIONS[1]); // Default to Global (15000)
+
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  const PITCHING_FEE = 15000;
 
   // Debounced search
   const performSearch = useCallback(
@@ -48,10 +53,10 @@ export default function PitchingInterface() {
     setMessage(null);
 
     try {
-      const result = await payPitchingFee(selectedUser.id);
+      const result = await payPitchingFee(selectedUser.id, selectedFee.amount);
       
       if (result.success) {
-        setMessage({ type: "success", text: "Pitching fee paid successfully!" });
+        setMessage({ type: "success", text: `${selectedFee.label} fee paid successfully!` });
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
@@ -122,6 +127,30 @@ export default function PitchingInterface() {
             </div>
            )}
         </div>
+        
+        {/* FEE SELECTION */}
+        <div className="flex flex-col gap-2">
+            <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
+                <FileText size={16} /> SELECT PITCHING TYPE
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+                {FEE_OPTIONS.map((opt) => (
+                    <button
+                        key={opt.label}
+                        onClick={() => setSelectedFee(opt)}
+                        className={`p-4 rounded-lg border transition-all flex flex-col items-center gap-2 ${
+                            selectedFee.label === opt.label
+                            ? "bg-[#AE00DE]/20 border-[#AE00DE] text-white shadow-[0_0_15px_rgba(174,0,222,0.3)]"
+                            : "bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700 hover:border-gray-500"
+                        }`}
+                    >
+                        <opt.icon size={24} className={selectedFee.label === opt.label ? "text-[#75E8F0]" : "text-gray-500"} />
+                        <span className="font-bold text-sm tracking-wide">{opt.label}</span>
+                        <span className="font-mono text-[#75E8F0]">{opt.amount.toLocaleString()} ET</span>
+                    </button>
+                ))}
+            </div>
+        </div>
 
         {/* INFO BOX */}
         <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex flex-col gap-2">
@@ -134,7 +163,7 @@ export default function PitchingInterface() {
             </div>
             <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Required Amount</span>
-                <span className="text-[#AE00DE] font-bold font-mono text-lg">{PITCHING_FEE.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} Eternites</span>
+                <span className="text-[#AE00DE] font-bold font-mono text-lg">{selectedFee.amount.toLocaleString().replace(/,/g, ".")} Eternites</span>
             </div>
         </div>
 
@@ -183,12 +212,12 @@ export default function PitchingInterface() {
             </div>
              <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
                 <span className="text-gray-400 text-sm">DESCRIPTION</span>
-                <span className="font-bold text-lg uppercase text-[#75E8F0]">PITCHING FEE</span>
+                <span className="font-bold text-lg uppercase text-[#75E8F0]">{selectedFee.label} FEE</span>
             </div>
             
              <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-[#AE00DE]/30">
                 <span className="text-gray-400 text-sm">AMOUT DUE</span>
-                <span className="font-bold text-2xl text-red-400">- {PITCHING_FEE.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} E</span>
+                <span className="font-bold text-2xl text-red-400">- {selectedFee.amount.toLocaleString().replace(/,/g, ".")} E</span>
             </div>
         </div>
         
