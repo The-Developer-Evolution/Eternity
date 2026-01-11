@@ -174,7 +174,7 @@ export default function CurrencyConvertInterface() {
               className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 pl-12 focus:border-[#75E8F0] outline-none text-xl font-mono"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <DollarSign size={20} />
+                {fromCurrency === "USD" ? <DollarSign size={20} /> : "Rp"}
             </div>
           </div>
         </div>
