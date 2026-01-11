@@ -22,6 +22,8 @@ model PeriodeTrading {
   craftStockPeriods   CraftStockPeriod[]
   masterTradings      MasterTrading[]
   rawStockPeriods     RawStockPeriod[]
+  rawPeriods          RawPeriod[]
+  craftPeriods        CraftPeriod[]
 }
 
 model MasterTrading {
@@ -93,20 +95,41 @@ model CraftUserAmount {
 model RawItem {
   id              String           @id @default(cuid())
   name            String
-  price           BigInt           @default(3000)
   craftRecipes    CraftRecipe[]
   rawStockPeriods RawStockPeriod[]
   rawUserAmounts  RawUserAmount[]
+  rawPeriods      RawPeriod[]
 }
 
 model CraftItem {
   id                  String               @id @default(cuid())
   name                String
-  price               BigInt               @default(3000)
   craftRecipes        CraftRecipe[]
   craftStockPeriods   CraftStockPeriod[]
   craftUserAmounts    CraftUserAmount[]
   mapRecipeComponents MapRecipeComponent[]
+  craftPeriods        CraftPeriod[]
+}
+
+model RawPeriod {
+  id      String @id @default(cuid())
+  rawId   String
+  periode Int
+
+  price          BigInt
+  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
+  rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
+}
+
+model CraftPeriod {
+  id      String @id @default(cuid())
+  craftId String
+  periode Int
+
+  price BigInt
+
+  periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
+  craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
 }
 
 model CraftRecipe {

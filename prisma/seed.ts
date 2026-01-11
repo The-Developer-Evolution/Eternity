@@ -24,7 +24,9 @@ type PeriodConfig = {
   craft: ItemConfig[];
 };
 
-// CRAFT ITEM Recipe
+
+
+// CRAFT ITEM's Recipe
 const RECIPES: RecipePattern[] = [
   { input: { wood: 10, water: 5 }, output: "brownPaper" },
   { input: { wood: 10, coal: 8 }, output: "pen" },
@@ -33,55 +35,149 @@ const RECIPES: RecipePattern[] = [
   { input: { wood: 15, metal: 5 }, output: "dividers" },
 ];
 
-// MAP REICPES
+// Forbidden MAP's REICPE
 const MAP_RECIPES = [
   { brownPaper: 2, pen: 1 , ink: 2, dividers: 1, magnifyingGlass: 1},
-  // { magnifyingGlass: 1, ink: 3 },
-  // { magnifyingGlass: 1, ink: 1, dividers: 1 }
 ];
 
-// stock BlackMarket
+// stock and price in BlackMarket
 const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
   {
     periode: 1,
     raw: [
-      { id: "1", stock: 100, price: 1000 }, // Wood
-      { id: "3", stock: 100, price: 1000 }, // Water
-      { id: "5", stock: 100, price: 1000 }, // Metal
+      { id: "1", stock: 15, price: 120 }, // Wood
+      { id: "2", stock: 13, price: 550 }, // Glass
+      { id: "3", stock: 14, price: 230 }, // Water
+      { id: "4", stock: 24, price: 270 }, // Coal
+      { id: "5", stock: 15, price: 375 }, // Metal
     ],
     craft: [
-      { id: "1", stock: 50, price: 5000 },  // Brown Paper
-      { id: "2", stock: 50, price: 5000 },  // Pen
-      { id: "4", stock: 50, price: 5000 },  // Ink
+      { id: "1", stock: 2, price: 2250 },  // Brown Paper
+      { id: "2", stock: 1, price: 3500 },  // Pen
+      { id: "3", stock: 3, price: 3000 },  // Magnifying glass
+      { id: "4", stock: 3, price: 3000 },  // Ink
+      { id: "5", stock: 3, price: 2000 },  // Dividers
     ],
   },
   {
     periode: 2,
     raw: [
-      { id: "1", stock: 90, price: 1200 }, // Wood (Price up, Stock down)
-      { id: "3", stock: 95, price: 1100 },
-      { id: "5", stock: 80, price: 1500 },
+      { id: "1", stock: 11, price: 95 },  // Wood
+      { id: "2", stock: 15, price: 490 }, // Glass
+      { id: "3", stock: 23, price: 190 }, // Water
+      { id: "4", stock: 20, price: 220 }, // Coal
+      { id: "5", stock: 16, price: 325 }, // Metal
     ],
     craft: [
-      { id: "1", stock: 40, price: 5500 },
-      { id: "2", stock: 45, price: 5200 },
-      { id: "4", stock: 40, price: 5300 },
+      { id: "1", stock: 5, price: 2500 }, // Brown Paper
+      { id: "2", stock: 1, price: 5000 }, // Pen
+      { id: "3", stock: 2, price: 3500 }, // Magnifying glass
+      { id: "4", stock: 4, price: 3500 }, // Ink
+      { id: "5", stock: 5, price: 2500 }, // Dividers
     ],
   },
   {
     periode: 3,
     raw: [
-      { id: "1", stock: 50, price: 2000 }, // Scarcity event?
-      { id: "3", stock: 90, price: 1200 },
-      { id: "5", stock: 60, price: 1800 },
+      { id: "1", stock: 23, price: 180 }, // Wood
+      { id: "2", stock: 21, price: 620 }, // Glass
+      { id: "3", stock: 20, price: 270 }, // Water
+      { id: "4", stock: 12, price: 375 }, // Coal
+      { id: "5", stock: 12, price: 500 }, // Metal
     ],
     craft: [
-      { id: "1", stock: 20, price: 7000 },
-      { id: "2", stock: 30, price: 6000 },
-      { id: "4", stock: 30, price: 6000 },
+      { id: "1", stock: 3, price: 4500 }, // Brown Paper
+      { id: "2", stock: 3, price: 8500 }, // Pen
+      { id: "3", stock: 2, price: 8000 }, // Magnifying glass
+      { id: "4", stock: 3, price: 6000 }, // Ink
+      { id: "5", stock: 4, price: 5500 }, // Dividers
     ],
   },
-  // ... Copy/Paste for Period 4, 5, 6, 7, 8
+  {
+    periode: 4,
+    raw: [
+      { id: "1", stock: 25, price: 220 }, // Wood
+      { id: "2", stock: 13, price: 575 }, // Glass
+      { id: "3", stock: 13, price: 250 }, // Water
+      { id: "4", stock: 14, price: 400 }, // Coal
+      { id: "5", stock: 17, price: 600 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 5, price: 4750 }, // Brown Paper
+      { id: "2", stock: 1, price: 7500 }, // Pen
+      { id: "3", stock: 5, price: 7000 }, // Magnifying glass
+      { id: "4", stock: 3, price: 5750 }, // Ink
+      { id: "5", stock: 5, price: 4500 }, // Dividers
+    ],
+  },
+  {
+    periode: 5,
+    raw: [
+      { id: "1", stock: 22, price: 50 },  // Wood
+      { id: "2", stock: 10, price: 350 }, // Glass
+      { id: "3", stock: 25, price: 120 }, // Water
+      { id: "4", stock: 23, price: 150 }, // Coal
+      { id: "5", stock: 12, price: 280 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 4, price: 2000 }, // Brown Paper
+      { id: "2", stock: 4, price: 3500 }, // Pen
+      { id: "3", stock: 3, price: 3200 }, // Magnifying glass
+      { id: "4", stock: 3, price: 2500 }, // Ink
+      { id: "5", stock: 3, price: 2250 }, // Dividers
+    ],
+  },
+  {
+    periode: 6,
+    raw: [
+      { id: "1", stock: 18, price: 105 }, // Wood
+      { id: "2", stock: 13, price: 520 }, // Glass
+      { id: "3", stock: 19, price: 215 }, // Water
+      { id: "4", stock: 11, price: 290 }, // Coal
+      { id: "5", stock: 24, price: 360 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 1, price: 2975 }, // Brown Paper
+      { id: "2", stock: 2, price: 5446 }, // Pen
+      { id: "3", stock: 2, price: 4725 }, // Magnifying glass
+      { id: "4", stock: 1, price: 4718 }, // Ink
+      { id: "5", stock: 5, price: 3731 }, // Dividers
+    ],
+  },
+  {
+    periode: 7,
+    raw: [
+      { id: "1", stock: 14, price: 100 }, // Wood
+      { id: "2", stock: 11, price: 500 }, // Glass
+      { id: "3", stock: 20, price: 150 }, // Water
+      { id: "4", stock: 12, price: 250 }, // Coal
+      { id: "5", stock: 17, price: 350 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 2, price: 2000 }, // Brown Paper
+      { id: "2", stock: 4, price: 4000 }, // Pen
+      { id: "3", stock: 2, price: 3500 }, // Magnifying glass
+      { id: "4", stock: 2, price: 3000 }, // Ink
+      { id: "5", stock: 2, price: 2000 }, // Dividers
+    ],
+  },
+  {
+    periode: 8,
+    raw: [
+      { id: "1", stock: 10, price: 300 }, // Wood
+      { id: "2", stock: 10, price: 1000 },// Glass
+      { id: "3", stock: 10, price: 450 }, // Water
+      { id: "4", stock: 10, price: 550 }, // Coal
+      { id: "5", stock: 10, price: 700 }, // Metal
+    ],
+    craft: [
+      { id: "1", stock: 1, price: 5000 }, // Brown Paper
+      { id: "2", stock: 1, price: 10000}, // Pen
+      { id: "3", stock: 1, price: 9500 }, // Magnifying glass
+      { id: "4", stock: 1, price: 7000 }, // Ink
+      { id: "5", stock: 1, price: 7000 }, // Dividers
+    ],
+  },
 ];
 
 
@@ -127,6 +223,8 @@ async function main() {
   // Trading Master Data
   // =========================
 
+  // Trading Duration
+  // SEED Price Forbidden Map, USD/IDR rate usd
   await prisma.periodeTrading.createMany({
     data: [
       { periode: 1, cost_map: 1000, price_map: 120000, duration: 30, usdidr_rate: 16500 },
@@ -149,6 +247,8 @@ async function main() {
     },
   });
 
+
+
   
   // Seed RawItem
   await prisma.rawItem.createMany({
@@ -161,7 +261,7 @@ async function main() {
     ],
     skipDuplicates: true,
   });
-
+  // seed craftItem
   await prisma.craftItem.createMany({
     data: [
       { id: "1", name: "brown paper" },
@@ -172,6 +272,115 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+
+  // Seed raw and craft price for each period
+  await prisma.rawPeriod.createMany({
+    data: [
+      // id 1 : Wood
+      { rawId: "1", periode: 1, price: 100 },
+      { rawId: "1", periode: 2, price: 110 },
+      { rawId: "1", periode: 3, price: 120 },
+      { rawId: "1", periode: 4, price: 130 },
+      { rawId: "1", periode: 5, price: 115 },
+      { rawId: "1", periode: 6, price: 105 },
+      { rawId: "1", periode: 7, price: 120 },
+      { rawId: "1", periode: 8, price: 125 },
+
+      // id 2 : Glass
+      { rawId: "2", periode: 1, price: 500 },
+      { rawId: "2", periode: 2, price: 530 },
+      { rawId: "2", periode: 3, price: 530 },
+      { rawId: "2", periode: 4, price: 490 },
+      { rawId: "2", periode: 5, price: 470 },
+      { rawId: "2", periode: 6, price: 520 },
+      { rawId: "2", periode: 7, price: 535 },
+      { rawId: "2", periode: 8, price: 505 },
+
+      // id 3 : Water
+      { rawId: "3", periode: 1, price: 200 },
+      { rawId: "3", periode: 2, price: 215 },
+      { rawId: "3", periode: 3, price: 185 },
+      { rawId: "3", periode: 4, price: 175 },
+      { rawId: "3", periode: 5, price: 215 },
+      { rawId: "3", periode: 6, price: 215 },
+      { rawId: "3", periode: 7, price: 200 },
+      { rawId: "3", periode: 8, price: 220 },
+
+      // id 4 : Coal
+      { rawId: "4", periode: 1, price: 250 },
+      { rawId: "4", periode: 2, price: 265 },
+      { rawId: "4", periode: 3, price: 285 },
+      { rawId: "4", periode: 4, price: 240 },
+      { rawId: "4", periode: 5, price: 230 },
+      { rawId: "4", periode: 6, price: 290 },
+      { rawId: "4", periode: 7, price: 290 },
+      { rawId: "4", periode: 8, price: 260 },
+
+      // id 5 : metal
+      { rawId: "5", periode: 1, price: 350 },
+      { rawId: "5", periode: 2, price: 375 },
+      { rawId: "5", periode: 3, price: 405 },
+      { rawId: "5", periode: 4, price: 415 },
+      { rawId: "5", periode: 5, price: 380 },
+      { rawId: "5", periode: 6, price: 360 },
+      { rawId: "5", periode: 7, price: 395 },
+      { rawId: "5", periode: 8, price: 350 },
+    ]
+  })
+
+  await prisma.craftPeriod.createMany({
+    data: [
+      // id 1: Brown Paper
+      { craftId: "1", periode: 1, price: 4200 },
+      { craftId: "1", periode: 2, price: 4568 },
+      { craftId: "1", periode: 3, price: 4463 },
+      { craftId: "1", periode: 4, price: 4568 },
+      { craftId: "1", periode: 5, price: 4673 },
+      { craftId: "1", periode: 6, price: 4463 },
+      { craftId: "1", periode: 7, price: 4620 },
+      { craftId: "1", periode: 8, price: 4935 },
+
+      // id 2: Pen
+      { craftId: "2", periode: 1, price: 7875 },
+      { craftId: "2", periode: 2, price: 8474 },
+      { craftId: "2", periode: 3, price: 8999 },
+      { craftId: "2", periode: 4, price: 9146 },
+      { craftId: "2", periode: 5, price: 8379 },
+      { craftId: "2", periode: 6, price: 8169 },
+      { craftId: "2", periode: 7, price: 8915 },
+      { craftId: "2", periode: 8, price: 8421 },
+
+      // id 3: Magnifyin glass
+      { craftId: "3", periode: 1, price: 6825 },
+      { craftId: "3", periode: 2, price: 7403 },
+      { craftId: "3", periode: 3, price: 8033 },
+      { craftId: "3", periode: 4, price: 8453 },
+      { craftId: "3", periode: 5, price: 7613 },
+      { craftId: "3", periode: 6, price: 7088 },
+      { craftId: "3", periode: 7, price: 7928 },
+      { craftId: "3", periode: 8, price: 7613 },
+
+      // id 4: ink
+      { craftId: "4", periode: 1, price: 6300 },
+      { craftId: "4", periode: 2, price: 6762 },
+      { craftId: "4", periode: 3, price: 7308 },
+      { craftId: "4", periode: 4, price: 6762 },
+      { craftId: "4", periode: 5, price: 6279 },
+      { craftId: "4", periode: 6, price: 7077 },
+      { craftId: "4", periode: 7, price: 7392 },
+      { craftId: "4", periode: 8, price: 6993 },
+
+      // id 5: dividers
+      { craftId: "5", periode: 1, price: 5040 },
+      { craftId: "5", periode: 2, price: 5387 },
+      { craftId: "5", periode: 3, price: 5114 },
+      { craftId: "5", periode: 4, price: 4589 },
+      { craftId: "5", periode: 5, price: 5093 },
+      { craftId: "5", periode: 6, price: 5597 },
+      { craftId: "5", periode: 7, price: 5376 },
+      { craftId: "5", periode: 8, price: 5418 },
+    ]
+  })
 
 
   // SEEDING MAP RECIPES
@@ -202,7 +411,7 @@ async function main() {
 
 
 
-  // SEED BLACKMARKET STOCK FOR EACH PERIOD
+  // SEED BLACKMARKET STOCK and Price FOR EACH PERIOD
 
   const rawStockData: RawStockPeriodCreateManyInput[] = [];
   const craftStockData: CraftStockPeriodCreateManyInput[] = [];
