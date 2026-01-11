@@ -88,16 +88,16 @@ export default async function Page() {
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-full top-0 left-0"></div>
         <CardPanel title="RALLY GAMES - POSTGUARD" extraClass="">
+          <BuyPosPanel
+            users={mappedUsers}
+            posOptions={posOptions}
+            onBuyAccess={buyPosAccessAction}
+          />
           <GiveItemsPanel
             users={mappedUsers}
             bigItems={bigItems}
             smallItems={smallItems}
             onGiveItems={giveItemsAction}
-          />
-          <BuyPosPanel
-            users={mappedUsers}
-            posOptions={posOptions}
-            onBuyAccess={buyPosAccessAction}
           />
         </CardPanel>
       </div>
