@@ -3,12 +3,11 @@
 import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
-import { sellItem } from "@/features/trading/services/sell";
-import { Loader2, CheckCircle, AlertCircle, User, Coins, Package, Layers, Map as MapIcon, DollarSign } from "lucide-react";
+import { sellItems, SellItemPayload } from "@/features/trading/services/sell";
+import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign } from "lucide-react";
 import { RawItem, CraftItem } from "@/generated/prisma/client";
 import { getRunningTradingPeriod } from "@/features/trading/action";
 import { AllTradingData } from "@/features/user/types";
-
 
 type InventoryItem = {
     id: string; // itemId or 'MAP'
@@ -32,8 +31,10 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
   const [userInventory, setUserInventory] = useState<InventoryItem[]>([]);
   
   const [activeTab, setActiveTab] = useState<"RAW" | "CRAFT" | "MAP">("RAW");
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-  const [amount, setAmount] = useState<string>("1");
+  
+  // Multi-select state: Record<itemId, amount>
+  // Key format: `${type}-${id}` to be unique 
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
@@ -63,21 +64,48 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
     performSearch(userQuery);
   }, [userQuery, performSearch]);
   
+  const toggleItem = (item: InventoryItem) => {
+      const key = `${item.type}-${item.id}`;
+      setSelectedItems(prev => {
+          const next = { ...prev };
+          if (next[key]) {
+              delete next[key];
+          } else {
+              next[key] = 1;
+          }
+          return next;
+      });
+  };
+
+  const updateItemAmount = (item: InventoryItem, val: number) => {
+      if (val < 1 || val > item.owned) return;
+      const key = `${item.type}-${item.id}`;
+      setSelectedItems(prev => ({ ...prev, [key]: val }));
+  };
 
   const handleSell = async () => {
     const period = await getRunningTradingPeriod()
     if (!period) return { success: false, error: "The game is PAUSED" };
 
-    if (!selectedUser || !selectedItem) return;
-
-    const qty = parseInt(amount);
-    if (isNaN(qty) || qty <= 0) {
-         setMessage({ type: "error", text: "Invalid amount." });
-         return;
-    }
+    if (!selectedUser) return;
     
-    if (qty > selectedItem.owned) {
-        setMessage({ type: "error", text: `You only own ${selectedItem.owned}.` });
+    // Prepare payload
+    const itemsToSell: SellItemPayload[] = [];
+    
+    // Iterate over inventory to match with selected keys safely
+    userInventory.forEach(invItem => {
+        const key = `${invItem.type}-${invItem.id}`;
+        if (selectedItems[key]) {
+            itemsToSell.push({
+                type: invItem.type,
+                id: invItem.id === 'MAP' ? 'MAP' : invItem.id, 
+                amount: selectedItems[key]
+            });
+        }
+    });
+
+    if (itemsToSell.length === 0) {
+        setMessage({ type: "error", text: "Please select items to sell." });
         return;
     }
 
@@ -85,15 +113,15 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
     setMessage(null);
 
     try {
-      const result = await sellItem(selectedUser.id, selectedItem.type, selectedItem.id === 'MAP' ? null : selectedItem.id, qty);
+      const result = await sellItems(selectedUser.id, itemsToSell);
       
       if (result.success && result.data) {
         setMessage({ type: "success", text: result.message || "Sold successfully!" });
+        setSelectedItems({}); // Clear selection
+        
         // Update local inventory from result
         const tradingData = result.data as unknown as AllTradingData;
-        // Re-construct inventory
-        // This logic mimics the "Load" logic I need to implement.
-        // I will extract this mapping logic.
+        
         const newInv: InventoryItem[] = [
             // Map
             {
@@ -115,9 +143,6 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
         ];
 
         setUserInventory(newInv);
-        // Deselect item if sold out? No, keep selected.
-        const updatedItem = newInv.find(i => i.id === selectedItem.id && i.type === selectedItem.type);
-        if (updatedItem) setSelectedItem(updatedItem);
 
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
@@ -132,6 +157,25 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
 
   // Filter items by tab
   const filteredItems = userInventory.filter(i => i.type === activeTab);
+
+  // Calculate totals
+  let totalEternites = 0;
+  let totalIDR = 0;
+  let totalCount = 0;
+
+  userInventory.forEach(item => {
+      const key = `${item.type}-${item.id}`;
+      const qty = selectedItems[key];
+      if (qty) {
+          totalCount += qty;
+          if (item.currency === 'IDR') {
+              totalIDR += item.price * qty;
+          } else {
+              totalEternites += item.price * qty;
+          }
+      }
+  });
+
 
   return (
     <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-4">
@@ -153,6 +197,7 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
                 if (selectedUser && e.target.value !== selectedUser.name) {
                   setSelectedUser(null);
                   setUserInventory([]); // Clear inventory
+                  setSelectedItems({});
                 }
               }}
             />
@@ -173,12 +218,7 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
                     setSelectedUser(u);
                     setUserQuery(u.name);
                     setMatchingUsers([]);
-                    // Trigger inventory load (Simulated via server action in future step)
-                    // For now, I'll need a way to get data. 
-                    // I will leave this hook empty and implement the fetcher in next step.
-                    // See `fetchInventory` placeholder.
-                    // Actually, I will call a prop function or action.
-                    // Let's assume `getUserInventory` is imported.
+                    
                     const { getUserInventory } = await import('@/features/trading/services/sell');
                     const data = await getUserInventory(u.id);
                     if (data) {
@@ -212,7 +252,7 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
         </div>
       </div>
 
-      {/* MIDDLE: ITEM SELECTION */}
+      {/* RIGHT: ITEM SELECTION */}
       <div className="col-span-1 md:col-span-2 bg-gray-900/80 backdrop-blur-md border border-cyan-500 p-6 rounded-xl flex flex-col gap-6 shadow-2xl min-h-[500px]">
          <div className="flex justify-between items-center border-b border-gray-700 pb-2">
             <h2 className="text-xl font-impact text-cyan-400 tracking-wider flex items-center gap-2">
@@ -222,7 +262,7 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
                 {(['RAW', 'CRAFT', 'MAP'] as const).map(type => (
                     <button
                         key={type}
-                        onClick={() => { setActiveTab(type); setSelectedItem(null); setAmount("1"); }}
+                        onClick={() => { setActiveTab(type); }}
                         className={`px-4 py-1 rounded text-sm font-bold transition-all ${
                             activeTab === type 
                             ? "bg-cyan-600 text-white" 
@@ -237,33 +277,55 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
 
          {/* ITEM GRID */}
          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto p-1">
-            {filteredItems.map(item => (
-                <button
+            {filteredItems.map(item => {
+                const key = `${item.type}-${item.id}`;
+                const isSelected = !!selectedItems[key];
+                
+                return (
+                <div
                     key={item.id}
-                    onClick={() => { setSelectedItem(item); setAmount("1"); }}
-                    disabled={item.owned <= 0}
-                    className={`p-3 rounded-lg border flex flex-col justify-between h-[100px] transition-all relative overflow-hidden ${
-                        selectedItem?.id === item.id && selectedItem?.type === item.type
+                    className={`p-3 rounded-lg border flex flex-col justify-between h-[120px] transition-all relative overflow-hidden ${
+                        isSelected
                          ? "bg-cyan-900/60 border-cyan-400"
                          : item.owned > 0 
-                            ? "bg-gray-800 border-gray-600 hover:border-cyan-400 group" 
+                            ? "bg-gray-800 border-gray-600 hover:border-cyan-400" 
                             : "bg-gray-800/50 border-gray-700 opacity-50 cursor-not-allowed"
                     }`}
                 >
-                    <div className="flex justify-between items-start w-full">
-                        <span className={`text-sm font-bold truncate ${selectedItem?.id === item.id ? "text-white" : "text-gray-300"}`}>{item.name}</span>
+                    <div className="cursor-pointer" onClick={() => item.owned > 0 && toggleItem(item)}>
+                        <div className="flex justify-between items-start w-full">
+                            <span className={`text-sm font-bold truncate ${isSelected ? "text-white" : "text-gray-300"}`}>{item.name}</span>
+                        </div>
+                        
+                        <div className="flex flex-col items-end mt-1">
+                             <span className={`text-xs ${item.currency === 'IDR' ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {item.price.toLocaleString()} {item.currency === 'IDR' ? 'IDR' : 'ET'}
+                            </span>
+                            <span className={`text-md font-bold ${item.owned > 0 ? "text-cyan-400" : "text-gray-600"}`}>
+                                Owned: {item.owned}
+                            </span>
+                        </div>
                     </div>
-                    
-                    <div className="flex flex-col items-end">
-                         <span className={`text-xs ${item.currency === 'IDR' ? 'text-green-400' : 'text-yellow-400'}`}>
-                            {item.price.toLocaleString()} {item.currency === 'IDR' ? 'IDR' : 'ET'}
-                        </span>
-                        <span className={`text-lg font-bold ${item.owned > 0 ? "text-cyan-400" : "text-gray-600"}`}>
-                            x{item.owned}
-                        </span>
-                    </div>
-                </button>
-            ))}
+
+                     {isSelected && (
+                         <div className="flex items-center gap-1 mt-auto bg-black/40 p-1 rounded justify-between z-10">
+                            <button 
+                                className="p-1 hover:bg-white/10 rounded"
+                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) - 1); }}
+                            >
+                                <Minus size={12} className="text-gray-300" />
+                            </button>
+                            <span className="text-sm font-bold text-white font-mono">{selectedItems[key]}</span>
+                            <button 
+                                className="p-1 hover:bg-white/10 rounded"
+                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) + 1); }}
+                            >
+                                <Plus size={12} className="text-gray-300" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )})}
             {filteredItems.length === 0 && (
                 <div className="col-span-full text-center text-gray-500 py-10 italic">No items found for this category.</div>
             )}
@@ -272,52 +334,30 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
          {/* SELL ACTION AREA */}
          <div className="mt-auto border-t border-gray-700 pt-4 flex flex-col md:flex-row gap-4 items-end justify-between">
             
-            {/* INPUT */}
-            <div className="flex gap-4 w-full md:w-auto items-center">
-                 <div className="flex flex-col gap-1 w-full">
-                    <label className="text-gray-400 text-xs font-bold">AMOUNT TO SELL</label>
-                    <div className="flex gap-2">
-                        <input 
-                            type="number" 
-                            min="1"
-                            max={selectedItem?.owned || 1}
-                            className="bg-gray-800 border border-gray-600 rounded p-2 text-white w-24 text-center focus:border-cyan-400 outline-none"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                        />
-                         <button 
-                            onClick={() => setAmount(String(selectedItem?.owned || 1))}
-                            disabled={!selectedItem}
-                            className="bg-gray-700 hover:bg-gray-600 text-xs px-3 rounded text-white"
-                        >
-                            MAX
-                        </button>
-                    </div>
-                 </div>
-            </div>
-
-            {/* SUMMARY & BUTTON */}
-            <div className="flex gap-4 items-center w-full md:w-auto">
-                {selectedItem && !isNaN(parseInt(amount)) && (
-                    <div className="text-right">
-                        <div className="text-gray-400 text-xs">TOTAL EARNINGS</div>
-                        <div className={`text-xl font-bold ${selectedItem.currency === 'IDR' ? 'text-green-400' : 'text-yellow-400'}`}>
-                             {(selectedItem.price * parseInt(amount)).toLocaleString()} {selectedItem.currency === 'IDR' ? 'IDR' : 'ET'}
-                        </div>
-                    </div>
+            {/* SUMMARY */}
+             <div className="flex flex-col text-sm text-gray-300">
+                <div>Selected Items: <span className="text-white font-bold">{totalCount}</span></div>
+                {totalEternites > 0 && (
+                     <div>Total Eternites: <span className="text-yellow-400 font-bold">{totalEternites.toLocaleString()} ET</span></div>
                 )}
-                
+                {totalIDR > 0 && (
+                     <div>Total IDR: <span className="text-green-400 font-bold">{totalIDR.toLocaleString()} IDR</span></div>
+                )}
+             </div>
+
+            {/* BUTTON */}
+            <div className="flex gap-4 items-center w-full md:w-auto">
                 <button
                 onClick={handleSell}
-                disabled={!selectedUser || !selectedItem || isTransacting || parseInt(amount) > (selectedItem?.owned || 0)}
+                disabled={!selectedUser || totalCount === 0 || isTransacting}
                 className={`px-8 py-3 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center gap-2 ${
-                    !selectedUser || !selectedItem || isTransacting || parseInt(amount) > (selectedItem?.owned || 0)
+                    !selectedUser || totalCount === 0 || isTransacting
                     ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                     : "bg-green-600 text-white hover:scale-[1.02] hover:shadow-green-500/50"
                 }`}
                 >
-                {isTransacting ? <Loader2 className="animate-spin" /> : <DollarSign />} 
-                SELL
+                {isTransacting ? <Loader2 className="animate-spin" /> : ""} 
+                SELL ITEMS
                 </button>
             </div>
          </div>

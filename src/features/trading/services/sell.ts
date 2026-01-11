@@ -1,10 +1,12 @@
 'use server'
 
 import { getUserTradingById } from "@/features/user/trading.service";
-import { BalanceLogType, BalanceTradingResource, RallyPeriodStatus } from "@/generated/prisma/enums";
+import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@/generated/prisma/client";
+import { getActiveTradingPeriod } from "./timer";
+import { getRunningTradingPeriod } from "../action";
 
 export async function getSellableItems() {
     const [rawItems, craftItems] = await Promise.all([
@@ -14,8 +16,7 @@ export async function getSellableItems() {
     return { rawItems, craftItems };
 }
 
-import { getActiveTradingPeriod } from "./timer";
-import { getRunningTradingPeriod } from "../action";
+
 
 export async function getMapPrice() {
     const activePeriod = await getActiveTradingPeriod();
@@ -35,17 +36,22 @@ export async function getUserInventory(userId: string) {
     return data;
 }
 
-export async function sellItem(
+
+export type SellItemPayload = {
+    type: "RAW" | "CRAFT" | "MAP";
+    id: string; // 'MAP' for map
+    amount: number;
+}
+
+export async function sellItems(
   userId: string,
-  itemType: "RAW" | "CRAFT" | "MAP",
-  itemId: string | null, // null for MAP
-  amount: number
+  items: SellItemPayload[]
 ): Promise<ActionResult<TradingData>> {
 
     const period = await getRunningTradingPeriod()
     if (!period) return { success: false, error: "The game is PAUSED" };
 
-    if (amount <= 0) return { success: false, error: "Amount must be positive." };
+    if (items.length === 0) return { success: false, error: "No items to sell." };
 
     const userResult = await getUserTradingById(userId);
     if (!userResult.success || !userResult.data?.tradingData) {
@@ -55,113 +61,107 @@ export async function sellItem(
 
     try {
         const ops: any[] = [];
-        let logMessage = "";
-        let logAmount = BigInt(0);
-        let logResource: BalanceTradingResource;
-        let isIdrTransaction = false;
-        let transactionTotal = BigInt(0);
+        let totalIDR = BigInt(0);
+        let totalEternites = BigInt(0);
 
-        if (itemType === "MAP") {
-            // SELL MAP (IDR)
-            if (tradingData.map < amount) {
-                return { success: false, error: `Insufficient Map. Owned: ${tradingData.map}` };
-            }
+        const mapPrice = BigInt(await getMapPrice());
 
-            const mapPrice = BigInt(await getMapPrice());
-            transactionTotal = mapPrice * BigInt(amount);
-            isIdrTransaction = true;
-
-            // 1. Deduct Map
-             ops.push(prisma.tradingData.update({
-                where: { id: tradingData.id },
-                data: { map: { decrement: amount } }
-            }));
-            
-            logMessage = `Sold ${amount} Map(s) for IDR ${transactionTotal}`;
-            logResource = BalanceTradingResource.MAP;
-
-        } else if (itemType === "RAW") {
-            // SELL RAW (ETERNITES)
-            if (!itemId) return { success: false, error: "Item ID required for RAW item." };
-            
-            const rawUserAmount = tradingData.rawUserAmounts.find(i => i.rawItemId === itemId);
-            if (!rawUserAmount || rawUserAmount.amount < BigInt(amount)) {
-                return { success: false, error: `Insufficient item amount.` };
-            }
-            
-            const itemDef = await prisma.rawItem.findUnique({ where: { id: itemId } });
-            if (!itemDef) return { success: false, error: "Item definition not found." };
-
-            transactionTotal = itemDef.price * BigInt(amount);
-
-             // 1. Deduct Raw Item
-            ops.push(prisma.rawUserAmount.update({
-                where: { id: rawUserAmount.id },
-                data: { amount: { decrement: amount } }
-            }));
-
-            logMessage = `Sold ${amount}x ${itemDef.name} for ${transactionTotal} Eternites`;
-            logResource = BalanceTradingResource.RAW;
-
-
-        } else if (itemType === "CRAFT") {
-             // SELL CRAFT (ETERNITES)
-            if (!itemId) return { success: false, error: "Item ID required for CRAFT item." };
-
-            const craftUserAmount = tradingData.craftUserAmounts.find(i => i.craftItemId === itemId);
-             if (!craftUserAmount || craftUserAmount.amount < BigInt(amount)) {
-                return { success: false, error: `Insufficient item amount.` };
-            }
-
-            const itemDef = await prisma.craftItem.findUnique({ where: { id: itemId } });
-            if (!itemDef) return { success: false, error: "Item definition not found." };
-
-            transactionTotal = itemDef.price * BigInt(amount);
-
-            // 1. Deduct Craft Item
-            ops.push(prisma.craftUserAmount.update({
-                where: { id: craftUserAmount.id },
-                data: { amount: { decrement: amount } }
-            }));
-
-            logMessage = `Sold ${amount}x ${itemDef.name} for ${transactionTotal} Eternites`;
-            logResource = BalanceTradingResource.CRAFT;
-
-        } else {
-            return { success: false, error: "Invalid item type." };
-        }
-
-        // 2. Credit Currency
-        if (isIdrTransaction) {
-             ops.push(prisma.tradingData.update({
-                where: { id: tradingData.id },
-                data: { idr: { increment: transactionTotal } }
-            }));
-        } else {
-             // Eternites is Int, need check overflow? 
-             // Using increment with simple Int might overflow if price is BigInt. 
-             // Schema says Eternites is Int, prices are BigInt.
-             // We must cast to Number for Eternites update, assuming it fits.
-             // OR update schema? Proceeding with Number cast for now as typical Eternites logic.
+        for (const item of items) {
+             if (item.amount <= 0) continue;
              
+             let itemPrice = BigInt(0);
+             let itemName = "";
+             let transactionTotal = BigInt(0);
+             let logResource: BalanceTradingResource;
+             
+             if (item.type === 'MAP') {
+                 if (tradingData.map < item.amount) {
+                      return { success: false, error: `Insufficient Map. Owned: ${tradingData.map}` };
+                 }
+                 itemPrice = mapPrice;
+                 itemName = "Map";
+                 logResource = BalanceTradingResource.MAP;
+                 
+                 ops.push(prisma.tradingData.update({
+                    where: { id: tradingData.id },
+                    data: { map: { decrement: item.amount } }
+                }));
+                
+                transactionTotal = itemPrice * BigInt(item.amount);
+                totalIDR += transactionTotal;
+
+             } else if (item.type === 'RAW') {
+                 const rawUserAmount = tradingData.rawUserAmounts.find(i => i.rawItemId === item.id);
+                 if (!rawUserAmount || rawUserAmount.amount < BigInt(item.amount)) {
+                    return { success: false, error: `Insufficient RAW item (ID: ${item.id}).` };
+                 }
+                 
+                 const itemDef = await prisma.rawItem.findUnique({ where: { id: item.id } });
+                 if (!itemDef) return { success: false, error: `Raw Item ${item.id} not found` };
+                 
+                 itemPrice = itemDef.price;
+                 itemName = itemDef.name;
+                 logResource = BalanceTradingResource.RAW;
+
+                 ops.push(prisma.rawUserAmount.update({
+                    where: { id: rawUserAmount.id },
+                    data: { amount: { decrement: item.amount } }
+                }));
+
+                transactionTotal = itemPrice * BigInt(item.amount);
+                totalEternites += transactionTotal;
+
+             } else if (item.type === 'CRAFT') {
+                 const craftUserAmount = tradingData.craftUserAmounts.find(i => i.craftItemId === item.id);
+                 if (!craftUserAmount || craftUserAmount.amount < BigInt(item.amount)) {
+                    return { success: false, error: `Insufficient CRAFT item (ID: ${item.id}).` };
+                 }
+
+                 const itemDef = await prisma.craftItem.findUnique({ where: { id: item.id } });
+                 if (!itemDef) return { success: false, error: `Craft Item ${item.id} not found` };
+
+                 itemPrice = itemDef.price;
+                 itemName = itemDef.name;
+                 logResource = BalanceTradingResource.CRAFT;
+
+                  ops.push(prisma.craftUserAmount.update({
+                    where: { id: craftUserAmount.id },
+                    data: { amount: { decrement: item.amount } }
+                }));
+
+                transactionTotal = itemPrice * BigInt(item.amount);
+                totalEternites += transactionTotal;
+             } else {
+                 continue; 
+             }
+
+             // Create Log per resource
+             ops.push(prisma.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: transactionTotal,
+                    type: BalanceLogType.CREDIT,
+                    resource: logResource!, 
+                    message: `Sold ${item.amount}x ${itemName} for ${transactionTotal} ${item.type === 'MAP' ? 'IDR' : 'Eternites'}`
+                }
+            }));
+        }
+        
+        // Credit Balance (Aggregated)
+        if (totalIDR > 0) {
              ops.push(prisma.tradingData.update({
                 where: { id: tradingData.id },
-                data: { eternites: { increment: Number(transactionTotal) } }
+                data: { idr: { increment: totalIDR } }
             }));
         }
 
-        // 3. Log
-        ops.push(prisma.balanceTradingLog.create({
-            data: {
-                tradingDataId: tradingData.id,
-                amount: transactionTotal,
-                type: BalanceLogType.CREDIT,
-                resource: isIdrTransaction ? BalanceTradingResource.IDR : logResource!, 
-                message: logMessage
-            }
-        }));
-
-
+        if (totalEternites > 0) {
+             ops.push(prisma.tradingData.update({
+                where: { id: tradingData.id },
+                data: { eternites: { increment: Number(totalEternites) } }
+            }));
+        }
+        
         await prisma.$transaction(ops);
 
          const finalData = await prisma.tradingData.findUnique({
@@ -173,11 +173,19 @@ export async function sellItem(
             },
         });
 
-        return { success: true, data: finalData!, message: "Transaction successful" };
-
+        return { success: true, data: finalData!, message: "Bulk transaction successful" };
 
     } catch (e) {
         console.error("Sell Error", e);
         return { success: false, error: "Transaction failed." };
     }
 }
+
+// Keep single sell for backward compat or refactor? 
+// The prompt implies the UI changes, so single sell might not be used.
+// But I'll keep it or replace it? 
+// "I need you to update the UI ... so user can multiple select" 
+// It replaces the old one. I will ADD this new function and keep the old one just in case 
+// or I can modify the old one? 
+// The file is `sell.ts`, I'll add `sellItems` and export it.
+
