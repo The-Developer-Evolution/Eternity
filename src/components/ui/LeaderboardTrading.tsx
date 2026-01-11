@@ -63,8 +63,8 @@ export default function LeaderboardTrading({
         entry.isCurrentUser || isUserRow ? 'bg-[#78CCEE]/20' : ''
       }`}
     >
-      <td className="px-4 py-4">
-        <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg border-2 ${getRankColor(entry.rank)}`}>
+      <td className="px-4 py-4 ">
+        <div className={`flex items-center mx-auto justify-center w-10 h-10 rounded-lg border-2 ${getRankColor(entry.rank)}`}>
           <span className={`font-impact text-lg ${
             entry.rank <= 3 ? 'text-white' : 'text-[#78CCEE]'
           }`}>
@@ -80,11 +80,11 @@ export default function LeaderboardTrading({
           )}
         </span>
       </td>
-      <td className="px-4 py-4">
+      {/* <td className="px-4 py-4">
         <span className="text-sm font-futura">
           {entry.team || '-'}
         </span>
-      </td>
+      </td> */}
       <td className="px-4 py-4 text-center">
         <span className="font-impact text-lg">
           {formatCurrency(entry.idr)}
@@ -119,15 +119,15 @@ export default function LeaderboardTrading({
           <table className="w-full">
             <thead>
               <tr className="bg-[#2f093b] border-b-2 text-white border-[#684095]">
-                <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
+                <th className="px-4 py-3  font-impact text-sm uppercase tracking-wider text-center">
                   Rank
-                </th>
-                <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
-                  Name
                 </th>
                 <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
                   Team
                 </th>
+                {/* <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
+                  Team
+                </th> */}
                 <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">
                   IDR
                 </th>
