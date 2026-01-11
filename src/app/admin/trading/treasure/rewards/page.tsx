@@ -20,6 +20,7 @@ export default function Page() {
           className="relative z-1 w-1/2 h-auto"
         />
          <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
+             <TreasureHuntStatusInterface />
              <RewardEternitiesInterface />
         </div>
       </div>

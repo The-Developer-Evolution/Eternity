@@ -4,14 +4,26 @@ import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { giveEternityRewards } from "@/features/trading/services/thunt";
-import { Loader2, CheckCircle, AlertCircle, User, Gem, Coins } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Gem, Coins, Layers } from "lucide-react";
+
+// Hardcoded reward mapping
+const REWARD_OPTIONS = [
+    { items: 1, eternities: 20 },
+    { items: 2, eternities: 25 },
+    { items: 3, eternities: 28 },
+    { items: 4, eternities: 30 },
+    { items: 5, eternities: 34 },
+    { items: 6, eternities: 36 },
+    { items: 7, eternities: 40 },
+    { items: 8, eternities: 42 },
+];
 
 export default function RewardEternitiesInterface() {
   const [userQuery, setUserQuery] = useState("");
   const [matchingUsers, setMatchingUsers] = useState<ShopUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
   
-  const [amount, setAmount] = useState<string>("1000");
+  const [selectedOption, setSelectedOption] = useState(REWARD_OPTIONS[0]);
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
@@ -44,12 +56,9 @@ export default function RewardEternitiesInterface() {
   const handleAddReward = async () => {
     if (!selectedUser) return;
 
-    const qty = parseInt(amount);
-    if (isNaN(qty) || qty <= 0) {
-         setMessage({ type: "error", text: "Invalid amount." });
-         return;
-    }
-
+    // Use the selected option's eternity amount
+    const qty = selectedOption.eternities;
+    
     setIsTransacting(true);
     setMessage(null);
 
@@ -57,7 +66,7 @@ export default function RewardEternitiesInterface() {
       const result = await giveEternityRewards(selectedUser.id, qty);
       
       if (result.success) {
-        setMessage({ type: "success", text: "Eternities added successfully!" });
+        setMessage({ type: "success", text: `Added ${qty} Eternities for ${selectedOption.items} items!` });
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
@@ -131,16 +140,29 @@ export default function RewardEternitiesInterface() {
            )}
         </div>
 
-        {/* 2. QUANTITY */}
+        {/* 2. REWARD SELECTION (BUTTONS) */}
          <div className="flex flex-col gap-2">
-             <label className="text-gray-400 text-sm font-bold">AMOUNT</label>
-             <input 
-                type="number" 
-                min="1"
-                className="bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-cyan-400 outline-none"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-             />
+             <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
+                <Layers size={16} /> SELECT ITEMS FOUND
+             </label>
+             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {REWARD_OPTIONS.map((opt) => (
+                    <button
+                        key={opt.items}
+                        onClick={() => setSelectedOption(opt)}
+                        className={`p-3 rounded-lg border transition-all flex flex-col items-center justify-center gap-1 ${
+                            selectedOption.items === opt.items
+                            ? "bg-cyan-600 border-cyan-400 text-white shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                            : "bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700 hover:border-gray-500"
+                        }`}
+                    >
+                        <span className="text-sm font-bold">{opt.items} ITEM{opt.items > 1 ? 'S' : ''}</span>
+                        <span className={`text-xs font-mono font-bold ${selectedOption.items === opt.items ? 'text-yellow-300' : 'text-cyan-600'}`}>
+                            {opt.eternities} ET
+                        </span>
+                    </button>
+                ))}
+             </div>
          </div>
 
         {/* ACTION BUTTON */}
@@ -159,7 +181,7 @@ export default function RewardEternitiesInterface() {
             </>
           ) : (
             <>
-              <Gem size={20} /> ADD REWARD
+              <Gem size={20} /> SEND {selectedOption.eternities} REWARD
             </>
           )}
         </button>
@@ -188,9 +210,16 @@ export default function RewardEternitiesInterface() {
             </div>
             
              <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-cyan-500/30">
-                <span className="text-gray-400 text-sm">AMOUNT</span>
+                <span className="text-gray-400 text-sm">ITEMS FOUND</span>
+                <span className="font-bold text-xl text-white">
+                    {selectedOption.items}
+                </span>
+            </div>
+
+             <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-green-500/30">
+                <span className="text-gray-400 text-sm">REWARD</span>
                 <span className="font-bold text-2xl text-green-400 flex items-center gap-2">
-                    <Coins size={24} /> {parseInt(amount).toLocaleString()} ETERNITIES
+                    <Coins size={24} /> {selectedOption.eternities} ETERNITIES
                 </span>
             </div>
         </div>

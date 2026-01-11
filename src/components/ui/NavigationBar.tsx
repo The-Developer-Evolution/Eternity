@@ -204,7 +204,7 @@ export default function NavigationBar() {
 
 
                 <Link
-                  href="/admin/trading/treasure/"
+                  href="/admin/trading/treasure/rewards"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
