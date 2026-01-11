@@ -1,10 +1,9 @@
-"use client";
-
+'use client'
 import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
-import { ShopUser, searchUsers } from "@/features/trading/services/shop";
+import { ShopUser, searchUsers, getUserCraftInventory } from "@/features/trading/services/shop";
 import { craftToMap } from "@/features/trading/services/map";
-import { Loader2, CheckCircle, AlertCircle, User, Map as MapIcon, Hammer } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Map as MapIcon, Hammer, ArrowRight, Coins } from "lucide-react";
 
 // Local type definitions to match serialized data from server
 interface RecipeComponent {
@@ -33,6 +32,8 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
   
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>("");
   const [amount, setAmount] = useState<string>("1");
+  const [cost, setCost] = useState<string>(""); // No default cost, forces user input
+  const [userInventory, setUserInventory] = useState<{craftItemId: string, amount: number, name: string}[]>([]);
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
@@ -40,10 +41,16 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
 
   const selectedRecipe = mapRecipes.find(r => r.id === selectedRecipeId);
 
+  // Auto-select first recipe on load
+  useEffect(() => {
+    if (mapRecipes.length > 0 && !selectedRecipeId) {
+        setSelectedRecipeId(mapRecipes[0].id);
+    }
+  }, [mapRecipes, selectedRecipeId]);
+
   // Helper to generate a name for the recipe if missing
   const getRecipeName = (r: MapRecipe) => {
       if (r.name) return r.name;
-      // Generate name from components
       const components = r.mapRecipeComponents.map(c => `${c.amount}x ${c.craftItem.name}`).join(", ");
       return `Recipe: ${components}`;
   };
@@ -72,23 +79,41 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
     performSearch(userQuery);
   }, [userQuery, performSearch]);
 
+  // Fetch inventory when user selected
+  useEffect(() => {
+      if (selectedUser) {
+          getUserCraftInventory(selectedUser.id).then(setUserInventory).catch(console.error);
+      } else {
+          setUserInventory([]);
+      }
+  }, [selectedUser]);
+
   const handleCraft = async () => {
     if (!selectedUser || !selectedRecipe) return;
 
     const qty = parseInt(amount);
+    const costVal = parseInt(cost);
+
     if (isNaN(qty) || qty <= 0) {
          setMessage({ type: "error", text: "Invalid amount." });
          return;
+    }
+    
+    if (isNaN(costVal) || costVal < 0) {
+        setMessage({ type: "error", text: "Invalid cost value." });
+        return;
     }
 
     setIsTransacting(true);
     setMessage(null);
 
     try {
-      const result = await craftToMap(selectedUser.id, selectedRecipe.id, qty);
+      const result = await craftToMap(selectedUser.id, selectedRecipe.id, qty, costVal);
       
       if (result.success) {
         setMessage({ type: "success", text: result.message || "Successfully crafted map!" });
+        // Refresh inventory
+        getUserCraftInventory(selectedUser.id).then(setUserInventory).catch(console.error);
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
@@ -100,8 +125,22 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
     }
   };
 
+  const checkInventory = (recipe: MapRecipe, qty: number) => {
+      let enough = true;
+      const details = recipe.mapRecipeComponents.map(comp => {
+          const required = BigInt(Math.floor(typeof comp.amount === 'string' ? parseFloat(comp.amount) : comp.amount)) * BigInt(qty);
+          const inInventory = userInventory.find(i => i.craftItemId === comp.craftItem.id)?.amount || 0;
+          const isEnough = BigInt(inInventory) >= required;
+          if (!isEnough) enough = false;
+          return { ...comp, required, inInventory, isEnough };
+      });
+      return { enough, details };
+  };
+
+  const qtyInt = parseInt(amount) || 0;
+  
   return (
-    <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4 mt-8 bg-gray-900/50 rounded-xl border border-purple-500/30">
+    <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4 mt-8 bg-gray-900/50 rounded-xl border border-purple-500/30">
         <div className="md:col-span-2 text-center border-b border-purple-500/30 pb-4">
              <h2 className="text-3xl font-impact text-purple-400 tracking-wider flex items-center justify-center gap-2">
                 <MapIcon className="text-purple-400" /> CRAFT MAP FROM RECIPE
@@ -164,22 +203,22 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
            )}
         </div>
 
-        {/* 2. RECIPE SELECTION */}
+        {/* 2. COST INPUT */}
         <div className="flex flex-col gap-2">
-             <label className="text-gray-400 text-sm font-bold">SELECT RECIPE</label>
-             <select 
+             <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
+                 <Coins size={16} /> CRAFT COST (ETERNITES)
+             </label>
+             <input 
+                type="number" 
+                min="0"
+                placeholder="Enter cost..." // Placeholder since no default
                 className="bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-purple-400 outline-none"
-                value={selectedRecipeId}
-                onChange={(e) => setSelectedRecipeId(e.target.value)}
-             >
-                 <option value="" disabled>-- Choose Recipe --</option>
-                 {mapRecipes.map(r => (
-                     <option key={r.id} value={r.id}>{getRecipeName(r)}</option>
-                 ))}
-             </select>
+                value={cost}
+                onChange={(e) => setCost(e.target.value)}
+             />
          </div>
 
-        {/* 3. AMOUNT */}
+        {/* 3. AMOUNT INPUT */}
          <div className="flex flex-col gap-2">
              <label className="text-gray-400 text-sm font-bold">QUANTITY OF MAPS</label>
              <input 
@@ -190,6 +229,63 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
                 onChange={(e) => setAmount(e.target.value)}
              />
          </div>
+
+        {/* 4. RECIPE SELECTION: CARD STYLE */}
+        <div className="flex flex-col gap-2">
+             <label className="text-gray-400 text-sm font-bold">
+                RECIPE
+             </label>
+             <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-1">
+                 {mapRecipes.map(r => {
+                     const isSelected = selectedRecipeId === r.id;
+                     const validation = checkInventory(r, qtyInt);
+                     const isEnough = !selectedUser || validation.enough; // Only fail if user selected AND not enough
+
+                     return (
+                         <div 
+                            key={r.id} 
+                            onClick={() => setSelectedRecipeId(r.id)}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all flex flex-col gap-2 relative group items-start text-left ${
+                                isSelected 
+                                    ? "bg-purple-900/40 border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]" 
+                                    : "bg-gray-800 border-gray-700 hover:border-gray-500"
+                            }`}
+                         >
+                             <div className="flex justify-between w-full items-center">
+                                 <h4 className={`font-bold uppercase text-sm ${isSelected ? "text-purple-300" : "text-gray-300"}`}>
+                                     {getRecipeName(r)}
+                                 </h4>
+                                 {isSelected && <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_5px_#a855f7]"></div>}
+                             </div>
+
+                             <div className="flex flex-wrap gap-2 mt-1 w-full">
+                                 {validation.details.map((d, idx) => (
+                                     <div key={idx} className={`text-xs px-2 py-1 rounded border flex items-center gap-1 ${
+                                         selectedUser
+                                            ? (d.isEnough 
+                                                ? "bg-green-900/30 border-green-500/30 text-green-300" 
+                                                : "bg-red-900/30 border-red-500/50 text-red-300")
+                                            : "bg-gray-900 border-gray-700 text-gray-400"
+                                     }`}>
+                                         <span>{d.craftItem.name}:</span>
+                                         <span className="font-mono">{d.required.toString()}</span>
+                                         {selectedUser && (
+                                            <>
+                                                <span className="text-gray-500 mx-1">/</span>
+                                                <span className={d.isEnough ? "text-green-400" : "text-red-400"}>
+                                                    {d.inInventory.toString()}
+                                                </span>
+                                            </>
+                                         )}
+                                     </div>
+                                 ))}
+                             </div>
+                         </div>
+                     )
+                 })}
+             </div>
+         </div>
+
 
         {/* ACTION BUTTON */}
         <button
@@ -227,7 +323,7 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
 
       {/* RIGHT COLUMN: PREVIEW */}
       <div className="hidden md:flex flex-col justify-start gap-6 text-white bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-white/10 h-full">
-        <h3 className="text-xl font-impact text-gray-300 border-b border-gray-700 pb-2">RECIPE REQUIREMENTS</h3>
+        <h3 className="text-xl font-impact text-gray-300 border-b border-gray-700 pb-2">PREVIEW & STATUS</h3>
         
         {selectedRecipe ? (
             <div className="flex flex-col gap-4">
@@ -237,25 +333,53 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
                         x{amount} Maps
                     </span>
                 </div>
-
-                <div className="space-y-2">
-                    {selectedRecipe.mapRecipeComponents.map(comp => {
-                        const amountFactor = typeof comp.amount === 'string' ? parseFloat(comp.amount) : Number(comp.amount);
-                        const totalReq = BigInt(Math.floor(amountFactor)) * BigInt(parseInt(amount) || 0);
-                        return (
-                            <div key={comp.id} className="flex justify-between items-center bg-gray-800/50 p-3 rounded border-l-4 border-purple-500">
-                                <span className="text-gray-300">{comp.craftItem.name}</span>
-                                <span className="font-mono font-bold text-purple-300">
-                                    {totalReq.toString()}
-                                </span>
-                            </div>
-                        )
-                    })}
+                
+                {/* Cost Preview */}
+                <div className="flex justify-between items-center bg-gray-800/50 p-3 rounded">
+                    <span className="text-gray-400 text-sm flex items-center gap-2">
+                        <Coins size={14}/> Cost
+                    </span>
+                    <span className="font-bold text-red-300">- {cost || 0} Eternites</span>
                 </div>
-                 
-                 <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded text-sm text-yellow-200/80 italic">
-                    Note: Ensure the user has enough materials in their inventory before crafting.
-                 </div>
+
+                <div className="p-4 bg-gray-800 rounded border border-gray-700">
+                    <h4 className="text-sm font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">RESOURCE CHECK</h4>
+                    <div className="space-y-3">
+                        {checkInventory(selectedRecipe, qtyInt).details.map((comp, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-sm">
+                                <span className="text-gray-300">{comp.craftItem.name}</span>
+                                <div className="flex items-center gap-2">
+                                     <span className="font-mono text-gray-400">Req: {comp.required.toString()}</span>
+                                     <ArrowRight size={12} className="text-gray-600" />
+                                     {selectedUser ? (
+                                         <span className={`font-mono font-bold ${comp.isEnough ? "text-green-400" : "text-red-400"}`}>
+                                             Have: {comp.inInventory.toString()}
+                                         </span>
+                                     ) : (
+                                         <span className="text-gray-600 italic">Select User</span>
+                                     )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {selectedUser ? (
+                     <div className={`mt-2 p-3 rounded border text-sm flex items-center gap-2 ${
+                         checkInventory(selectedRecipe, qtyInt).enough
+                            ? "bg-green-900/20 border-green-500/30 text-green-300"
+                            : "bg-red-900/20 border-red-500/30 text-red-300"
+                     }`}>
+                         {checkInventory(selectedRecipe, qtyInt).enough 
+                            ? <><CheckCircle size={16}/> Resources Available</>
+                            : <><AlertCircle size={16}/> Insufficient Resources</>
+                         }
+                     </div>
+                ) : (
+                    <div className="mt-2 p-3 bg-yellow-900/20 border border-yellow-500/30 rounded text-sm text-yellow-200/80 italic">
+                        Select a user to check inventory levels.
+                    </div>
+                )}
             </div>
         ) : (
             <div className="flex flex-col items-center justify-center h-40 text-gray-500 italic">

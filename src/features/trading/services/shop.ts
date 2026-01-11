@@ -62,3 +62,22 @@ export async function getAllRawItems(): Promise<ShopRawItem[]> {
     price: Number(item.price),
   }));
 }
+
+export async function getUserCraftInventory(userId: string) {
+  const inventory = await prisma.craftUserAmount.findMany({
+    where: {
+        tradingData: {
+            userId: userId
+        }
+    },
+    include: {
+        craftItem: true
+    }
+  });
+
+  return inventory.map(item => ({
+      craftItemId: item.craftItemId,
+      amount: Number(item.amount),
+      name: item.craftItem.name
+  }));
+}

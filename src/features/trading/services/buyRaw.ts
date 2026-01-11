@@ -117,7 +117,7 @@ export async function buyMaterial(
 export async function buyCustomRawMaterials(
   userId: string,
   items: { id: string, amount: number }[],
-  transactionFee: number = 500
+  transactionFee: number = 0
 ): Promise<ActionResult<TradingData>> {
 
     const period = await getRunningTradingPeriod()

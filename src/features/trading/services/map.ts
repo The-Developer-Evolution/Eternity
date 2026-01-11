@@ -19,16 +19,19 @@ export async function getAllMapRecipes() {
     });
 }
 
+// create map using map recipe (recipe dari database)
 export async function craftToMap(
   userId: string,
   mapRecipeId: string,
-  amount: number = 1
+  amount: number = 1,
+  cost: number = 0
 ): Promise<ActionResult<TradingData>> {
 
     const period = await getRunningTradingPeriod()
     if (!period) return { success: false, error: "The game is PAUSED" };
 
   if (amount <= 0) return { success: false, error: "Amount must be positive" };
+  if (cost < 0) return { success: false, error: "Cost cannot be negative" };
 
   // 1. Get user trading data
   const userResult = await getUserTradingById(userId);
@@ -37,6 +40,11 @@ export async function craftToMap(
   }
 
   const tradingData = userResult.data.tradingData;
+
+  // 1.5 Check Balance (Eternites) for the cost
+  if (tradingData.eternites < cost) {
+       return { success: false, error: `Insufficient Eternites. Required: ${cost}, Available: ${tradingData.eternites}` };
+  }
 
   // 2. Get Recipe
   const recipe = await prisma.mapRecipe.findUnique({
@@ -76,7 +84,25 @@ export async function craftToMap(
       totalItemsConsumed += Number(requiredAmount); // Approx for log
   }
 
-  // 4. Add Map & Log
+  // 4. Add Map & Log & Deduct Cost
+  // Deduct Cost (Eternites)
+  if (cost > 0) {
+      ops.push(prisma.tradingData.update({
+          where: { id: tradingData.id },
+          data: { eternites: { decrement: cost } }
+      }));
+      
+      ops.push(prisma.balanceTradingLog.create({
+          data: {
+              tradingDataId: tradingData.id,
+              amount: BigInt(-cost),
+              type: BalanceLogType.DEBIT,
+              resource: BalanceTradingResource.ETERNITES,
+              message: `Paid cost for Map Recipe`
+          }
+      }));
+  }
+
   ops.push(
       prisma.tradingData.update({
           where: { id: tradingData.id },
@@ -123,7 +149,7 @@ export async function craftToMap(
 }
 
 
-// create map using craft item
+// create map using CUSTOM RECIPE (recipe bukan dari database)
 export async function craftMapWithCustomRecipe(
   userId: string,
   components: [string, number][], // [craftId, amount]

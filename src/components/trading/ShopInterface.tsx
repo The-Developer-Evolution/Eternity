@@ -224,7 +224,7 @@ export default function ShopInterface({ initialItems }: ShopInterfaceProps) {
         </div>
 
         {/* 3. TRANSACTION COST */}
-        <div className="flex flex-col gap-2">
+        {/* <div className="flex flex-col gap-2">
            <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
                 <Coins size={16} /> TRANSACTION COST (ETERNITES)
            </label>
@@ -235,7 +235,7 @@ export default function ShopInterface({ initialItems }: ShopInterfaceProps) {
                 onChange={(e) => setTransactionFee(e.target.value)}
                 className="w-full bg-gray-800 text-white border border-gray-600 rounded p-3 focus:border-[#75E8F0] outline-none"
            />
-        </div>
+        </div> */}
 
         {/* ACTION BUTTON */}
         <button

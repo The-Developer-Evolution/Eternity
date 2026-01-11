@@ -24,7 +24,7 @@ type PeriodConfig = {
   craft: ItemConfig[];
 };
 
-// 2. Your Recipe Data
+// CRAFT ITEM Recipe
 const RECIPES: RecipePattern[] = [
   { input: { wood: 10, water: 5 }, output: "brownPaper" },
   { input: { wood: 10, coal: 8 }, output: "pen" },
@@ -33,10 +33,11 @@ const RECIPES: RecipePattern[] = [
   { input: { wood: 15, metal: 5 }, output: "dividers" },
 ];
 
+// MAP REICPES
 const MAP_RECIPES = [
-  { brownPaper: 2, pen: 1 },
-  { magnifyingGlass: 1, ink: 3 },
-  { magnifyingGlass: 1, ink: 1, dividers: 1 }
+  { brownPaper: 2, pen: 1 , ink: 2, dividers: 1, magnifyingGlass: 1},
+  // { magnifyingGlass: 1, ink: 3 },
+  // { magnifyingGlass: 1, ink: 1, dividers: 1 }
 ];
 
 // stock BlackMarket
@@ -83,7 +84,8 @@ const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
   // ... Copy/Paste for Period 4, 5, 6, 7, 8
 ];
 
-// 3. Helper Maps (Mapping your string keys to DB IDs)
+
+// Helper Mapping (Mapping string keys to DB IDs)
 const RAW_ID_MAP: Record<string, string> = {
   wood: "1",
   glass: "2",
