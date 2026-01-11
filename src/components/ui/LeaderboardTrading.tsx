@@ -80,11 +80,6 @@ export default function LeaderboardTrading({
           )}
         </span>
       </td>
-      {/* <td className="px-4 py-4">
-        <span className="text-sm font-futura">
-          {entry.team || '-'}
-        </span>
-      </td> */}
       <td className="px-4 py-4 text-center">
         <span className="font-impact text-lg">
           {formatCurrency(entry.idr)}
@@ -125,9 +120,6 @@ export default function LeaderboardTrading({
                 <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
                   Team
                 </th>
-                {/* <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">
-                  Team
-                </th> */}
                 <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">
                   IDR
                 </th>
