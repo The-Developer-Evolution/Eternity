@@ -38,8 +38,19 @@ export async function buyMaterial(
     return { success: false, error: `Raw material not found` };
   }
 
+  const rawPeriod = await prisma.rawPeriod.findFirst({
+      where: {
+          rawId: rawItemId,
+          periode: period.periode
+      }
+  });
+
+  if (!rawPeriod) {
+      return { success: false, error: `Price for ${rawItem.name} not found in current period` };
+  }
+
   const materialName = rawItem.name;
-  const priceFn = Number(rawItem.price);
+  const priceFn = Number(rawPeriod.price);
   const totalPrice = priceFn * amount;
 
   // 2. Check balance
@@ -145,7 +156,16 @@ export async function buyCustomRawMaterials(
                 const rawItem = await tx.rawItem.findUnique({ where: { id: item.id } });
                 if (!rawItem) throw new Error(`Item ${item.id} not found`);
 
-                const cost = Number(rawItem.price) * item.amount;
+                const rawPeriod = await tx.rawPeriod.findFirst({
+                    where: {
+                        rawId: item.id,
+                        periode: period.periode
+                    }
+                });
+
+                if (!rawPeriod) throw new Error(`Price for item ${rawItem.name} not found in current period`);
+
+                const cost = Number(rawPeriod.price) * item.amount;
                 totalItemCost += cost;
 
                 // Grant Item

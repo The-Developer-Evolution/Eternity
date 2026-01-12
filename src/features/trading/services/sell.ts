@@ -8,12 +8,46 @@ import { TradingData } from "@/generated/prisma/client";
 import { getActiveTradingPeriod } from "./timer";
 import { getRunningTradingPeriod } from "../action";
 
-export async function getSellableItems() {
-    const [rawItems, craftItems] = await Promise.all([
-        prisma.rawItem.findMany(),
-        prisma.craftItem.findMany()
-    ]);
-    return { rawItems, craftItems };
+
+export interface SellItem {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export async function getSellableItems(): Promise<{ rawItems: SellItem[], craftItems: SellItem[] }> {
+    const activePeriod = await prisma.periodeTrading.findFirst({
+        where: { status: "ON_GOING" }
+    });
+
+    const rawItems = await prisma.rawItem.findMany({
+        include: {
+            rawPeriods: {
+                where: { periode: activePeriod ? activePeriod.periode : -1 }
+            }
+        }
+    });
+
+    const craftItems = await prisma.craftItem.findMany({
+        include: {
+            craftPeriods: {
+                where: { periode: activePeriod ? activePeriod.periode : -1 }
+            }
+        }
+    });
+
+    return {
+        rawItems: rawItems.map(i => ({
+            id: i.id,
+            name: i.name,
+            price: Number(i.rawPeriods[0]?.price || 0)
+        })),
+        craftItems: craftItems.map(i => ({
+            id: i.id,
+            name: i.name,
+            price: Number(i.craftPeriods[0]?.price || 0)
+        }))
+    };
 }
 
 
@@ -99,7 +133,16 @@ export async function sellItems(
                  const itemDef = await prisma.rawItem.findUnique({ where: { id: item.id } });
                  if (!itemDef) return { success: false, error: `Raw Item ${item.id} not found` };
                  
-                 itemPrice = itemDef.price;
+                 // Fetch price from RawPeriod
+                 const rawPeriod = await prisma.rawPeriod.findFirst({
+                    where: {
+                        rawId: item.id,
+                        periode: period.periode
+                    }
+                 });
+                 if (!rawPeriod) return { success: false, error: `Price for ${itemDef.name} not found in current period` };
+                 
+                 itemPrice = rawPeriod.price;
                  itemName = itemDef.name;
                  logResource = BalanceTradingResource.RAW;
 
@@ -120,7 +163,16 @@ export async function sellItems(
                  const itemDef = await prisma.craftItem.findUnique({ where: { id: item.id } });
                  if (!itemDef) return { success: false, error: `Craft Item ${item.id} not found` };
 
-                 itemPrice = itemDef.price;
+                 // Fetch price from CraftPeriod
+                 const craftPeriod = await prisma.craftPeriod.findFirst({
+                    where: {
+                        craftId: item.id,
+                        periode: period.periode
+                    }
+                 });
+                 if (!craftPeriod) return { success: false, error: `Price for ${itemDef.name} not found in current period` };
+
+                 itemPrice = craftPeriod.price;
                  itemName = itemDef.name;
                  logResource = BalanceTradingResource.CRAFT;
 
@@ -180,12 +232,3 @@ export async function sellItems(
         return { success: false, error: "Transaction failed." };
     }
 }
-
-// Keep single sell for backward compat or refactor? 
-// The prompt implies the UI changes, so single sell might not be used.
-// But I'll keep it or replace it? 
-// "I need you to update the UI ... so user can multiple select" 
-// It replaces the old one. I will ADD this new function and keep the old one just in case 
-// or I can modify the old one? 
-// The file is `sell.ts`, I'll add `sellItems` and export it.
-

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
-import MapCraftInterface from "@/components/trading/MapCraftInterface";
 import MapCraftRecipeInterface from "@/components/trading/MapCraftRecipeInterface";
 import { getAllCraftRecipes } from "@/features/trading/services/craft";
 import { getAllMapRecipes } from "@/features/trading/services/map";
@@ -17,7 +16,6 @@ export default async function Page() {
           amount: c.amount.toString(),
           craftItem: {
               ...c.craftItem,
-              price: c.craftItem.price.toString()
           }
       }))
   }));

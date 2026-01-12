@@ -3,9 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
-import { sellItems, SellItemPayload } from "@/features/trading/services/sell";
+import { sellItems, SellItemPayload, SellItem, getUserInventory } from "@/features/trading/services/sell";
 import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign } from "lucide-react";
-import { RawItem, CraftItem } from "@/generated/prisma/client";
 import { getRunningTradingPeriod } from "@/features/trading/action";
 import { AllTradingData } from "@/features/user/types";
 
@@ -19,8 +18,8 @@ type InventoryItem = {
 };
 
 interface SellInterfaceProps {
-    rawItems: RawItem[];
-    craftItems: CraftItem[];
+    rawItems: SellItem[];
+    craftItems: SellItem[];
     mapPrice: number;
 }
 
@@ -219,7 +218,8 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
                     setUserQuery(u.name);
                     setMatchingUsers([]);
                     
-                    const { getUserInventory } = await import('@/features/trading/services/sell');
+                    setMatchingUsers([]);
+                    
                     const data = await getUserInventory(u.id);
                     if (data) {
                          const newInv: InventoryItem[] = [

@@ -56,17 +56,33 @@ export async function searchUsers(query: string): Promise<ShopUser[]> {
 }
 
 export async function getAllRawItems(): Promise<ShopRawItem[]> {
+  const activePeriod = await prisma.periodeTrading.findFirst({
+    where: {
+      status: "ON_GOING",
+    },
+  });
+
   const items = await prisma.rawItem.findMany({
     orderBy: {
       name: "asc",
     },
+    include: {
+      rawPeriods: {
+        where: {
+            periode: activePeriod ? activePeriod.periode : -1
+        }
+      }
+    }
   });
 
-  return items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    price: Number(item.price),
-  }));
+  return items.map((item) => {
+    const periodData = item.rawPeriods[0];
+    return {
+      id: item.id,
+      name: item.name,
+      price: periodData ? Number(periodData.price) : 0,
+    };
+  });
 }
 
 export async function getUserCraftInventory(userId: string) {
