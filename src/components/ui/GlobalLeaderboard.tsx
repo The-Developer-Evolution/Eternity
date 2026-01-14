@@ -118,13 +118,13 @@ export default function GlobalLeaderboard({
 
                 {/* TOTAL POINTS (Diblur) - Menampilkan 2 desimal */}
                 <td className="px-4 py-4 text-center">
-                    <span className={`font-impact text-xl text-white block ${blurClass}`}>
+                    <span className={`font-futura text-xl text-white block ${blurClass}`}>
                         {Number(entry.totalPoints).toFixed(2)}
                     </span>
                 </td>
 
                 <td className="px-4 py-4 text-center">
-                    <span className={`font-impact text-lg text-white block ${blurClass}`}>
+                    <span className={`font-futura text-lg text-white block ${blurClass}`}>
                         {entry.minus_point}
                     </span>
                 </td>
@@ -137,7 +137,7 @@ export default function GlobalLeaderboard({
 
     return (
         <div className="w-full max-w-7xl my-[10%] md:my-[5%] mx-auto relative z-10">
-            <div className="bg-black/40 backdrop-blur-xl rounded-2xl border-3 border-[#684095] shadow-[0_0_50px_rgba(104,64,149,0.3)] overflow-hidden">
+            <div className="bg-black/50 backdrop-blur-2xl rounded-2xl border-3 border-[#684095] shadow-[0_0_50px_rgba(104,64,149,0.3)] overflow-hidden">
 
                 {/* HEADER & TOGGLE BUTTON */}
                 <div className="bg-[#04043A] p-6 border-b-3 border-[#684095] flex flex-col md:flex-row items-center justify-between gap-4">
