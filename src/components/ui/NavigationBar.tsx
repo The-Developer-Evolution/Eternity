@@ -292,6 +292,13 @@ export default function NavigationBar() {
                   Peserta
                 </h3>
                 <Link
+                  href="/peserta/global-leaderboard"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Global Leaderboard
+                </Link>
+                <Link
                   href="/peserta/rally"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
