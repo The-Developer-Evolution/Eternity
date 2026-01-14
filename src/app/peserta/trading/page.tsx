@@ -8,6 +8,8 @@ import prisma from "@/lib/prisma";
 import { PlayerTradingDashboard } from "@/components/trading/PlayerTradingDashboard";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   // Wrap everything in try-catch for debugging
   try {
