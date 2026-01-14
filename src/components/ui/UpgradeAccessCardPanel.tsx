@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import CardPanel from "@/components/ui/CardPanel";
 import { Plus, Minus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface InventoryItem {
   id: string;
@@ -119,14 +120,18 @@ export default function UpgradeAccessCardPanel({
     setSelectedUser(user);
     setSelectedItems([]);
     setError(null);
+    if (selectedUser?.smallItemInventory == undefined || selectedUser?.smallItemInventory.length <= 0) {
+      setError("Selected user has no small items in inventory");
+      toast.error(`${selectedUser ? selectedUser.name : "Selected user"} has no small items in inventory`, { duration: 5000 });
+    }
     setSuccess(null);
   };
 
   const addItem = (item: InventoryItem, type: 'big' | 'small') => {
     const existingItem = selectedItems.find(i => i.id === item.id && i.type === type);
-    
+
     if (existingItem) {
-      setSelectedItems(selectedItems.map(i => 
+      setSelectedItems(selectedItems.map(i =>
         i.id === item.id && i.type === type
           ? { ...i, amount: i.amount + 1 }
           : i
@@ -140,7 +145,7 @@ export default function UpgradeAccessCardPanel({
     if (newAmount <= 0) {
       removeItem(id, type);
     } else {
-      setSelectedItems(selectedItems.map(i => 
+      setSelectedItems(selectedItems.map(i =>
         i.id === id && i.type === type
           ? { ...i, amount: newAmount }
           : i
@@ -163,6 +168,9 @@ export default function UpgradeAccessCardPanel({
       return;
     }
 
+    const confirmAction = window.confirm(`Apakah Anda yakin ingin melakukan upgrade untuk ${selectedUser.name}?`);
+    if (!confirmAction) return;
+
     setIsLoading(true);
     setError(null);
     setSuccess(null);
@@ -171,7 +179,7 @@ export default function UpgradeAccessCardPanel({
       const bigItems = selectedItems
         .filter(i => i.type === 'big')
         .map(i => ({ id: i.id, amount: i.amount }));
-      
+
       const smallItems = selectedItems
         .filter(i => i.type === 'small')
         .map(i => ({ id: i.id, amount: i.amount }));
@@ -179,7 +187,7 @@ export default function UpgradeAccessCardPanel({
       const response = await fetch("/api/rally/upgrade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           userId: selectedUser.id,
           eonixCost,
           bigItems,
@@ -192,26 +200,27 @@ export default function UpgradeAccessCardPanel({
       if (data.success) {
         const newLevel = data.newLevel;
         setSuccess(`Successfully upgraded ${selectedUser.name} to level ${newLevel}`);
+        toast.success(`Successfully upgraded ${selectedUser.name} to level ${newLevel}`);
 
         // Update user in list
         const updatedUsers = allUsers.map(u =>
           u.id === selectedUser.id
-            ? { 
-                ...u, 
-                rallyData: { 
-                  ...u.rallyData!, 
-                  access_card_level: newLevel,
-                  enonix: (u.rallyData?.enonix || 0) - eonixCost
-                },
-                bigItemInventory: u.bigItemInventory?.map(inv => {
-                  const usedItem = bigItems.find(bi => bi.id === inv.id);
-                  return usedItem ? { ...inv, amount: inv.amount - usedItem.amount } : inv;
-                }),
-                smallItemInventory: u.smallItemInventory?.map(inv => {
-                  const usedItem = smallItems.find(si => si.id === inv.id);
-                  return usedItem ? { ...inv, amount: inv.amount - usedItem.amount } : inv;
-                })
-              }
+            ? {
+              ...u,
+              rallyData: {
+                ...u.rallyData!,
+                access_card_level: newLevel,
+                enonix: (u.rallyData?.enonix || 0) - eonixCost
+              },
+              bigItemInventory: u.bigItemInventory?.map(inv => {
+                const usedItem = bigItems.find(bi => bi.id === inv.id);
+                return usedItem ? { ...inv, amount: inv.amount - usedItem.amount } : inv;
+              }),
+              smallItemInventory: u.smallItemInventory?.map(inv => {
+                const usedItem = smallItems.find(si => si.id === inv.id);
+                return usedItem ? { ...inv, amount: inv.amount - usedItem.amount } : inv;
+              })
+            }
             : u
         );
         setAllUsers(updatedUsers);
@@ -230,7 +239,9 @@ export default function UpgradeAccessCardPanel({
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error(err instanceof Error ? err.message : "An error occurred")
     } finally {
+      await new Promise((resolve) => setTimeout(resolve, 300));
       setIsLoading(false);
     }
   };
@@ -296,9 +307,8 @@ export default function UpgradeAccessCardPanel({
               <button
                 key={user.id}
                 onClick={() => handleSelectUser(user)}
-                className={`w-full p-4 text-left border-b border-[#684095]/30 transition-all hover:bg-black/10 ${
-                  selectedUser?.id === user.id ? "bg-black/20 border-l-4 border-l-[#78CCEE]" : ""
-                }`}
+                className={`w-full p-4 text-left border-b border-[#684095]/30 transition-all hover:bg-black/10 ${selectedUser?.id === user.id ? "bg-black/20 border-l-4 border-l-[#78CCEE]" : ""
+                  }`}
               >
                 <div className="flex justify-between items-center">
                   <div>
@@ -370,7 +380,7 @@ export default function UpgradeAccessCardPanel({
           {/* Eonix Cost Input */}
           <div className="p-4 bg-[#3E344A]/80 border-2 border-[#684095] rounded-lg">
             <label className="text-white font-bold text-sm mb-2 block uppercase">
-              Eonix Cost 
+              Eonix Cost
               {currentRequirement && (
                 <span className="text-yellow-300 ml-2">(Recommended: {currentRequirement.eonix})</span>
               )}
@@ -384,8 +394,7 @@ export default function UpgradeAccessCardPanel({
               placeholder="Enter Eonix cost..."
             />
           </div>
-
-          {/* Big Items Selection */}
+          {/* 
           {selectedUser.bigItemInventory && selectedUser.bigItemInventory.length > 0 && (
             <div className="p-4 bg-[#3E344A]/80 border-2 border-[#684095] rounded-lg">
               <p className="text-[#41FFA3] font-bold mb-3 uppercase text-sm">Select Big Items (Tokens):</p>
@@ -403,7 +412,7 @@ export default function UpgradeAccessCardPanel({
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Small Items Selection */}
           {selectedUser.smallItemInventory && selectedUser.smallItemInventory.length > 0 && (
@@ -475,7 +484,7 @@ export default function UpgradeAccessCardPanel({
       <div className="w-full flex gap-4">
         <button
           onClick={handleUpgrade}
-          disabled={!selectedUser || isLoading || (selectedUser?.rallyData?.access_card_level || 0) >= 5}
+          disabled={!selectedUser || isLoading || (selectedUser?.rallyData?.access_card_level || 0) >= 5 || selectedUser.smallItemInventory!!.length <= 0}
           className="flex-1 px-6 py-3 bg-[#41FFA3] hover:bg-[#2dd981] disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-impact text-xl rounded-lg transition-all shadow-lg hover:shadow-[#41FFA3]/30"
         >
           {isLoading ? "Upgrading..." : "UPGRADE"}

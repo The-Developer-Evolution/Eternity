@@ -198,11 +198,21 @@ export async function craftBigItem(userId: string, resultItemId: string) {
 }
 
 export async function gachaItem(userId: string) {
-  const smallItems = await prisma.rallySmallItem.findMany();
+  const excludedIds = ["1", "2", "3", "7"];
+
+  const smallItems = await prisma.rallySmallItem.findMany({
+    where: {
+      id: {
+        notIn: excludedIds,
+      },
+    },
+  });
 
   if (smallItems.length === 0) {
     throw new Error("No small items available for gacha");
   }
+
+  const possibleGachaItems = smallItems;
 
   const rallyData = await prisma.rallyData.findUnique({
     where: {

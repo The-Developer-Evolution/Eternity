@@ -167,7 +167,7 @@ export default function BuySpecialTicketPanel({
   ];
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
+    <div className="w-full bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6 relative z-50">
       <h2 className="text-3xl font-impact text-[#78CCEE] mb-6 text-center uppercase tracking-wider flex items-center justify-center gap-3">
         <Ticket size={32} /> BUY SPECIAL TICKET
       </h2>

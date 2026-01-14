@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FaDice } from "react-icons/fa";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -35,8 +36,6 @@ export default function GachaItemPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [gachaResult, setGachaResult] = useState<SmallItem | null>(null);
-  
-  const possibleGachaItems = smallItems.slice(3, 6);
 
   useEffect(() => {
     setAllUsers(users);
@@ -72,6 +71,9 @@ export default function GachaItemPanel({
       return;
     }
 
+    const confirmAction = window.confirm(`Apakah Anda yakin ingin melakukan gacha untuk ${selectedUser.name}?`);
+    if (!confirmAction) return;
+
     const currentEnonix = selectedUser.rallyData?.enonix || 0;
     if (currentEnonix < 3) {
       setError("User doesn't have enough Eonix (Required: 3)");
@@ -90,19 +92,20 @@ export default function GachaItemPanel({
         setSuccess(
           `Successfully performed gacha for ${selectedUser.name}!`
         );
+        toast.success(`Gacha successful for ${selectedUser.name}!`);
         setGachaResult(result.item);
-        
+
         // Update local state - decrement eonix
         setAllUsers((prev) =>
           prev.map((u) =>
             u.id === selectedUser.id
               ? {
-                  ...u,
-                  rallyData: {
-                    ...u.rallyData!,
-                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
-                  },
-                }
+                ...u,
+                rallyData: {
+                  ...u.rallyData!,
+                  enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
+                },
+              }
               : u
           )
         );
@@ -110,31 +113,35 @@ export default function GachaItemPanel({
           prev.map((u) =>
             u.id === selectedUser.id
               ? {
-                  ...u,
-                  rallyData: {
-                    ...u.rallyData!,
-                    enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
-                  },
-                }
+                ...u,
+                rallyData: {
+                  ...u.rallyData!,
+                  enonix: Math.max(0, (u.rallyData?.enonix || 0) - 3),
+                },
+              }
               : u
           )
         );
         setSelectedUser((prev) =>
           prev
             ? {
-                ...prev,
-                rallyData: {
-                  ...prev.rallyData!,
-                  enonix: Math.max(0, (prev.rallyData?.enonix || 0) - 3),
-                },
-              }
+              ...prev,
+              rallyData: {
+                ...prev.rallyData!,
+                enonix: Math.max(0, (prev.rallyData?.enonix || 0) - 3),
+              },
+            }
             : null
         );
       } else {
         setError(result.error || "Failed to perform gacha");
+        toast.error(result.error || "Gacha failed");
       }
     } catch (err) {
       setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
+      toast.error(
         err instanceof Error ? err.message : "An unexpected error occurred"
       );
     } finally {
@@ -172,11 +179,10 @@ export default function GachaItemPanel({
               <button
                 key={user.id}
                 onClick={() => handleSelectUser(user)}
-                className={`w-full p-3 mb-2 rounded-lg border-2 transition-all text-left ${
-                  selectedUser?.id === user.id
-                    ? "bg-[#78CCEE]/20 border-[#78CCEE]"
-                    : "bg-[#3E344A] border-[#684095] hover:border-[#78CCEE]/50"
-                }`}
+                className={`w-full p-3 mb-2 rounded-lg border-2 transition-all text-left ${selectedUser?.id === user.id
+                  ? "bg-[#78CCEE]/20 border-[#78CCEE]"
+                  : "bg-[#3E344A] border-[#684095] hover:border-[#78CCEE]/50"
+                  }`}
               >
                 <div className="flex justify-between items-center">
                   <div>
@@ -220,59 +226,75 @@ export default function GachaItemPanel({
         <div className="mb-6 p-4 bg-[#3E344A]/50 rounded-lg border-2 border-[#684095]">
           <h3 className="text-[#78CCEE] font-bold mb-3">Possible Items:</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {possibleGachaItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-[#3E344A] px-3 py-2 rounded-lg border border-[#684095] text-center"
-              >
-                <p className="text-white text-sm">{item.name}</p>
-              </div>
-            ))}
+            {smallItems.map((item) => {
+              const excludedIds = ["1", "2", "3", "7"];
+
+              // Jika ID item ada dalam daftar pengecualian, jangan tampilkan apa-apa
+              if (excludedIds.includes(item.id)) return null;
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-[#3E344A] px-3 py-2 rounded-lg border border-[#684095] text-center"
+                >
+                  <p className="text-white text-sm">{item.name}</p>
+                </div>
+              );
+            })}
           </div>
           <p className="text-slate-400 text-xs mt-3 text-center">
             Cost: 3 Eonix per gacha
           </p>
         </div>
-      )}
+      )
+      }
 
       {/* Gacha Result */}
-      {gachaResult && (
-        <div className="mb-6 p-6 bg-gradient-to-r from-[#41FFA3]/20 to-[#78CCEE]/20 rounded-lg border-2 border-[#41FFA3] animate-pulse">
-          <div className="text-center">
-            <FaDice className="text-5xl text-[#41FFA3] mx-auto mb-3" />
-            <h3 className="text-2xl font-impact text-[#41FFA3] mb-2">
-              GACHA RESULT!
-            </h3>
-            <p className="text-white text-3xl font-bold">{gachaResult.name}</p>
+      {
+        gachaResult && (
+          <div className="mb-6 p-6 bg-gradient-to-r from-[#41FFA3]/20 to-[#78CCEE]/20 rounded-lg border-2 border-[#41FFA3] animate-pulse">
+            <div className="text-center">
+              <FaDice className="text-5xl text-[#41FFA3] mx-auto mb-3" />
+              <h3 className="text-2xl font-impact text-[#41FFA3] mb-2">
+                GACHA RESULT!
+              </h3>
+              <p className="text-white text-3xl font-bold">{gachaResult.name}</p>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Action Button */}
-      {selectedUser && (
-        <div className="mb-6">
-          <button
-            onClick={handleGacha}
-            disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < 3}
-            className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          >
-            <FaDice className="text-2xl" />
-            {isLoading ? "SPINNING..." : "PERFORM GACHA (3 EONIX)"}
-          </button>
-        </div>
-      )}
+      {
+        selectedUser && (
+          <div className="mb-6">
+            <button
+              onClick={handleGacha}
+              disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < 3}
+              className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            >
+              <FaDice className="text-2xl" />
+              {isLoading ? "SPINNING..." : "PERFORM GACHA (3 EONIX)"}
+            </button>
+          </div>
+        )
+      }
 
       {/* Messages */}
-      {error && (
-        <div className="bg-red-500/20 border-2 border-red-500 text-red-300 p-4 rounded-lg mb-4">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-500/20 border-2 border-green-500 text-green-300 p-4 rounded-lg mb-4">
-          {success}
-        </div>
-      )}
-    </div>
+      {
+        error && (
+          <div className="bg-red-500/20 border-2 border-red-500 text-red-300 p-4 rounded-lg mb-4">
+            {error}
+          </div>
+        )
+      }
+      {
+        success && (
+          <div className="bg-green-500/20 border-2 border-green-500 text-green-300 p-4 rounded-lg mb-4">
+            {success}
+          </div>
+        )
+      }
+    </div >
   );
 }
