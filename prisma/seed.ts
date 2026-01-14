@@ -1,6 +1,10 @@
 import { RawStockPeriod } from "@/generated/prisma/browser";
 import { PrismaClient, Role } from "@/generated/prisma/client";
-import { CraftStockPeriodCreateInput, CraftStockPeriodCreateManyInput, RawStockPeriodCreateManyInput } from "@/generated/prisma/models";
+import {
+  CraftStockPeriodCreateInput,
+  CraftStockPeriodCreateManyInput,
+  RawStockPeriodCreateManyInput,
+} from "@/generated/prisma/models";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
@@ -10,11 +14,9 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-
-
 type RecipePattern = {
   input: Record<string, number>; // e.g., { wood: 10 }
-  output: string;                // e.g., "brownPaper"
+  output: string; // e.g., "brownPaper"
 };
 type ItemConfig = { id: string; stock: number; price: number };
 
@@ -23,8 +25,6 @@ type PeriodConfig = {
   raw: ItemConfig[];
   craft: ItemConfig[];
 };
-
-
 
 // CRAFT ITEM's Recipe
 const RECIPES: RecipePattern[] = [
@@ -37,7 +37,7 @@ const RECIPES: RecipePattern[] = [
 
 // Forbidden MAP's REICPE
 const MAP_RECIPES = [
-  { brownPaper: 2, pen: 1 , ink: 2, dividers: 1, magnifyingGlass: 1},
+  { brownPaper: 2, pen: 1, ink: 2, dividers: 1, magnifyingGlass: 1 },
 ];
 
 // stock and price in BlackMarket
@@ -52,17 +52,17 @@ const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
       { id: "5", stock: 15, price: 375 }, // Metal
     ],
     craft: [
-      { id: "1", stock: 2, price: 2250 },  // Brown Paper
-      { id: "2", stock: 1, price: 3500 },  // Pen
-      { id: "3", stock: 3, price: 3000 },  // Magnifying glass
-      { id: "4", stock: 3, price: 3000 },  // Ink
-      { id: "5", stock: 3, price: 2000 },  // Dividers
+      { id: "1", stock: 2, price: 2250 }, // Brown Paper
+      { id: "2", stock: 1, price: 3500 }, // Pen
+      { id: "3", stock: 3, price: 3000 }, // Magnifying glass
+      { id: "4", stock: 3, price: 3000 }, // Ink
+      { id: "5", stock: 3, price: 2000 }, // Dividers
     ],
   },
   {
     periode: 2,
     raw: [
-      { id: "1", stock: 11, price: 95 },  // Wood
+      { id: "1", stock: 11, price: 95 }, // Wood
       { id: "2", stock: 15, price: 490 }, // Glass
       { id: "3", stock: 23, price: 190 }, // Water
       { id: "4", stock: 20, price: 220 }, // Coal
@@ -113,7 +113,7 @@ const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
   {
     periode: 5,
     raw: [
-      { id: "1", stock: 22, price: 50 },  // Wood
+      { id: "1", stock: 22, price: 50 }, // Wood
       { id: "2", stock: 10, price: 350 }, // Glass
       { id: "3", stock: 25, price: 120 }, // Water
       { id: "4", stock: 23, price: 150 }, // Coal
@@ -165,14 +165,14 @@ const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
     periode: 8,
     raw: [
       { id: "1", stock: 10, price: 300 }, // Wood
-      { id: "2", stock: 10, price: 1000 },// Glass
+      { id: "2", stock: 10, price: 1000 }, // Glass
       { id: "3", stock: 10, price: 450 }, // Water
       { id: "4", stock: 10, price: 550 }, // Coal
       { id: "5", stock: 10, price: 700 }, // Metal
     ],
     craft: [
       { id: "1", stock: 1, price: 5000 }, // Brown Paper
-      { id: "2", stock: 1, price: 10000}, // Pen
+      { id: "2", stock: 1, price: 10000 }, // Pen
       { id: "3", stock: 1, price: 9500 }, // Magnifying glass
       { id: "4", stock: 1, price: 7000 }, // Ink
       { id: "5", stock: 1, price: 7000 }, // Dividers
@@ -180,25 +180,22 @@ const CUSTOM_PERIOD_DATA: PeriodConfig[] = [
   },
 ];
 
-
 // Helper Mapping (Mapping string keys to DB IDs)
 const RAW_ID_MAP: Record<string, string> = {
   wood: "1",
   glass: "2",
   water: "3",
   coal: "4",
-  metal: "5"
+  metal: "5",
 };
 
 const CRAFT_ID_MAP: Record<string, string> = {
-  brownPaper: "1",       // "brown paper"
-  pen: "2",              // "pen"
-  magnifyingGlass: "3",  // "magnifying glass"
-  ink: "4",              // "ink"
-  dividers: "5"          // "dividers"
+  brownPaper: "1", // "brown paper"
+  pen: "2", // "pen"
+  magnifyingGlass: "3", // "magnifying glass"
+  ink: "4", // "ink"
+  dividers: "5", // "dividers"
 };
-
-
 
 const passwords = [
   "Alpha123!",
@@ -227,14 +224,62 @@ async function main() {
   // SEED Price Forbidden Map, USD/IDR rate usd
   await prisma.periodeTrading.createMany({
     data: [
-      { periode: 1, cost_map: 1000, price_map: 120000, duration: 30, usdidr_rate: 16500 },
-      { periode: 2, cost_map: 1300, price_map: 118000, duration: 20, usdidr_rate: 16830 },
-      { periode: 3, cost_map: 1600, price_map: 116000, duration: 20, usdidr_rate: 15989 },
-      { periode: 4, cost_map: 1900, price_map: 114000, duration: 20, usdidr_rate: 16628 },
-      { periode: 5, cost_map: 2200, price_map: 112000, duration: 20, usdidr_rate: 17293 },
-      { periode: 6, cost_map: 2500, price_map: 110000, duration: 20, usdidr_rate: 18677 },
-      { periode: 7, cost_map: 2800, price_map: 108000, duration: 20, usdidr_rate: 17743 },
-      { periode: 8, cost_map: 3100, price_map: 106000, duration: 20, usdidr_rate: 15969 },
+      {
+        periode: 1,
+        cost_map: 1000,
+        price_map: 120000,
+        duration: 30,
+        usdidr_rate: 16500,
+      },
+      {
+        periode: 2,
+        cost_map: 1300,
+        price_map: 118000,
+        duration: 20,
+        usdidr_rate: 16830,
+      },
+      {
+        periode: 3,
+        cost_map: 1600,
+        price_map: 116000,
+        duration: 20,
+        usdidr_rate: 15989,
+      },
+      {
+        periode: 4,
+        cost_map: 1900,
+        price_map: 114000,
+        duration: 20,
+        usdidr_rate: 16628,
+      },
+      {
+        periode: 5,
+        cost_map: 2200,
+        price_map: 112000,
+        duration: 20,
+        usdidr_rate: 17293,
+      },
+      {
+        periode: 6,
+        cost_map: 2500,
+        price_map: 110000,
+        duration: 20,
+        usdidr_rate: 18677,
+      },
+      {
+        periode: 7,
+        cost_map: 2800,
+        price_map: 108000,
+        duration: 20,
+        usdidr_rate: 17743,
+      },
+      {
+        periode: 8,
+        cost_map: 3100,
+        price_map: 106000,
+        duration: 20,
+        usdidr_rate: 15969,
+      },
     ],
     skipDuplicates: true,
   });
@@ -247,9 +292,6 @@ async function main() {
     },
   });
 
-
-
-  
   // Seed RawItem
   await prisma.rawItem.createMany({
     data: [
@@ -257,7 +299,7 @@ async function main() {
       { id: "2", name: "glass" },
       { id: "3", name: "water" },
       { id: "4", name: "coal" },
-      { id: "5", name: "metal" }
+      { id: "5", name: "metal" },
     ],
     skipDuplicates: true,
   });
@@ -268,7 +310,7 @@ async function main() {
       { id: "2", name: "pen" },
       { id: "3", name: "magnifying glass" },
       { id: "4", name: "ink" },
-      { id: "5", name: "dividers" }
+      { id: "5", name: "dividers" },
     ],
     skipDuplicates: true,
   });
@@ -325,8 +367,8 @@ async function main() {
       { rawId: "5", periode: 6, price: 360 },
       { rawId: "5", periode: 7, price: 395 },
       { rawId: "5", periode: 8, price: 350 },
-    ]
-  })
+    ],
+  });
 
   await prisma.craftPeriod.createMany({
     data: [
@@ -379,9 +421,8 @@ async function main() {
       { craftId: "5", periode: 6, price: 5597 },
       { craftId: "5", periode: 7, price: 5376 },
       { craftId: "5", periode: 8, price: 5418 },
-    ]
-  })
-
+    ],
+  });
 
   // SEEDING MAP RECIPES
   console.log(`Seeding ${MAP_RECIPES.length} Map Recipes...`);
@@ -389,14 +430,14 @@ async function main() {
     // Convert the simple object { pen: 1 } into Prisma's "create" format
     const componentsData = Object.entries(recipe).map(([key, amount]) => {
       const craftId = CRAFT_ID_MAP[key];
-      
+
       if (!craftId) {
         throw new Error(`Invalid item key: ${key}`);
       }
 
       return {
         amount: amount,
-        craftItemId: craftId
+        craftItemId: craftId,
       };
     });
 
@@ -404,12 +445,11 @@ async function main() {
     await prisma.mapRecipe.create({
       data: {
         mapRecipeComponents: {
-          create: componentsData
-        }
-      }
-  })}
-
-
+          create: componentsData,
+        },
+      },
+    });
+  }
 
   // SEED BLACKMARKET STOCK and Price FOR EACH PERIOD
 
@@ -433,7 +473,7 @@ async function main() {
         periode: pData.periode,
         craftId: item.id,
         stock: item.stock,
-        price: BigInt(item.price), 
+        price: BigInt(item.price),
       });
     }
   }
@@ -454,10 +494,6 @@ async function main() {
       skipDuplicates: true,
     });
   }
-
-
-
-
 
   ///////////////////////////
   // SEED CRAFT RECIPE
@@ -487,7 +523,7 @@ async function main() {
       recipeData.push({
         craftItemId: craftItemId,
         rawItemId: rawItemId,
-        amount: amount // Requires the schema update mentioned above!
+        amount: amount, // Requires the schema update mentioned above!
       });
     }
   }
@@ -500,8 +536,6 @@ async function main() {
     });
     console.log(`✅ Created ${recipeData.length} recipe ingredients.`);
   }
-
-
 
   // create Admin user for each role
   const roles: Role[] = [
@@ -521,8 +555,6 @@ async function main() {
     Role.THUNT,
     Role.UPGRADE,
   ];
-
-
 
   for (let i = 0; i < roles.length; i++) {
     const role = roles[i];
@@ -560,43 +592,186 @@ async function main() {
   // =========================
   // Dummy Users
   // =========================
-  const user1 = await prisma.user.upsert({
-    where: { name: "team1" },
-    update: {},
-    create: {
-      name: "001_Santorini",
-      password: await bcrypt.hash("password123", 10),
-      tradingData: {
-        create: {},
-      },
-    },
-  });
 
-  const user2 = await prisma.user.upsert({
-    where: { name: "team2" },
-    update: {},
-    create: {
-      name: "046_Gozo",
-      password: await bcrypt.hash("password123", 10),
-      tradingData: {
-        create: {},
-      },
-    },
-  });
+  const dummyUserNames = [
+    "001_Indonesia",
+    "002_Malaysia",
+    "003_Singapore",
+    "004_Thailand",
+    "005_Philippines",
+    "006_Vietnam",
+    "007_Laos",
+    "008_Cambodia",
+    "009_Myanmar",
+    "010_Brunei",
+    "011_Japan",
+    "012_SouthKorea",
+    "013_NorthKorea",
+    "014_China",
+    "015_Taiwan",
+    "016_HongKong",
+    "017_Macau",
+    "018_India",
+    "019_Pakistan",
+    "020_Bangladesh",
+    "021_Nepal",
+    "022_Bhutan",
+    "023_SriLanka",
+    "024_Maldives",
+    "025_Afghanistan",
+    "026_Iran",
+    "027_Iraq",
+    "028_SaudiArabia",
+    "029_UnitedArabEmirates",
+    "030_Qatar",
+    "031_Kuwait",
+    "032_Oman",
+    "033_Yemen",
+    "034_Jordan",
+    "035_Israel",
+    "036_Palestine",
+    "037_Turkey",
+    "038_Greece",
+    "039_Italy",
+    "040_France",
+    "041_Germany",
+    "042_Netherlands",
+    "043_Belgium",
+    "044_Switzerland",
+    "045_Austria",
+    "046_Spain",
+    "047_Portugal",
+    "048_UnitedKingdom",
+    "049_Ireland",
+    "050_Iceland",
+    "051_Norway",
+    "052_Sweden",
+    "053_Finland",
+    "054_Denmark",
+    "055_Poland",
+    "056_CzechRepublic",
+    "057_Slovakia",
+    "058_Hungary",
+    "059_Romania",
+    "060_Bulgaria",
+    "061_Serbia",
+    "062_Croatia",
+    "063_Slovenia",
+    "064_Bosnia",
+    "065_Montenegro",
+    "066_Albania",
+    "067_Russia",
+    "068_Ukraine",
+    "069_Belarus",
+    "070_Lithuania",
+    "071_Latvia",
+    "072_Estonia",
+    "073_UnitedStates",
+    "074_Canada",
+    "075_Mexico",
+    "076_Brazil",
+    "077_Argentina",
+    "078_Chile",
+    "079_Peru",
+    "080_Colombia",
+    "081_Venezuela",
+    "082_Bolivia",
+    "083_Paraguay",
+    "084_Uruguay",
+    "085_Ecuador",
+    "086_Panama",
+    "087_CostaRica",
+    "088_Cuba",
+    "089_Jamaica",
+    "090_Haiti",
+    "091_DominicanRepublic",
+    "092_Australia",
+    "093_NewZealand",
+    "094_PapuaNewGuinea",
+    "095_Fiji",
+    "096_SolomonIslands",
+    "097_SouthAfrica",
+    "098_Nigeria",
+    "099_Kenya",
+    "100_Egypt",
+  ];
 
-  console.log({ masterTrading, user1, user2 });
+  for (const name of dummyUserNames) {
+    await prisma.user.upsert({
+      where: { name },
+      update: {},
+      create: {
+        name,
+        password: await bcrypt.hash("12345678", 10),
+        tradingData: {
+          create: {},
+        },
+      },
+    });
+    console.log(`Created dummy user: ${name}`);
+  }
+
+  console.log({ masterTrading });
 
   // Rally Datas
   await prisma.rallyPeriod.createMany({
     data: [
-      { id: "1", name: "Pasang Surut", duration: 20, special_ticket_name: "Special Ticket Pasang Surut", special_ticket_stock: 5 },
-      { id: "2", name: "Musim Kemarau", duration: 20, special_ticket_name: "Special Ticket Musim Kemarau", special_ticket_stock: 5 },
-      { id: "3", name: "Musim Salju", duration: 20, special_ticket_name: "Special Ticket Musim Salju", special_ticket_stock: 5 },
-      { id: "4", name: "Banjir", duration: 20, special_ticket_name: "Special Ticket Banjir", special_ticket_stock: 5 },
-      { id: "5", name: "Bulan Merah", duration: 20, special_ticket_name: "Special Ticket Bulan Merah", special_ticket_stock: 5 },
-      { id: "6", name: "Cuaca Cerah", duration: 20, special_ticket_name: "Special Ticket Cuaca Cerah", special_ticket_stock: 5 },
-      { id: "7", name: "Hujan Asam", duration: 20, special_ticket_name: "Special Ticket Hujan Asam", special_ticket_stock: 5 },
-      { id: "8", name: "Tornado", duration: 20, special_ticket_name: "Special Ticket Tornado", special_ticket_stock: 5 },
+      {
+        id: "1",
+        name: "Pasang Surut",
+        duration: 20,
+        special_ticket_name: "Special Ticket Pasang Surut",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "2",
+        name: "Musim Kemarau",
+        duration: 20,
+        special_ticket_name: "Special Ticket Musim Kemarau",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "3",
+        name: "Musim Salju",
+        duration: 20,
+        special_ticket_name: "Special Ticket Musim Salju",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "4",
+        name: "Banjir",
+        duration: 20,
+        special_ticket_name: "Special Ticket Banjir",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "5",
+        name: "Bulan Merah",
+        duration: 20,
+        special_ticket_name: "Special Ticket Bulan Merah",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "6",
+        name: "Cuaca Cerah",
+        duration: 20,
+        special_ticket_name: "Special Ticket Cuaca Cerah",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "7",
+        name: "Hujan Asam",
+        duration: 20,
+        special_ticket_name: "Special Ticket Hujan Asam",
+        special_ticket_stock: 5,
+      },
+      {
+        id: "8",
+        name: "Tornado",
+        duration: 20,
+        special_ticket_name: "Special Ticket Tornado",
+        special_ticket_stock: 5,
+      },
     ],
   });
 
@@ -1168,7 +1343,7 @@ async function main() {
       { id: "4", name: "Rune Material", price: 5, show_in_inventory: true },
       { id: "5", name: "Shard Material", price: 5, show_in_inventory: true },
       { id: "6", name: "Flux Material", price: 5, show_in_inventory: true },
-      {id: "7", name: "Kartu Zona", price: 25, show_in_inventory: false},
+      { id: "7", name: "Kartu Zona", price: 25, show_in_inventory: false },
     ],
   });
 
