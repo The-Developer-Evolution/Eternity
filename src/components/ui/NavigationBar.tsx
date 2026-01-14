@@ -49,6 +49,13 @@ export default function NavigationBar() {
   const isRallyAdmin =
     userRole && (rallyAdminRoles as readonly Role[]).includes(userRole);
 
+  const TalkShowAdminRoles = [
+    Role.TALKSHOW,
+    Role.SUPER,
+  ] as const;
+  const isTalkShowAdmin =
+    userRole && (TalkShowAdminRoles as readonly Role[]).includes(userRole);
+
   return (
     <>
       <nav className="fixed w-screen overflow-hidden px-[5%] z-50 h-[7vh] bg-[#04043A] flex justify-between items-center text-4xl font-bold">
@@ -113,6 +120,21 @@ export default function NavigationBar() {
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
                   Login
+                </Link>
+              </div>
+            )}
+
+            {isTalkShowAdmin && (
+              <div className="flex flex-col gap-4">
+                <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
+                  Admin Talkshow
+                </h3>
+                <Link
+                  href="/admin/talkshow"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  Talkshow Admin Panel
                 </Link>
               </div>
             )}

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "talkshowPoints" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalPoints" DECIMAL(65,30) NOT NULL DEFAULT 0;
