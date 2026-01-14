@@ -395,7 +395,7 @@ export async function buySpecialTicket(
         });
 
         if (!userBigItem || userBigItem.amount < item.amount) {
-          throw new Error(`Not enough ${item.type} item with id ${item.id}`);
+          throw new Error(`Not enough ${item.type} item`);
         }
 
         await tx.userBigItemInventory.update({

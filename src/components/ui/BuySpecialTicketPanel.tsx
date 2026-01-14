@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Ticket, Plus, Trash2, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -91,11 +92,13 @@ export default function BuySpecialTicketPanel({
   const addItem = (item: BigItem | SmallItem, type: 'big' | 'small') => {
     if (selectedItems.length >= 2) {
       setError("Maksimal 2 item saja");
+      toast.error("Maksimal 2 item saja");
       return;
     }
     
     if (selectedItems.find(i => i.id === item.id && i.type === type)) {
       setError("Item sudah dipilih");
+      toast.error("Item sudah dipilih");
       return;
     }
 
@@ -118,16 +121,19 @@ export default function BuySpecialTicketPanel({
   const handleBuyTicket = async () => {
     if (!selectedUser) {
       setError("Pilih user terlebih dahulu");
+      toast.error("Pilih user terlebih dahulu");
       return;
     }
 
     if (selectedItems.length === 0) {
       setError("Pilih minimal 1 item");
+      toast.error("Pilih minimal 1 item");
       return;
     }
 
     if (ticketStock <= 0) {
       setError("Special ticket sudah habis");
+      toast.error("Special ticket sudah habis");
       return;
     }
 
@@ -150,11 +156,14 @@ export default function BuySpecialTicketPanel({
 
       if (res.success) {
         setSuccess(`Special Ticket berhasil dibeli untuk ${selectedUser.name}!`);
+        toast.success(`Special Ticket berhasil dibeli untuk ${selectedUser.name}!`);
         setSelectedItems([]);
       } else {
+        toast.error(res.error || "Gagal membeli special ticket");
         setError(res.error || "Gagal membeli special ticket");
       }
     } catch (err) {
+      toast.error("Terjadi kesalahan sistem");
       setError("Terjadi kesalahan sistem");
     } finally {
       setIsLoading(false);

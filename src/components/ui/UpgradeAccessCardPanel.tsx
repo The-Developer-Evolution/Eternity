@@ -236,12 +236,13 @@ export default function UpgradeAccessCardPanel({
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(data.error || "Upgrade failed");
+        toast.error(data.error || "Upgrade failed");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred")
     } finally {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
     }
   };

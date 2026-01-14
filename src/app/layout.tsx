@@ -34,7 +34,7 @@ export default function RootLayout({
           <NavigationBar />
           <span className="h-[7vh]"></span>
           {children}
-          <Toaster position="bottom-right" />
+          <Toaster richColors position="bottom-right" />
         </Providers>
       </body>
     </html>
