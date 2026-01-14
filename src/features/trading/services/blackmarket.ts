@@ -252,3 +252,163 @@ export async function buyItemBM(
         return { success: false, error: "Transaction failed. Stock may have changed." };
     }
 }
+
+export async function buyBulkItemsBM(
+  userId: string,
+  items: { stockPeriodId: string; amount: number; type: 'RAW' | 'CRAFT'; }[]
+): Promise<ActionResult<TradingData>> {
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
+
+    if (!items || items.length === 0) return { success: false, error: "No items selected." };
+    if (items.some(i => i.amount <= 0)) return { success: false, error: "Invalid amount." };
+
+    // 1. Get User
+    const userResult = await getUserTradingById(userId);
+    if (!userResult.success || !userResult.data?.tradingData) {
+        return { success: false, error: "User not found." };
+    }
+    const tradingData = userResult.data.tradingData;
+
+    try {
+        // 2. Fetch all stocks and validate availability & cost
+        // We can do this in parallel or map
+        // To be safe and consistent, let's fetch one by one or group by type.
+        // Grouping by type is efficient.
+        
+        let totalCost = BigInt(0);
+        const operations: any[] = [];
+
+        // We need to fetch details to check stock and price.
+        // Let's loop and validation. Ideally we want to prevent partial failure before transaction.
+        
+        // Optimization: Fetch all Raw and Craft needed.
+        // Actually since we have ID, we can just `findUnique` inside a map.
+        // Prisma transaction prevents race conditions if we use `update`.
+        // But we need to check total user balance first.
+        
+        // Let's build a plan.
+        
+        for (const item of items) {
+             let stockRecord: any;
+             let itemName = "";
+             let itemId = "";
+
+             if (item.type === 'RAW') {
+                stockRecord = await prisma.rawStockPeriod.findUnique({
+                    where: { id: item.stockPeriodId },
+                    include: { rawItem: true }
+                });
+                 if (stockRecord) {
+                    itemName = stockRecord.rawItem.name;
+                    itemId = stockRecord.rawId;
+                }
+             } else {
+                stockRecord = await prisma.craftStockPeriod.findUnique({
+                    where: { id: item.stockPeriodId },
+                    include: { craftItem: true }
+                });
+                if(stockRecord) {
+                    itemName = stockRecord.craftItem.name;
+                    itemId = stockRecord.craftId;
+                }
+             }
+             
+             if (!stockRecord) throw new Error(`Item ${item.stockPeriodId} no longer available.`);
+             if (stockRecord.stock < item.amount) throw new Error(`Insufficient stock for ${itemName}.`);
+
+             const cost = BigInt(stockRecord.price) * BigInt(item.amount);
+             totalCost += cost;
+
+             // Prepare Deduction Operation
+             if (item.type === 'RAW') {
+                 operations.push(prisma.rawStockPeriod.update({
+                    where: { id: item.stockPeriodId },
+                    data: { stock: { decrement: item.amount } }
+                 }));
+             } else {
+                 operations.push(prisma.craftStockPeriod.update({
+                    where: { id: item.stockPeriodId },
+                    data: { stock: { decrement: item.amount } }
+                 }));
+             }
+             
+             // Prepare Inventory Update (Upsert-like logic, but we need to check existence if we want update vs create)
+             // Using upsert with prisma is cleaner if we had a unique constraint on (tradingDataId, itemId).
+             // Assuming schema has it (usually yes).
+             // However, current code uses check-then-update/create. We must stick to it or use upsert if schema allows.
+             // To be safe inside a loop without making it too complex, let's just push a check-operation or optimistic update?
+             // No, inside transaction we can't easily read-then-write conditionally based on read from SAME transaction unless we chain carefully.
+             // Actually, Prisma `upsert` is best here.
+             // Let's check schema via what `buyItemBM` did: it did a javascript find on `tradingData.rawUserAmounts` (which was loaded).
+             // Since we loaded `tradingData` (via `getUserTradingById`), we have the array!
+             
+             if (item.type === 'RAW') {
+                const existing = tradingData.rawUserAmounts.find(u => u.rawItemId === itemId);
+                if (existing) {
+                    operations.push(prisma.rawUserAmount.update({
+                        where: { id: existing.id },
+                        data: { amount: { increment: item.amount } }
+                    }));
+                } else {
+                    operations.push(prisma.rawUserAmount.create({
+                        data: { tradingDataId: tradingData.id, rawItemId: itemId, amount: item.amount }
+                    }));
+                }
+             } else {
+                 const existing = tradingData.craftUserAmounts.find(u => u.craftItemId === itemId);
+                if (existing) {
+                    operations.push(prisma.craftUserAmount.update({
+                        where: { id: existing.id },
+                        data: { amount: { increment: item.amount } }
+                    }));
+                } else {
+                    operations.push(prisma.craftUserAmount.create({
+                        data: { tradingDataId: tradingData.id, craftItemId: itemId, amount: item.amount }
+                    }));
+                }
+             }
+        }
+
+        const totalCostNumber = Number(totalCost);
+        if (tradingData.eternites < totalCostNumber) {
+            return { success: false, error: `Insufficient Eternites. Cost: ${totalCostNumber.toLocaleString()}, Balance: ${tradingData.eternites.toLocaleString()}` };
+        }
+
+        // Add Balance Deduction
+        operations.push(
+            prisma.tradingData.update({
+                where: { id: tradingData.id },
+                data: { eternites: { decrement: totalCostNumber } }
+            }),
+             prisma.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: BigInt(-Math.floor(totalCostNumber)),
+                    type: BalanceLogType.DEBIT,
+                    resource: BalanceTradingResource.ETERNITES,
+                    message: `Bought ${items.length} items (BM Bulk)`
+                }
+            })
+        );
+
+        // Execute Transaction
+        await prisma.$transaction(operations);
+
+        // Return updated data
+        const finalData = await prisma.tradingData.findUnique({
+            where: { id: tradingData.id },
+            include: {
+                rawUserAmounts: { include: { rawItem: true } },
+                craftUserAmounts: { include: { craftItem: true } },
+                balanceTradingLogs: true,
+            },
+        });
+
+        return { success: true, data: finalData!, message: "Bulk Purchase Successful!" };
+
+    } catch (error: any) {
+        console.error("Black Market Bulk Buy Error:", error);
+        return { success: false, error: error.message || "Transaction failed." };
+    }
+}

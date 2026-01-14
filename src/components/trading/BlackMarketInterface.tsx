@@ -3,8 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
-import { buyItemBM, BlackMarketItemDetail } from "@/features/trading/services/blackmarket";
-import { Loader2, CheckCircle, AlertCircle, User, ShoppingCart, Package } from "lucide-react";
+import { buyBulkItemsBM, BlackMarketItemDetail } from "@/features/trading/services/blackmarket";
+import { Loader2, CheckCircle, AlertCircle, User, ShoppingCart, Package, Minus, Plus } from "lucide-react";
 
 interface BlackMarketInterfaceProps {
     items: BlackMarketItemDetail[];
@@ -15,8 +15,8 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
   const [matchingUsers, setMatchingUsers] = useState<ShopUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
   
-  const [selectedItem, setSelectedItem] = useState<BlackMarketItemDetail | null>(null);
-  const [amount, setAmount] = useState<string>("1");
+  // Multi-select state: Record<item_stock_id, amount>
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
@@ -49,12 +49,41 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
     performSearch(userQuery);
   }, [userQuery, performSearch]);
 
-  const handleBuy = async () => {
-    if (!selectedUser || !selectedItem) return;
+  const toggleItem = (item: BlackMarketItemDetail) => {
+      setSelectedItems(prev => {
+          const next = { ...prev };
+          if (next[item.id]) {
+              delete next[item.id];
+          } else {
+              next[item.id] = 1;
+          }
+          return next;
+      });
+  };
 
-    const qty = parseInt(amount);
-    if (isNaN(qty) || qty <= 0) {
-        setMessage({ type: "error", text: "Invalid amount." });
+  const updateItemAmount = (itemId: string, val: number) => {
+      if (val < 1) return;
+      // Optional: Check stock limit
+      const item = items.find(i => i.id === itemId);
+      if (item && val > item.stock) return; 
+
+      setSelectedItems(prev => ({ ...prev, [itemId]: val }));
+  };
+
+  const handleBuy = async () => {
+    if (!selectedUser) return;
+
+    const itemsToBuy = Object.entries(selectedItems).map(([id, amount]) => {
+        const itemInfo = items.find(i => i.id === id);
+        return {
+            stockPeriodId: id,
+            amount: amount,
+            type: itemInfo?.type || 'RAW' // Default/Fallback, though should always be found
+        };
+    });
+
+    if (itemsToBuy.length === 0) {
+        setMessage({ type: "error", text: "Please select at least one item." });
         return;
     }
 
@@ -62,10 +91,11 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
     setMessage(null);
 
     try {
-      const result = await buyItemBM(selectedUser.id, selectedItem.id, qty, selectedItem.type);
+      const result = await buyBulkItemsBM(selectedUser.id, itemsToBuy as any);
       
       if (result.success) {
         setMessage({ type: "success", text: result.message || "Purchase successful!" });
+        setSelectedItems({}); // Clear selection
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
@@ -77,6 +107,12 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
       setIsTransacting(false);
     }
   };
+
+  // Calculations
+  const totalCost = Object.entries(selectedItems).reduce((acc, [id, amount]) => {
+      const item = items.find(i => i.id === id);
+      return acc + (item ? item.price * amount : 0);
+  }, 0);
 
   return (
     <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-4">
@@ -145,27 +181,48 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
                 <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
                     <Package size={16} /> RAW MATERIALS
                 </label>
-                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
-                    {rawItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => setSelectedItem(item)}
-                            disabled={item.stock <= 0}
-                            className={`p-3 rounded text-sm flex justify-between items-center transition-all border ${
-                                selectedItem?.id === item.id 
-                                ? "bg-red-900/60 border-red-500 text-white" 
-                                : item.stock <= 0
-                                    ? "bg-gray-800/50 text-gray-600 border-transparent cursor-not-allowed"
-                                    : "bg-gray-800 text-gray-300 border-gray-600 hover:border-red-500"
-                            }`}
-                        >
-                            <span className="font-bold">{item.name}</span>
-                            <div className="flex flex-col items-end text-xs">
-                                <span className={item.stock > 0 ? "text-green-400" : "text-red-400"}>Stock: {item.stock}</span>
-                                <span className="text-yellow-500 font-mono">{item.price.toLocaleString("en-US")} E</span>
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                    {rawItems.map((item) => {
+                        const isSelected = !!selectedItems[item.id];
+                        return (
+                            <div
+                                key={item.id}
+                                className={`p-3 rounded text-sm flex flex-col justify-between transition-all border ${
+                                    isSelected
+                                    ? "bg-red-900/20 border-red-500" 
+                                    : item.stock <= 0
+                                        ? "bg-gray-800/50 text-gray-600 border-transparent cursor-not-allowed"
+                                        : "bg-gray-800 text-gray-300 border-gray-600 hover:border-red-500"
+                                }`}
+                            >
+                                <div className="flex justify-between items-center cursor-pointer" onClick={() => item.stock > 0 && toggleItem(item)}>
+                                    <span className={`font-bold ${isSelected ? "text-red-400" : ""}`}>{item.name}</span>
+                                    <div className="flex flex-col items-end text-xs">
+                                        <span className={item.stock > 0 ? "text-green-400" : "text-red-400"}>Stock: {item.stock}</span>
+                                        <span className="text-yellow-500 font-mono">{item.price.toLocaleString("en-US")} E</span>
+                                    </div>
+                                </div>
+
+                                {isSelected && (
+                                     <div className="flex items-center gap-2 mt-2 bg-black/40 p-1 rounded justify-between border border-red-900/50">
+                                        <button 
+                                            className="p-1 hover:bg-white/10 rounded"
+                                            onClick={() => updateItemAmount(item.id, selectedItems[item.id] - 1)}
+                                        >
+                                            <Minus size={14} className="text-gray-400" />
+                                        </button>
+                                        <span className="text-sm font-bold text-white font-mono">{selectedItems[item.id]}</span>
+                                        <button 
+                                            className="p-1 hover:bg-white/10 rounded"
+                                            onClick={() => updateItemAmount(item.id, selectedItems[item.id] + 1)}
+                                        >
+                                            <Plus size={14} className="text-gray-400" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                        </button>
-                    ))}
+                        );
+                    })}
                     {rawItems.length === 0 && <div className="text-gray-500 italic text-sm">No raw items available.</div>}
                 </div>
             </div>
@@ -175,70 +232,67 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
                 <label className="text-gray-400 text-sm font-bold flex items-center gap-2">
                     <Package size={16} /> CRAFT ITEMS
                 </label>
-                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
-                    {craftItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => setSelectedItem(item)}
-                             disabled={item.stock <= 0}
-                            className={`p-3 rounded text-sm flex justify-between items-center transition-all border ${
-                                selectedItem?.id === item.id 
-                                ? "bg-purple-900/60 border-purple-500 text-white" 
-                                : item.stock <= 0
-                                    ? "bg-gray-800/50 text-gray-600 border-transparent cursor-not-allowed"
-                                    : "bg-gray-800 text-gray-300 border-gray-600 hover:border-purple-500"
-                            }`}
-                        >
-                            <span className="font-bold">{item.name}</span>
-                           <div className="flex flex-col items-end text-xs">
-                                <span className={item.stock > 0 ? "text-green-400" : "text-red-400"}>Stock: {item.stock}</span>
-                                <span className="text-yellow-500 font-mono">{item.price.toLocaleString("en-US")} E</span>
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                    {craftItems.map((item) => {
+                         const isSelected = !!selectedItems[item.id];
+                         return (
+                            <div
+                                key={item.id}
+                                className={`p-3 rounded text-sm flex flex-col justify-between transition-all border ${
+                                    isSelected
+                                    ? "bg-purple-900/20 border-purple-500" 
+                                    : item.stock <= 0
+                                        ? "bg-gray-800/50 text-gray-600 border-transparent cursor-not-allowed"
+                                        : "bg-gray-800 text-gray-300 border-gray-600 hover:border-purple-500"
+                                }`}
+                            >
+                                <div className="flex justify-between items-center cursor-pointer" onClick={() => item.stock > 0 && toggleItem(item)}>
+                                    <span className={`font-bold ${isSelected ? "text-purple-400" : ""}`}>{item.name}</span>
+                                    <div className="flex flex-col items-end text-xs">
+                                        <span className={item.stock > 0 ? "text-green-400" : "text-red-400"}>Stock: {item.stock}</span>
+                                        <span className="text-yellow-500 font-mono">{item.price.toLocaleString("en-US")} E</span>
+                                    </div>
+                                </div>
+                                
+                                {isSelected && (
+                                     <div className="flex items-center gap-2 mt-2 bg-black/40 p-1 rounded justify-between border border-purple-900/50">
+                                        <button 
+                                            className="p-1 hover:bg-white/10 rounded"
+                                            onClick={() => updateItemAmount(item.id, selectedItems[item.id] - 1)}
+                                        >
+                                            <Minus size={14} className="text-gray-400" />
+                                        </button>
+                                        <span className="text-sm font-bold text-white font-mono">{selectedItems[item.id]}</span>
+                                        <button 
+                                            className="p-1 hover:bg-white/10 rounded"
+                                            onClick={() => updateItemAmount(item.id, selectedItems[item.id] + 1)}
+                                        >
+                                            <Plus size={14} className="text-gray-400" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                        </button>
-                    ))}
+                        );
+                    })}
                     {craftItems.length === 0 && <div className="text-gray-500 italic text-sm">No craft items available.</div>}
                 </div>
             </div>
         </div>
 
-        {/* 3. QUANTITY & BUY */}
-        <div className="flex items-end gap-4">
-             <div className="flex flex-col gap-2 flex-grow">
-                 <label className="text-gray-400 text-sm font-bold">QUANTITY</label>
-                 <input 
-                    type="number" 
-                    min="1"
-                    className="bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-red-500 outline-none w-full"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                 />
-             </div>
-             
+        {/* 3. BUY BUTTON */}
+        <div className="flex justify-end pt-4">
              <button
                 onClick={handleBuy}
-                disabled={!selectedUser || !selectedItem || isTransacting}
-                className={`py-3 px-8 rounded font-impact tracking-wider text-xl transition-all shadow-lg hidden md:flex items-center justify-center gap-2 h-[50px] ${
-                    !selectedUser || !selectedItem || isTransacting
+                disabled={!selectedUser || Object.keys(selectedItems).length === 0 || isTransacting}
+                className={`w-full md:w-auto py-3 px-8 rounded font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 h-[50px] ${
+                    !selectedUser || Object.keys(selectedItems).length === 0 || isTransacting
                     ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                     : "bg-red-600 text-white hover:bg-red-500"
                 }`}
             >
-                 {isTransacting ? <Loader2 className="animate-spin" /> : <ShoppingCart size={20} />} BUY
+                 {isTransacting ? <Loader2 className="animate-spin" /> : <ShoppingCart size={20} />} BUY SELECTED
             </button>
         </div>
-        
-         <button
-            onClick={handleBuy}
-            disabled={!selectedUser || !selectedItem || isTransacting}
-            className={`w-full py-4 rounded font-impact tracking-wider text-xl transition-all shadow-lg md:hidden flex items-center justify-center gap-2 ${
-                !selectedUser || !selectedItem || isTransacting
-                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "bg-red-600 text-white hover:bg-red-500"
-            }`}
-        >
-                {isTransacting ? <Loader2 className="animate-spin" /> : <ShoppingCart size={20} />} BUY NOW
-        </button>
-
 
         {/* MESSAGE DISPLAY */}
         {message && (
@@ -262,22 +316,32 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
                 <span className="text-gray-400 text-sm">BUYER</span>
                 <span className="font-bold text-lg">{selectedUser?.name || "---"}</span>
             </div>
-             <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
-                <span className="text-gray-400 text-sm">ITEM</span>
-                <span className="font-bold text-lg text-red-400 text-right">{selectedItem?.name || "---"}</span>
-            </div>
-             <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
-                <span className="text-gray-400 text-sm">UNIT PRICE</span>
-                <span className="font-mono text-yellow-500">{selectedItem ? selectedItem.price.toLocaleString("en-US") + " E" : "---"}</span>
-            </div>
-             <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
-                <span className="text-gray-400 text-sm">TOTAL</span>
-                 <span className="font-mono text-xl font-bold text-red-400">
-                    {selectedItem && !isNaN(parseInt(amount)) 
-                        ? (selectedItem.price * parseInt(amount)).toLocaleString("en-US") + " E" 
-                        : "---"
-                    }
-                </span>
+             
+             {/* Selected Items List */}
+             <div className="bg-black/30 p-4 rounded border border-red-900/30">
+                <div className="text-xs text-gray-400 mb-2 font-bold uppercase border-b border-gray-700 pb-1">Items Selected</div>
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                    {Object.keys(selectedItems).length === 0 ? (
+                        <div className="text-gray-500 italic text-sm">No items selected</div>
+                    ) : (
+                        Object.entries(selectedItems).map(([id, amount]) => {
+                            const item = items.find(i => i.id === id);
+                            if (!item) return null;
+                            return (
+                                <div key={id} className="flex justify-between text-sm items-center">
+                                    <span className="text-gray-300">{item.name}</span>
+                                    <div className="text-right">
+                                        <div className="font-mono text-red-400">{amount} x {item.price.toLocaleString("en-US")}</div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+                 <div className="flex justify-between text-sm items-center mt-2 pt-2 border-t border-gray-700 font-bold">
+                    <span className="text-gray-400">Total</span>
+                    <span className="text-yellow-500">{totalCost.toLocaleString("en-US")} E</span>
+                </div>
             </div>
         </div>
         
