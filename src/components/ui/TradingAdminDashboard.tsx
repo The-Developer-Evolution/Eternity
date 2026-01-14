@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { StartTradingTimer, pauseTrading, resumeTrading, endTrading } from "@/features/trading/services/timer";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 import { pusherClient } from "@/lib/pusher";
@@ -123,7 +123,7 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
     };
   }, [mutate]);
 
-  const handleAction = async (action: string) => {
+  const handleAction = useCallback(async (action: string) => {
     setIsLoading(action);
     setError(null);
     try {
@@ -147,7 +147,14 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
     } finally {
       setIsLoading(null);
     }
-  };
+  }, [selectedPeriodId, duration, mutate]);
+
+  // Auto-end trading when timer reaches 0
+  useEffect(() => {
+    if (status === "ON_GOING" && timeLeft === 0 && !isLoading) {
+      handleAction("end");
+    }
+  }, [status, timeLeft, handleAction, isLoading]);
 
   return (
     <div className="max-w-2xl mx-auto bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl mb-8">
