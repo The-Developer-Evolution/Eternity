@@ -1,10 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-
 import { pusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
-
 
 export async function getAllTradingPeriods() {
   return await prisma.periodeTrading.findMany({
@@ -23,8 +21,6 @@ export async function getActiveTradingPeriod() {
     },
   });
 }
-
-
 
 export async function StartTradingTimer(periodId: string, durationMinutes: number) {
   const activeTrading = await prisma.periodeTrading.findFirst({

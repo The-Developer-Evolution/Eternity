@@ -52,17 +52,13 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(20);
-
-
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
 
-  // Sync timer with server data
   useEffect(() => {
     if (!tradingData) return;
 
-    // Calculate offset ONCE when data updates
     let timeOffset = 0;
     if (tradingData.serverTime) {
       const serverNow = new Date(tradingData.serverTime).getTime();
@@ -81,12 +77,11 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
            const paused = new Date(tradingData.pausedTime).getTime();
            return Math.max(0, Math.floor((end - paused) / 1000));
         }
-        return timeLeft; // Keep current if data missing
+        return timeLeft; 
       }
 
       if (status === "ON_GOING" && tradingData.endTime) {
         const end = new Date(tradingData.endTime).getTime();
-        // Use the fixed offset to calculate current server time
         const now = Date.now() + timeOffset;
         return Math.max(0, Math.floor((end - now) / 1000));
       }
@@ -96,7 +91,6 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
 
     setTimeLeft(calculateTimeLeft());
 
-    // Only set interval if running
     if (status === "ON_GOING") {
       const interval = setInterval(() => {
         setTimeLeft(calculateTimeLeft());
@@ -149,12 +143,21 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
     }
   }, [selectedPeriodId, duration, mutate]);
 
-  // Auto-end trading when timer reaches 0
   useEffect(() => {
-    if (status === "ON_GOING" && timeLeft === 0 && !isLoading) {
-      handleAction("end");
+    if (status === "ON_GOING" && !isLoading && tradingData?.endTime) {
+      let currentOffset = 0;
+      if (tradingData.serverTime) {
+         currentOffset = new Date(tradingData.serverTime).getTime() - Date.now();
+      }
+      const end = new Date(tradingData.endTime).getTime();
+      const now = Date.now() + currentOffset;
+      const realSecondsRemaining = Math.floor((end - now) / 1000);
+
+      if (realSecondsRemaining <= 0) {
+        handleAction("end");
+      }
     }
-  }, [status, timeLeft, handleAction, isLoading]);
+  }, [status, timeLeft, handleAction, isLoading, tradingData]);
 
   return (
     <div className="max-w-2xl mx-auto bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl mb-8">
