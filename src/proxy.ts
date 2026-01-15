@@ -20,6 +20,7 @@ const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin": [Role.SUPER],
 };
 
+
 export default withAuth(
   async function middleware(req) {
     const token = req.nextauth.token;
