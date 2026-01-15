@@ -704,7 +704,9 @@ async function main() {
         name,
         password: await bcrypt.hash("12345678", 10),
         tradingData: {
-          create: {},
+          create: {
+            eternites: 10000
+          },
         },
       },
     });
