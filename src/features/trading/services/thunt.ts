@@ -20,14 +20,43 @@ export async function updateThunt(userId: string): Promise<ActionResult<TradingD
         return { success: false, error: 'User already played' };
     }
 
+    // CHECK BALANCE
+    const PRICE = 100;
+    if (tradingData.eternites < PRICE) {
+        return { success: false, error: `Insufficient Eternities. Required: ${PRICE}, Available: ${tradingData.eternites}` };
+    }
 
-    // update isPlayedThunt to true
-    const updatedTradingData = await prisma.tradingData.update({
-        where: { userId },
-        data: { isPlayedThunt: true }
-    });
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Deduct Balance & Update Status
+            const updatedTradingData = await tx.tradingData.update({
+                where: { userId },
+                data: { 
+                    isPlayedThunt: true,
+                    eternites: { decrement: PRICE }
+                }
+            });
 
-    return { success: true, data: updatedTradingData };
+            // 2. Log Transaction
+            await tx.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: BigInt(-PRICE),
+                    type: BalanceLogType.DEBIT,
+                    resource: BalanceTradingResource.ETERNITES,
+                    message: `Treasure Hunt Participation Fee`
+                }
+            });
+
+            return updatedTradingData;
+        });
+
+        return { success: true, data: result };
+
+    } catch (error) {
+        console.error("Update Thunt Error: ", error);
+        return { success: false, error: "Failed to update status and charge user." };
+    }
 }
 
 export async function getAllRawItems() {
