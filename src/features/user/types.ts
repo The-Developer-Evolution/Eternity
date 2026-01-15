@@ -8,7 +8,7 @@ export interface UserTrading extends User{
 export interface AllTradingData extends TradingData{
     rawItems: RawItem[], // Keeping legacy for now if used elsewhere, but ideally remove
     craftItems: CraftItem[], // Keeping legacy
-    rawUserAmounts: RawUserAmount[],
-    craftUserAmounts: CraftUserAmount[],
+    rawUserAmounts: (RawUserAmount & { rawItem: RawItem })[],
+    craftUserAmounts: (CraftUserAmount & { craftItem: CraftItem })[],
     balanceTradingLogs: BalanceTradingLog[]
 }
