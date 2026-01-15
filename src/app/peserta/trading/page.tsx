@@ -11,14 +11,15 @@ import { redirect } from "next/navigation";
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
+  const session = await getServerSession(authOptions);
+    
+  // Check session first
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
   // Wrap everything in try-catch for debugging
   try {
-    const session = await getServerSession(authOptions);
-    
-    // Check session first
-    if (!session?.user?.id) {
-      redirect("/login");
-    }
 
     // 1. Get User Data
     const userRes = await getUserTradingById(session.user.id);
