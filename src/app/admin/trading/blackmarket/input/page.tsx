@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import BlackMarketInterface from "@/components/trading/BlackMarketInterface";
+import BlackMarketSellInterface from "@/components/trading/BlackMarketSellInterface";
 import { getBlackMarketItems } from "@/features/trading/services/blackmarket";
 
 export default async function Page() {
@@ -24,6 +25,7 @@ export default async function Page() {
         />
         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
              <BlackMarketInterface items={items} />
+             <BlackMarketSellInterface items={items} />
         </div>
       </div>
     </div>
