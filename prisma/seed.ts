@@ -197,23 +197,7 @@ const CRAFT_ID_MAP: Record<string, string> = {
   dividers: "5", // "dividers"
 };
 
-const passwords = [
-  "Alpha123!",
-  "Bravo456@",
-  "Charlie789#",
-  "Delta321$",
-  "Echo654%",
-  "Foxtrot987^",
-  "Golf246&",
-  "Hotel135*",
-  "India864(",
-  "Juliet753)", //pitching
-  "Kilo987!", // PITCHING GUARD
-  "Lima246@",
-  "Mike753#",
-  "November468$",
-  "Oscar159%",
-];
+
 
 async function main() {
   // =========================
@@ -549,20 +533,38 @@ async function main() {
   const roles: Role[] = [
     Role.SUPER,
     Role.BLACKMARKET,
-    Role.BUYRAW,
-    Role.SELL,
-    Role.CRAFT,
-    Role.CURRENCY,
+    Role.BUYRAW, //done
+    Role.SELL, 
+    Role.CRAFT, // done
+    Role.CURRENCY, //done
     Role.EXCHANGE,
-    Role.MAP,
+    Role.MAP, // done
     Role.MONSTER,
-    Role.PITCHING,
-    Role.PITCHINGGUARD,
-    Role.POSTGUARD,
-    Role.TALKSHOW,
-    Role.THUNT,
-    Role.UPGRADE,
+    Role.PITCHING, // done
+    Role.PITCHINGGUARD, // done
+    Role.POSTGUARD, 
+    Role.TALKSHOW, 
+    Role.THUNT, // done
+    Role.UPGRADE, 
   ];
+
+  const passwords = [
+  "Alpha123!", //super
+  "Bravo456@",
+  "Charlie789#", //buyraw
+  "Delta321$", // sell
+  "Echo654%", // craft
+  "Foxtrot987^", //currency
+  "Golf246&", // exchange (rally)
+  "Hotel135*", // map
+  "India864(", // monstel (rally)
+  "Juliet753)", //pitching
+  "Kilo987!", // PITCHING GUARD
+  "Lima246@", // postguard (rally)
+  "Mike753#", 
+  "November468$", // THUNT
+  "Oscar159%",
+];
 
   for (let i = 0; i < roles.length; i++) {
     const role = roles[i];
