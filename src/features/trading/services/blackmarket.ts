@@ -29,7 +29,7 @@ export async function payBlackMarketFee(userId: string): Promise<ActionResult<Tr
   const tradingData = userResult.data.tradingData;
 
   // Deduct Blackmarket Fee
-  const blackmarketFee = BigInt(20000);
+  const blackmarketFee = BigInt(1000);
   if (tradingData.eternites < Number(blackmarketFee)) {
     return { success: false, error: "Insufficient Eternites for Blackmarket Fee." };
   }
