@@ -135,7 +135,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
         {/* Currencies */}
         <div className="bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 p-6 rounded-xl flex flex-col gap-4">
             <h3 className="text-xl font-bold text-blue-200 border-b border-blue-500/30 pb-2">Wallet</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col flex-wrap gap-4">
                 <div>
                     <p className="text-xs text-blue-300">USD</p>
                     <p className="text-2xl font-bold text-white" suppressHydrationWarning>${stats.usd}</p>
@@ -146,7 +146,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
                 </div>
                 <div className="col-span-2">
                     <p className="text-xs text-blue-300">Eternities</p>
-                    <p className="text-2xl font-bold text-[#AE00DE]" suppressHydrationWarning>{stats.eternites}</p>
+                    <p className="text-2xl font-bold text-white" suppressHydrationWarning>{stats.eternites}</p>
                 </div>
             </div>
         </div>
