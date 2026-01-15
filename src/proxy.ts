@@ -6,12 +6,12 @@ const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin/talkshow": [Role.SUPER, Role.TALKSHOW],
   "/admin/trading/blackmarket": [Role.SUPER, Role.BLACKMARKET],
   "/admin/trading/shop": [Role.SUPER, Role.BUYRAW],
-  "/admin/trading/shop/sell": [Role.SUPER, Role.SELL],
+  "/admin/trading/sell": [Role.SUPER, Role.SELL],
 
   "/admin/trading/convert/material": [Role.SUPER, Role.CRAFT],
   "/admin/trading/convert/currency": [Role.SUPER, Role.CURRENCY],
   "/admin/trading/convert/map": [Role.SUPER, Role.MAP],
-  
+
   "/admin/trading/pitching": [Role.SUPER, Role.PITCHING, Role.PITCHINGGUARD],
   "/admin/trading/pressure": [Role.SUPER, Role.PRESSURE],
   "/admin/trading/treasure": [Role.SUPER, Role.THUNT],
