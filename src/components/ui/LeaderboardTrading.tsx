@@ -81,17 +81,17 @@ export default function LeaderboardTrading({
         </span>
       </td>
       <td className="px-4 py-4 text-center">
-        <span className="font-impact text-lg">
+        <span className="text-white font-impact text-lg">
           {formatCurrency(entry.idr)}
         </span>
       </td>
       <td className="px-4 py-4 text-center">
-        <span className="font-impact text-lg">
+        <span className="text-white font-impact text-lg">
           {formatCurrency(entry.usd)}
         </span>
       </td>
       <td className="px-4 py-4 text-center">
-        <span className="font-impact text-lg">
+        <span className="text-white font-impact text-lg">
           {formatCurrency(entry.eternites)}
         </span>
       </td>
