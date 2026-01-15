@@ -220,7 +220,7 @@ async function main() {
   // Trading Master Data
   // =========================
 
-  // Trading Duration
+  // Trading Duration PERIODE
   // SEED Price Forbidden Map, USD/IDR rate usd
   await prisma.periodeTrading.createMany({
     data: [
@@ -230,6 +230,7 @@ async function main() {
         price_map: 120000,
         duration: 30,
         usdidr_rate: 16500,
+        news: "Stabil."
       },
       {
         periode: 2,
@@ -237,6 +238,7 @@ async function main() {
         price_map: 118000,
         duration: 20,
         usdidr_rate: 16830,
+        news: "Pajak naik."
       },
       {
         periode: 3,
@@ -244,6 +246,7 @@ async function main() {
         price_map: 116000,
         duration: 20,
         usdidr_rate: 15989,
+        news: "Musim hujan."
       },
       {
         periode: 4,
@@ -251,6 +254,7 @@ async function main() {
         price_map: 114000,
         duration: 20,
         usdidr_rate: 16628,
+        news: "Bencana karena hujan."
       },
       {
         periode: 5,
@@ -258,6 +262,7 @@ async function main() {
         price_map: 112000,
         duration: 20,
         usdidr_rate: 17293,
+        news: "Banjir berakhir."
       },
       {
         periode: 6,
@@ -265,6 +270,7 @@ async function main() {
         price_map: 110000,
         duration: 20,
         usdidr_rate: 18677,
+        news: "Munculnya pabrik baru dan adanya pabrik pesaing yang bangkrut."
       },
       {
         periode: 7,
@@ -272,6 +278,7 @@ async function main() {
         price_map: 108000,
         duration: 20,
         usdidr_rate: 17743,
+        news: "Cuaca stabil dan pembangunan besar-besaran perusahaan yang membutuhkan kayu, logam, dan kaca."
       },
       {
         periode: 8,
@@ -279,6 +286,7 @@ async function main() {
         price_map: 106000,
         duration: 20,
         usdidr_rate: 15969,
+        news: "Gunung berapi meletus dan terjadi kebakaran hutan."
       },
     ],
     skipDuplicates: true,

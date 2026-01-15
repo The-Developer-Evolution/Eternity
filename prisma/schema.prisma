@@ -8,12 +8,14 @@ datasource db {
 }
 
 model PeriodeTrading {
-  id                  String             @id @default(cuid())
-  periode             Int                @unique
-  cost_map            Int
-  price_map           Int
-  usdidr_rate         Int
-  duration            Int
+  id          String @id @default(cuid())
+  periode     Int    @unique
+  cost_map    Int
+  price_map   Int
+  usdidr_rate Int
+  duration    Int
+  news        String
+
   endTime             DateTime?
   pausedTime          DateTime?
   startTime           DateTime?
