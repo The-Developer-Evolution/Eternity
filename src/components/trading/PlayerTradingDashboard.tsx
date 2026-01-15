@@ -37,9 +37,11 @@ interface PlayerTradingDashboardProps {
     craftItemAmount: number;
     mapAmount: number;
   };
+  news?: string;
+  periodNumber?: number;
 }
 
-export function PlayerTradingDashboard({ periodId, initialStatus, stats }: PlayerTradingDashboardProps) {
+export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, periodNumber }: PlayerTradingDashboardProps) {
 
   const { data: tradingData, mutate } = useSWR<TradingStatusResponse>(
     periodId ? `/api/trading/status?periodId=${periodId}` : null,
@@ -51,6 +53,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
+  const isRunning = status === "ON_GOING" || status === "PAUSED";
 
   // Sync timer with server data
   useEffect(() => {
@@ -113,7 +116,14 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 p-4" suppressHydrationWarning>
       {/* Timer Section */}
-      <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl text-center">
+      <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl text-center relative overflow-hidden">
+        {/* Period Number Badge */}
+        {periodNumber && isRunning && (
+          <div className="absolute top-4 right-4 bg-purple-900/50 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold text-purple-300 tracking-wider">
+             PERIOD #{periodNumber}
+          </div>
+        )}
+
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">Trading Status</p>
         <p className={`text-4xl font-impact tracking-wide ${
           status === "ON_GOING" ? "text-green-400" : 
@@ -123,10 +133,18 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats }: Playe
             {status ? status.replace(/_/g, " ") : "WAITING..."}
         </p>
         
-        {(status === "ON_GOING" || status === "PAUSED") && (
+        {isRunning && (
              <div className="mt-2 text-6xl font-mono text-white font-bold tabular-nums tracking-widest text-shadow-glow" suppressHydrationWarning>
                 {formatTime(timeLeft)}
              </div>
+        )}
+
+        {/* NEWS DISPLAY - Only when running */}
+        {news && isRunning && (
+          <div className="mt-4 bg-blue-900/40 border border-blue-500/30 p-3 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+            <p className="text-blue-200 text-sm font-bold uppercase tracking-wider mb-1">NEWS INFO</p>
+            <p className="text-white font-medium italic">"{news}"</p>
+          </div>
         )}
       </div>
 

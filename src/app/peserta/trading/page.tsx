@@ -102,8 +102,10 @@ export default async function Page() {
           <div className="w-full px-4">
             <PlayerTradingDashboard 
               periodId={activePeriod?.id || null}
+              periodNumber={activePeriod?.periode}
               initialStatus={activePeriod?.status || null}
               stats={stats}
+              news={activePeriod?.news}
             />
           </div>
         </div>
