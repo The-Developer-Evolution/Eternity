@@ -295,22 +295,22 @@ async function main() {
   // Seed RawItem
   await prisma.rawItem.createMany({
     data: [
-      { id: "1", name: "wood" },
-      { id: "2", name: "glass" },
-      { id: "3", name: "water" },
-      { id: "4", name: "coal" },
-      { id: "5", name: "metal" },
+      { id: "1", name: "Wood" },
+      { id: "2", name: "Glass" },
+      { id: "3", name: "Water" },
+      { id: "4", name: "Coal" },
+      { id: "5", name: "Metal" },
     ],
     skipDuplicates: true,
   });
   // seed craftItem
   await prisma.craftItem.createMany({
     data: [
-      { id: "1", name: "brown paper" },
-      { id: "2", name: "pen" },
-      { id: "3", name: "magnifying glass" },
-      { id: "4", name: "ink" },
-      { id: "5", name: "dividers" },
+      { id: "1", name: "Brown Paper" },
+      { id: "2", name: "Pen" },
+      { id: "3", name: "Magnifying Glass" },
+      { id: "4", name: "Ink" },
+      { id: "5", name: "Dividers" },
     ],
     skipDuplicates: true,
   });

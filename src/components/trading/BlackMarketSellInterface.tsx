@@ -5,7 +5,7 @@ import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { sellBulkItemsBM, BlackMarketItemDetail } from "@/features/trading/services/blackmarket";
 import { getUserInventory } from "@/features/trading/services/sell"; 
-import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign, ShoppingCart } from "lucide-react";
 
 interface BlackMarketSellInterfaceProps {
     items: BlackMarketItemDetail[];
@@ -162,10 +162,10 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   });
 
   return (
-    <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-4 mt-8 bg-black/20 rounded-xl border border-red-900/30">
+    <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-8 mt-8 bg-black/40 backdrop-blur-md rounded-xl border border-red-900/30">
         <div className="col-span-full mb-4 border-b border-red-900/50 pb-2">
             <h2 className="text-3xl font-impact text-red-500 tracking-wider flex items-center gap-2">
-                 <DollarSign className="text-red-500" /> SELL TO BLACK MARKET
+                <ShoppingCart className="text-red-500" /> SELL TO BLACK MARKET
             </h2>
             <p className="text-gray-400 text-sm">Sell items back to the Black Market at current market rates.</p>
         </div>
