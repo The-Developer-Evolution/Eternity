@@ -232,7 +232,7 @@ export default function CraftMaterialPanel({
                       <span className="text-white font-bold text-sm uppercase tracking-tight">{item.name}</span>
                       <button
                         disabled={isLoading !== null || !firstRecipe}
-                        onClick={() => firstRecipe && handleAction("Crafting", item.name, firstRecipe.id, onCraftBigItem, false)}
+                        onClick={() => firstRecipe && handleAction("Crafting", item.name, item.id, onCraftBigItem, false)}
                         className="bg-[#78CCEE] hover:bg-[#5bb8e0] text-[#3E344A] font-impact px-4 py-2 rounded-lg text-xs transition-all active:scale-95 disabled:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-[#78CCEE]/10"
                       >
                         {isLoading === (firstRecipe?.id || item.id) ? "..." : "CRAFT"}

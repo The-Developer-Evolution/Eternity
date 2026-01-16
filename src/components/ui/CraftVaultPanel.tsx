@@ -127,7 +127,7 @@ export default function CraftVaultPanel({
   };
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
+    <div className="w-full bg-black/40 relative z-2 backdrop-blur-md rounded-2xl border-3 border-[#684095] shadow-2xl p-6">
       <h2 className="text-3xl font-impact text-[#78CCEE] mb-6 text-center">
         CRAFT THE VAULT
       </h2>
