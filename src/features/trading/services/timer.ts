@@ -59,11 +59,15 @@ export async function StartTradingTimer(periodId: string, durationMinutes: numbe
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger("trading-channel", "status-update", {
-      status: "ON_GOING",
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    });
+    try {
+      await pusher.trigger("trading-channel", "status-update", {
+        status: "ON_GOING",
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      });
+    } catch (error) {
+      console.error("Failed to trigger Pusher event:", error);
+    }
   }
 
   revalidatePath("/admin/trading", "layout");
@@ -89,9 +93,13 @@ export async function pauseTrading() {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger("trading-channel", "status-update", {
-      status: "PAUSED",
-    });
+    try {
+      await pusher.trigger("trading-channel", "status-update", {
+        status: "PAUSED",
+      });
+    } catch (error) {
+      console.error("Failed to trigger Pusher event:", error);
+    }
   }
 
   revalidatePath("/admin/trading", "layout");
@@ -122,10 +130,14 @@ export async function resumeTrading() {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger("trading-channel", "status-update", {
-      status: "ON_GOING",
-      endTime: newEndTime.toISOString(),
-    });
+    try {
+      await pusher.trigger("trading-channel", "status-update", {
+        status: "ON_GOING",
+        endTime: newEndTime.toISOString(),
+      });
+    } catch (error) {
+      console.error("Failed to trigger Pusher event:", error);
+    }
   }
 
   revalidatePath("/admin/trading", "layout");
@@ -152,9 +164,13 @@ export async function endTrading() {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger("trading-channel", "status-update", {
-      status: "ENDED",
-    });
+    try {
+      await pusher.trigger("trading-channel", "status-update", {
+        status: "ENDED",
+      });
+    } catch (error) {
+      console.error("Failed to trigger Pusher event:", error);
+    }
   }
 
   revalidatePath("/admin/trading");
