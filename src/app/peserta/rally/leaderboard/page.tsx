@@ -25,7 +25,6 @@ export default async function Page() {
         <div className="my-[10%] md:my-[5%] relative z-10 w-full flex flex-col items-center gap-6">
           <LeaderboardRally 
             title="Rally Leaderboard"
-            currentUserId={session?.user?.id || ""}
           />
         </div>
       </div>
