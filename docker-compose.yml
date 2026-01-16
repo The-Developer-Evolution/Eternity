@@ -27,14 +27,14 @@ services:
       context: ./
       dockerfile: Dockerfile
       target: runner
+      args:
+        - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
+        - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
+        - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
+        - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
     container_name: eternity
     env_file:
       - ./.env.prod
-    args:
-      - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
-      - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
-      - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
-      - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
     depends_on:
       migrate:
         condition: service_completed_successfully
