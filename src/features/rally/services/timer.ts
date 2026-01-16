@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getPusherServer } from "@/lib/pusher";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 async function initializeRallyDataForAllUsers() {
   try {
@@ -95,15 +95,23 @@ export async function getAllRallyPeriods() {
   });
 }
 
-export async function getActiveContest() {
-  return await prisma.rallyPeriod.findFirst({
-    where: {
-      status: {
-        in: ["ON_GOING", "PAUSED"],
+// Optimized getActiveContest with caching
+export const getActiveContest = unstable_cache(
+  async () => {
+    return await prisma.rallyPeriod.findFirst({
+      where: {
+        status: {
+          in: ["ON_GOING", "PAUSED"],
+        },
       },
-    },
-  });
-}
+    });
+  },
+  ["active-contest"],
+  {
+    tags: ["active-contest"],
+    revalidate: 60, // Fallback revalidation every 60s
+  }
+);
 
 export async function StartContestTimer(
   periodId: string,
@@ -112,6 +120,11 @@ export async function StartContestTimer(
   // Initialize rally data untuk semua users jika belum ada
   await initializeRallyDataForAllUsers();
 
+  // Note: calling the cached version here is fine for checking existence, unless we need absolutely fresh data. 
+  // Given StartContest is an admin action, we might prefer fresh data, but consistency with the rest of the app suggests using the cached function or direct prisma call. 
+  // For safety in this critical mutation, let's stick to direct prisma call or ensure we handle it correctly. 
+  // But to stick to the pattern, let's use direct prisma for critical checks to avoid race conditions from stale cache.
+  
   const activeContest = await prisma.rallyPeriod.findFirst({
     where: { status: "ON_GOING" },
   });
@@ -197,6 +210,7 @@ export async function StartContestTimer(
 
   revalidatePath("/admin/super");
   revalidatePath("/peserta/rally");
+  revalidateTag("active-contest"); 
   return updatedPeriod;
 }
 
@@ -225,6 +239,7 @@ export async function pauseContest() {
   }
 
   revalidatePath("/admin/super");
+  revalidateTag("active-contest");
 }
 
 export async function resumeContest() {
@@ -259,6 +274,7 @@ export async function resumeContest() {
   }
 
   revalidatePath("/admin/super");
+  revalidateTag("active-contest");
 }
 
 export async function endContest() {
@@ -291,4 +307,5 @@ export async function endContest() {
 
   revalidatePath("/admin/super");
   revalidatePath("/peserta/rally");
+  revalidateTag("active-contest");
 }

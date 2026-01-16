@@ -13,10 +13,15 @@ interface User {
   };
 }
 
+interface ActionResponse {
+  success: boolean;
+  error?: string;
+}
+
 interface EonixPanelProps {
   users?: User[];
-  onAddEonix: (userId: string, amount: number) => Promise<any>;
-  onSubtractEonix: (userId: string, amount: number) => Promise<any>;
+  onAddEonix: (userId: string, amount: number) => Promise<ActionResponse>;
+  onSubtractEonix: (userId: string, amount: number) => Promise<ActionResponse>;
 }
 
 export default function EonixPanel({
@@ -92,7 +97,7 @@ export default function EonixPanel({
     setSelectedUser(prev => prev?.id === userId ? { ...prev, rallyData: { ...prev.rallyData!, enonix: newEonix } } : prev);
   };
 
-  const processAction = async (actionFn: any, isSubtract: boolean) => {
+  const processAction = async (actionFn: (userId: string, amount: number) => Promise<ActionResponse>, isSubtract: boolean) => {
     if (!selectedUser) return setError("Select a user");
     
     // 1. Check Cooldown & Loading

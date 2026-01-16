@@ -1,23 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getActiveContest } from "@/features/rally/services/timer";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     // Get active rally period
-    const activePeriod = await prisma.rallyPeriod.findFirst({
-      where: {
-        status: {
-          in: ["ON_GOING", "PAUSED"],
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        status: true,
-      },
-    });
+    // Get active rally period
+    const activePeriod = await getActiveContest();
 
     if (!activePeriod) {
       return NextResponse.json({
