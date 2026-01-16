@@ -10,7 +10,18 @@ services:
     networks:
       - global_proxy
       - eternity_internal
-
+  migrate_reset:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: eternity-migrate-reset
+    command: pnpm prisma migrate reset --force
+    env_file:
+      - .env
+    networks:
+      - global_proxy
+      - eternity_internal
   seeder:
     build:
       context: ./
