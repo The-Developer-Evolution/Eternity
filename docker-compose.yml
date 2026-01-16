@@ -8,7 +8,8 @@ services:
     env_file:
       - .env.prod
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
 
   seeder:
     build:
@@ -20,7 +21,23 @@ services:
     env_file:
       - .env.prod
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+
+  db:
+    image: postgres:15-alpine
+    container_name: eternity_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT_EXTERNAL}:5432"
+    networks:
+      - eternity_internal
 
   app:
     build:
@@ -38,11 +55,19 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      db:
+        condition: service_started
     expose:
       - "3000"
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
 
 networks:
-  npm_default:
+  global_proxy:
     external: true
+  eternity_internal:
+    driver: bridge
+
+volumes:
+  pg_data:
