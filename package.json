@@ -7,7 +7,8 @@
     "build": "prisma generate && next build",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "k6": "esbuild k6/load-test.ts --bundle --outfile=k6/dist/test.js --target=es2015 && k6 run k6/dist/test.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -36,12 +37,14 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
+    "@types/k6": "^1.5.0",
     "@types/lodash": "^4.17.21",
     "@types/node": "^20",
     "@types/pusher-js": "^5.1.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "esbuild": "^0.27.2",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "prisma": "6.19.2",
@@ -49,8 +52,7 @@
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"
-  }
-  ,
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   }
