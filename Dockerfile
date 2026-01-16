@@ -1,11 +1,11 @@
 # -------- Stage 1: Build --------
 FROM node:20-alpine AS builder
-RUN npm install -g pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN corepack enable pnpm
+COPY package.json pnpm-lock.yaml* ./
+COPY prisma ./prisma
+RUN pnpm i --frozen-lockfile
 
 COPY . .
 
