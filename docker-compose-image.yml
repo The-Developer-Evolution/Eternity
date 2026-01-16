@@ -1,0 +1,28 @@
+services:
+  migrator:
+    container_name: eternity_migration
+    image: ghcr.io/the-developer-evolution/eternity:latest
+    environment:
+      - PRISMA_CONFIG_SKIP_LOAD=true
+    command: prisma migrate deploy --schema=./prisma/schema.prisma
+    env_file:
+      - .env
+    networks:
+      - npm_default
+
+  app:
+    container_name: eternity
+    image: ghcr.io/the-developer-evolution/eternity:latest
+    env_file:
+      - .env
+    expose:
+      - 3000
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - npm_default
+
+networks:
+  npm_default:
+    external: true

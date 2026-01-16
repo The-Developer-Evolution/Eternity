@@ -1,22 +1,31 @@
 services:
-  migrator:
-    container_name: eternity-migrator
-    image: ghcr.io/the-developer-evolution/eternity:latest
-    command: npx prisma migrate deploy --url $$DATABASE_URL
+  migrate:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: d-stream-migration
     env_file:
-      - .env
+      - .env.prod
     networks:
       - npm_default
 
-  app:
-    container_name: eternity
-    image: ghcr.io/the-developer-evolution/eternity:latest
-    depends_on:
-      migrator:
-        condition: service_completed_successfully
+  d-stream:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: runner
+    container_name: d-stream
     env_file:
-      - .env
+      - ./.env.prod
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     expose:
-      - 3000
+      - "3000"
     networks:
       - npm_default
+
+networks:
+  npm_default:
+    external: true
