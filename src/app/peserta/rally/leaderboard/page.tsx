@@ -4,10 +4,24 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import LeaderboardRally from "@/components/ui/LeaderboardRally";
 import { getLeaderBoardData } from "@/features/rally/services/user";
 import { getServerSession } from "next-auth";
+
+interface RawLeaderboardEntry {
+  user: {
+    id: string;
+    name: string;
+  };
+  point: number;
+  access_card_level: number;
+  vault: number;
+  minus_point: number;
+}
+
 export default async function Page() {
   const session = await getServerSession();
+  
   const leaderboardRaw = await getLeaderBoardData();
-  const leaderboard = leaderboardRaw.map((entry, index) => ({
+
+  const leaderboard = leaderboardRaw.map((entry: RawLeaderboardEntry, index: number) => ({
     rank: index + 1,
     name: entry.user.name,
     eonix: entry.point,
@@ -16,6 +30,7 @@ export default async function Page() {
     minus_point: entry.minus_point,
     isCurrentUser: session?.user?.id === entry.user.id
   }));
+
   return (
     <div className="overflow-hidden">
       <div className="relative min-h-screen w-screen flex flex-col gap-8 justify-center items-center py-12 px-4">
