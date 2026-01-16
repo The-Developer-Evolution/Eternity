@@ -42,10 +42,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Prisma support
-RUN npm install -g prisma@7.0.0
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./
 
 # Copy only what standalone needs
 COPY --from=builder /app/public ./public
