@@ -251,6 +251,13 @@ export default function NavigationBar() {
                     >
                       Super Admin Rally
                     </Link>
+                    <Link
+                      href="/admin/rally/eonix"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      Eonix Management
+                    </Link>
                   </div>
                 )}
 
