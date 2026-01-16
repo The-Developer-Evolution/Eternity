@@ -29,6 +29,10 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [pointAmount, setPointAmount] = useState<number>(10);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // --- STATE BARU UNTUK COOLDOWN ---
+  const [cooldown, setCooldown] = useState(0); 
+
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   
@@ -38,6 +42,17 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
     setAllUsers(users);
     setFilteredUsers(users);
   }, [users]);
+
+  // --- LOGIKA TIMER MUNDUR ---
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,6 +79,7 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
     setSearchQuery("");
     setShowDropdown(false);
     setMessage(null);
+    setCooldown(0); // Reset cooldown saat ganti user (opsional)
   };
 
   const updateLocalState = (userId: string, addedAmount: number) => {
@@ -82,6 +98,9 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
   const processTransaction = async (isAddition: boolean) => {
     if (!selectedUser) return;
     
+    // Cegah klik jika sedang loading atau sedang cooldown
+    if (isLoading || cooldown > 0) return;
+
     setIsLoading(true);
     setMessage(null);
 
@@ -94,6 +113,9 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
         updateLocalState(selectedUser.id, finalAmount);
         setMessage({ text: isAddition ? "Points Added!" : "Points Deducted!", type: 'success' });
         toast.success(isAddition ? "Points Added Successfully!" : "Points Deducted Successfully!");
+        
+        setCooldown(5); 
+
       } else {
         setMessage({ text: result.error || "Transaction Failed", type: 'error' });
         toast.error(result.error || "Transaction Failed");
@@ -107,7 +129,7 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
   };
 
   return (
-    <section className={`relative z-10 p-6 md:p-12 box-border rounded-lg w-full max-w-[80vw] bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-start items-center gap-8 min-h-[600px]`}>
+    <section className={`relative my-[10%] z-10 p-6 md:p-12 box-border rounded-lg w-full max-w-[80vw] bg-gradient-to-b from-[#79CCEE]/40 to-[#1400CC]/40 backdrop-blur-md shadow-lg border-[#684095] border-3 flex flex-col justify-start items-center gap-8 min-h-[600px]`}>
       
       <div className='w-full flex flex-col justify-center items-center mb-4'>
         <h1 className='text-center text-4xl md:text-5xl font-impact text-white drop-shadow-lg tracking-wider'>
@@ -207,19 +229,22 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
+                    {/* BUTTON DEDUCT */}
                     <button
                         onClick={() => processTransaction(false)}
-                        disabled={isLoading || selectedUser.talkshowPoints <= 0}
+                        disabled={isLoading || selectedUser.talkshowPoints <= 0 || cooldown > 0}
                         className="bg-red-500/80 hover:bg-red-500 text-white font-impact text-xl py-4 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-red-500/20"
                     >
-                        {isLoading ? "PROCESSING..." : "DEDUCT (-)"}
+                        {isLoading ? "..." : cooldown > 0 ? `WAIT ${cooldown}s` : "DEDUCT (-)"}
                     </button>
+                    
+                    {/* BUTTON ADD */}
                     <button
                         onClick={() => processTransaction(true)}
-                        disabled={isLoading}
+                        disabled={isLoading || cooldown > 0}
                         className="bg-[#41FFA3] hover:bg-[#00ff80] text-[#1a1a40] font-impact text-xl py-4 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-[#41FFA3]/20"
                     >
-                        {isLoading ? "PROCESSING..." : "ADD POINTS (+)"}
+                         {isLoading ? "..." : cooldown > 0 ? `WAIT ${cooldown}s` : "ADD POINTS (+)"}
                     </button>
                 </div>
             </div>
