@@ -6,7 +6,7 @@ import {
   getAllRallyPeriods,
 } from "@/features/rally/services/timer";
 import { AdminDashboard } from "@/components/ui/AdminDashboard";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 import { getAllTradingPeriods } from "@/features/trading/services/timer";
 
 // Add this line to prevent pre-rendering at build time

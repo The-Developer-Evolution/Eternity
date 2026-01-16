@@ -2,7 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { TradingAdminDashboard } from "@/components/ui/TradingAdminDashboard";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 import { getActiveTradingPeriod, getAllTradingPeriods } from "@/features/trading/services/timer";
 
 export const dynamic = 'force-dynamic';
