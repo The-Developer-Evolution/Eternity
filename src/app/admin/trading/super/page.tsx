@@ -5,6 +5,8 @@ import { TradingAdminDashboard } from "@/components/ui/TradingAdminDashboard";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 import { getActiveTradingPeriod, getAllTradingPeriods } from "@/features/trading/services/timer";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
 
   let initialContestStatus: RallyPeriodStatus | null = null;

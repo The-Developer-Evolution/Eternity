@@ -4,6 +4,8 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import TreasureHuntInterface from "@/components/trading/TreasureHuntInterface";
 import { getAllRawItems } from "@/features/trading/services/thunt";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const rawItems = await getAllRawItems();
 

@@ -5,6 +5,8 @@ import BlackMarketInterface from "@/components/trading/BlackMarketInterface";
 import BlackMarketSellInterface from "@/components/trading/BlackMarketSellInterface";
 import { getBlackMarketItems } from "@/features/trading/services/blackmarket";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const items = await getBlackMarketItems();
   console.log(items)

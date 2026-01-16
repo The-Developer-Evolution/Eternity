@@ -4,6 +4,8 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import CraftInterface from "@/components/trading/CraftInterface";
 import { getAllCraftRecipes } from "@/features/trading/services/craft";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const recipes = await getAllCraftRecipes();
 

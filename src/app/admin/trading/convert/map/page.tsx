@@ -5,6 +5,8 @@ import MapCraftRecipeInterface from "@/components/trading/MapCraftRecipeInterfac
 import { getAllCraftRecipes } from "@/features/trading/services/craft";
 import { getAllMapRecipes } from "@/features/trading/services/map";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const craftItems = await getAllCraftRecipes();
   const mapRecipes = await getAllMapRecipes();

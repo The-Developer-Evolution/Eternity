@@ -5,6 +5,7 @@ import CurrencyConvertInterface from "@/components/trading/CurrencyConvertInterf
 
 import { getRunningTradingPeriod } from "@/features/trading/action";
 
+export const dynamic = 'force-dynamic';
 export default async function Page() {
   const period = await getRunningTradingPeriod();
   const currentRate = period?.usdidr_rate ?? 16000;

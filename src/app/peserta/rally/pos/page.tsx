@@ -3,6 +3,8 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getAllPos } from "@/features/rally/services/pos";
 import CardPanel from "@/components/ui/CardPanel";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const pos = await getAllPos();
   return (
