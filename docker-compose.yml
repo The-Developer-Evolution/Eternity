@@ -73,8 +73,8 @@ services:
     command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
     env_file:
       - .env
-    ports:
-      - "5555:5555"
+    expose:
+      - "5555"
     networks:
       - global_proxy
       - eternity_internal
