@@ -3,7 +3,7 @@ import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import ActionButton from "@/components/common/ActionButton";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 
 export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);

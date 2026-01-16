@@ -2,8 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { getRunningTradingPeriod } from "../action";
-import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
-import { TradingData } from "@/generated/prisma/browser";
+import { BalanceLogType, BalanceTradingResource } from "@prisma/client";
+import { TradingData } from "@prisma/client";
 import { ActionResult } from "@/types/actionResult";
 
 export async function chargeEternities(userId: string, amount: number, reason: string = "Exclusive News"): Promise<ActionResult<TradingData>> {

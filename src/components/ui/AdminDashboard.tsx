@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { StartContestTimer, pauseContest, resumeContest, endContest } from "@/features/rally/services/timer";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 import { getPusherClient } from "@/lib/pusher";
 
 interface RallyPeriod {

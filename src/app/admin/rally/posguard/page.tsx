@@ -5,7 +5,7 @@ import GiveItemsPanel from "@/components/ui/GiveItemsPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import { buyPosAccessAction } from "@/features/rally/actions/pos-access-action";
 import { giveItemsAction } from "@/features/rally/actions/craft-item-action";
 import { getAllPosForAdmin } from "@/features/rally/services/pos";

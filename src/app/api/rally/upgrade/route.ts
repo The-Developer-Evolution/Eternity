@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {

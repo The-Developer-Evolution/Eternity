@@ -1,7 +1,7 @@
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import UpgradeAccessCardPanel from "@/components/ui/UpgradeAccessCardPanel";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";

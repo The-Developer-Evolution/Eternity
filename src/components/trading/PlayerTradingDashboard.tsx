@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { useState, useEffect } from "react";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 import { getPusherClient } from "@/lib/pusher";
 import Link from "next/link";
 import LinkButton from "@/components/common/LinkButton";

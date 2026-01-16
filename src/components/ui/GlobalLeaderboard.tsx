@@ -4,7 +4,7 @@ import { FaChevronLeft, FaChevronRight, FaEye, FaEyeSlash } from 'react-icons/fa
 import useSWR, { useSWRConfig } from "swr";
 import { useEffect, useState } from "react";
 import { getPusherClient } from "@/lib/pusher";
-import { Role } from '@/generated/prisma/enums';
+import { Role } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 
 interface LeaderboardEntry {

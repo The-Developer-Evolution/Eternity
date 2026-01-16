@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 
 export async function getTradingLeaderboard() {
   try {

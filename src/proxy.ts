@@ -1,6 +1,6 @@
 import withAuth from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 
 const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin/talkshow": [Role.SUPER, Role.TALKSHOW],

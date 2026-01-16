@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { useState, useEffect, useCallback } from "react";
 import { StartTradingTimer, pauseTrading, resumeTrading, endTrading } from "@/features/trading/services/timer";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 import { getPusherClient } from "@/lib/pusher";
 
 interface TradingPeriod {

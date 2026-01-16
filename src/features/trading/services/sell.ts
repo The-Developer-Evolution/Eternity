@@ -1,10 +1,10 @@
 'use server'
 
 import { getUserTradingById } from "@/features/user/trading.service";
-import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums";
+import { BalanceLogType, BalanceTradingResource } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
-import { TradingData } from "@/generated/prisma/client";
+import { TradingData } from "@prisma/client";
 import { getActiveTradingPeriod } from "./timer";
 import { getRunningTradingPeriod } from "../action";
 

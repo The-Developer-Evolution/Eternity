@@ -4,7 +4,7 @@ import MinusPointPanel from "@/components/ui/MinusPointPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import { minusPointAction, neutralizePointAction } from "@/features/rally/actions/minus-point-action";
 
 export default async function Page() {

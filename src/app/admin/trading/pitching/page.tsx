@@ -5,7 +5,7 @@ import PitchingInterface from "@/components/trading/PitchingInterface";
 import PitchingRewardInterface from "@/components/trading/PitchingRewardInterface";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);

@@ -1,6 +1,6 @@
 'use server'
 
-import { BalanceLogType, BalanceTradingResource, TradingData } from "@/generated/prisma/client";
+import { BalanceLogType, BalanceTradingResource, TradingData } from "@prisma/client";
 import { RawMaterial } from "../types/craft";
 import { ActionResult } from "@/types/actionResult";
 import { getUserTradingById } from "@/features/user/trading.service";

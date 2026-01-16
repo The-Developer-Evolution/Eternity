@@ -6,7 +6,7 @@ import BuySpecialTicketPanel from "@/components/ui/BuySpecialTicketPanel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import { gachaItemAction } from "@/features/rally/actions/gacha-action";
 import { craftItemAction, craftVaultAction, buyItemAction, buySpecialTicketAction } from "@/features/rally/actions/craft-item-action";
 import CardPanel from "@/components/ui/CardPanel"

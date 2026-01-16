@@ -3,7 +3,7 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
+import { Role } from "@prisma/client";
 import TalkshowAdminPanel from "@/components/ui/TalkshowAdminPanel";
 import { updateTalkshowPoints } from "@/features/user/talkshow";
 
