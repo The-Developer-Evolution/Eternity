@@ -65,6 +65,8 @@ export async function StartTradingTimer(periodId: string, durationMinutes: numbe
         status: "ON_GOING",
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
+        periodNumber: targetPeriod.periode,
+        news: targetPeriod.news,
       });
       console.log("Pusher trigger success (START).");
     } catch (error) {

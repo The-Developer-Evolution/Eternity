@@ -50,6 +50,9 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
   );
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [currentPeriodNumber, setCurrentPeriodNumber] = useState<number | undefined>(periodNumber);
+  const [currentNews, setCurrentNews] = useState<string | undefined>(news);
+  
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
   const isRunning = status === "ON_GOING" || status === "PAUSED";
 
@@ -140,9 +143,19 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
                 status: data.status,
                 startTime: data.startTime ?? currentData.startTime,
                 endTime: data.endTime ?? currentData.endTime,
-                serverTime: new Date().toISOString(), // Use current client time
+                serverTime: new Date().toISOString(),
             };
-        }, { revalidate: false }); // Don't refetch - the Pusher data is the source of truth
+        }, { revalidate: false });
+        
+        // Update period number if provided in the event
+        if (data.periodNumber !== undefined) {
+            setCurrentPeriodNumber(data.periodNumber);
+        }
+        
+        // Update news if provided in the event
+        if (data.news !== undefined) {
+            setCurrentNews(data.news);
+        }
     });
 
     return () => {
@@ -158,9 +171,9 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
       {/* Timer Section */}
       <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl text-center relative overflow-hidden">
         {/* Period Number Badge */}
-        {periodNumber && isRunning && (
+        {currentPeriodNumber && isRunning && (
           <div className="absolute top-4 right-4 bg-purple-900/50 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold text-purple-300 tracking-wider">
-             PERIOD #{periodNumber}
+             PERIOD #{currentPeriodNumber}
           </div>
         )}
 
@@ -180,10 +193,10 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
         )}
 
         {/* NEWS DISPLAY - Only when running */}
-        {news && isRunning && (
+        {currentNews && isRunning && (
           <div className="mt-4 bg-blue-900/40 border border-blue-500/30 p-3 rounded-lg animate-in fade-in slide-in-from-bottom-2">
             <p className="text-blue-200 text-sm font-bold uppercase tracking-wider mb-1">NEWS INFO</p>
-            <p className="text-white font-medium italic">&quot;{news}&quot;</p>
+            <p className="text-white font-medium italic">&quot;{currentNews}&quot;</p>
           </div>
         )}
       </div>
