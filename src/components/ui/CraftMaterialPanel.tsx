@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Hammer, ShoppingCart, ChevronDown, Package } from "lucide-react";
 import { toast } from "sonner";
+import debounce from "lodash/debounce";
 
 interface User {
   id: string;
@@ -52,6 +53,7 @@ export default function CraftMaterialPanel({
   onCraftBigItem,
 }: CraftMaterialPanelProps) {
   const [localUsers, setLocalUsers] = useState<User[]>(users);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -79,9 +81,37 @@ export default function CraftMaterialPanel({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredUsers = localUsers.filter((u) =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Create a debounced search handler
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => {
+      if (!query) {
+         setFilteredUsers(users); // Reset if empty
+         return;
+      }
+      const lowerQuery = query.toLowerCase();
+      const filtered = users.filter((u) =>
+        u.name.toLowerCase().includes(lowerQuery)
+      );
+      setFilteredUsers(filtered);
+    }, 300),
+    [users]
   );
+
+  useEffect(() => {
+     // Initial load
+     setFilteredUsers(users);
+     return () => {
+       debouncedSearch.cancel();
+     };
+  }, [users, debouncedSearch]);
+
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
+  };
+
 
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
@@ -146,7 +176,7 @@ export default function CraftMaterialPanel({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             onFocus={() => setShowUserDropdown(true)}
             placeholder="Type name..."
             className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors pr-10"
@@ -232,7 +262,7 @@ export default function CraftMaterialPanel({
                       <span className="text-white font-bold text-sm uppercase tracking-tight">{item.name}</span>
                       <button
                         disabled={isLoading !== null || !firstRecipe}
-                        onClick={() => firstRecipe && handleAction("Crafting", item.name, firstRecipe.id, onCraftBigItem, false)}
+                        onClick={() => firstRecipe && handleAction("Crafting", item.name, item.id, onCraftBigItem, false)}
                         className="bg-[#78CCEE] hover:bg-[#5bb8e0] text-[#3E344A] font-impact px-4 py-2 rounded-lg text-xs transition-all active:scale-95 disabled:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-[#78CCEE]/10"
                       >
                         {isLoading === (firstRecipe?.id || item.id) ? "..." : "CRAFT"}

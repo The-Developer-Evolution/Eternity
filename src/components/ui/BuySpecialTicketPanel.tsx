@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Ticket, Plus, Trash2, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Ticket, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import debounce from "lodash/debounce";
 
 interface User {
   id: string;
@@ -47,7 +48,7 @@ export default function BuySpecialTicketPanel({
   ticketStock,
   onBuyTicket,
 }: BuySpecialTicketPanelProps) {
-  const [localUsers, setLocalUsers] = useState<User[]>(users);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -59,14 +60,6 @@ export default function BuySpecialTicketPanel({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLocalUsers(users);
-    if (selectedUser) {
-      const updated = users.find(u => u.id === selectedUser.id);
-      if (updated) setSelectedUser(updated);
-    }
-  }, [users, selectedUser]);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
@@ -76,9 +69,37 @@ export default function BuySpecialTicketPanel({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredUsers = localUsers.filter((u) =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Create a debounced search handler
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => {
+      if (!query) {
+         setFilteredUsers(users); // Reset if empty
+         return;
+      }
+      const lowerQuery = query.toLowerCase();
+      const filtered = users.filter((u) =>
+        u.name.toLowerCase().includes(lowerQuery)
+      );
+      setFilteredUsers(filtered);
+    }, 300),
+    [users]
   );
+
+  useEffect(() => {
+     // Initial load
+     setFilteredUsers(users);
+     return () => {
+       debouncedSearch.cancel();
+     };
+  }, [users, debouncedSearch]);
+
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
+  };
+
 
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
@@ -204,15 +225,11 @@ export default function BuySpecialTicketPanel({
         <div className="relative">
           <input
             type="text"
-            placeholder="Search user..."
-            value={selectedUser ? selectedUser.name : searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              if (selectedUser) setSelectedUser(null);
-              setShowUserDropdown(true);
-            }}
+            value={searchQuery}
+            onChange={handleSearchChange}
             onFocus={() => setShowUserDropdown(true)}
-            className="w-full bg-[#3E344A] text-white border-2 border-[#684095] rounded-lg p-3 pr-10 focus:border-[#78CCEE] outline-none transition-all"
+            placeholder="Type name..."
+            className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors pr-10"
           />
           <ChevronDown
             className={`absolute right-3 top-1/2 -translate-y-1/2 text-[#78CCEE] transition-transform ${showUserDropdown ? 'rotate-180' : ''}`}

@@ -12,7 +12,14 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await endContest();
+    const result = await endContest();
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 400 }
+      );
+    }
     
     return NextResponse.json({ 
       success: true, 
