@@ -209,7 +209,7 @@ export async function StartContestTimer(
   }
 
   revalidatePath("/admin/super");
-  revalidatePath("/peserta/rally");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest"); 
   return updatedPeriod;
 }
@@ -239,6 +239,7 @@ export async function pauseContest() {
   }
 
   revalidatePath("/admin/super");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
 }
 
@@ -274,6 +275,7 @@ export async function resumeContest() {
   }
 
   revalidatePath("/admin/super");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
 }
 
@@ -308,7 +310,7 @@ export async function endContest() {
   }
 
   revalidatePath("/admin/super");
-  revalidatePath("/peserta/rally");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
   
   return { success: true, message: "Contest ended successfully." };

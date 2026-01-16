@@ -37,8 +37,9 @@ export default function ContestTimer() {
 
     const channel = pusher.subscribe("contest-channel");
     
-    const handleStatusUpdate = (updatedContest: ContestState) => {
-      mutate("/api/contest/status", updatedContest, false);
+    
+    const handleStatusUpdate = () => {
+      mutate("/api/contest/status");
     };
 
     channel.bind("status-update", handleStatusUpdate);
