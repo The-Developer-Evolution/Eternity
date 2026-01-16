@@ -47,7 +47,7 @@ export default function LeaderboardRally({
     `/api/leaderboard?page=${currentPage}&limit=${limit}`,
     fetcher,
     {
-      refreshInterval: 5000,
+      refreshInterval: 19000,
       keepPreviousData: true // UX agar tidak flickering saat ganti halaman
     }
   );
