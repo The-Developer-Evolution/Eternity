@@ -29,6 +29,10 @@ export default function MinusPointPanel({
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [pointAmount, setPointAmount] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // --- STATE BARU: Cooldown ---
+  const [cooldown, setCooldown] = useState(0);
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -39,6 +43,17 @@ export default function MinusPointPanel({
     setAllUsers(users);
     setFilteredUsers(users);
   }, [users]);
+
+  // --- EFEK BARU: Timer Mundur ---
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,6 +81,7 @@ export default function MinusPointPanel({
     setShowDropdown(false);
     setError(null);
     setSuccess(null);
+    setCooldown(0); // Reset cooldown saat ganti user (opsional)
   };
 
   const updateLocalState = (userId: string, newMinus: number) => {
@@ -77,6 +93,18 @@ export default function MinusPointPanel({
 
   const processAction = async (actionFn: any, isNeutralize: boolean) => {
     if (!selectedUser) return setError("Select a user");
+    
+    // 1. Cek Cooldown & Loading
+    if (isLoading || cooldown > 0) return;
+
+    // 2. Alert Konfirmasi
+    const actionName = isNeutralize ? "NEUTRALIZE (Reduce Minus)" : "ADD MINUS POINT";
+    const confirmMessage = `Are you sure you want to ${actionName} for user ${selectedUser.name} with amount ${pointAmount}?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return; // Batalkan jika user klik Cancel
+    }
+
     setIsLoading(true);
     setError(null);
     setSuccess(null);
@@ -88,6 +116,10 @@ export default function MinusPointPanel({
         const nextValue = isNeutralize ? Math.max(0, currentMinus - pointAmount) : currentMinus + pointAmount;
         updateLocalState(selectedUser.id, nextValue);
         setSuccess("Operation Successful");
+
+        // 3. Set Cooldown 5 Detik setelah sukses
+        setCooldown(5); 
+
       } else {
         setError(result.error || "Operation Failed");
       }
@@ -185,17 +217,17 @@ export default function MinusPointPanel({
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => processAction(onMinusPoint, false)}
-                disabled={isLoading}
-                className="bg-red-500 hover:bg-red-600 disabled:bg-slate-800 text-white font-impact py-3 rounded-xl text-lg transition-all active:scale-95 shadow-lg shadow-red-500/20"
+                disabled={isLoading || cooldown > 0}
+                className="bg-red-500 hover:bg-red-600 disabled:bg-slate-800 text-white font-impact py-3 rounded-xl text-lg transition-all active:scale-95 shadow-lg shadow-red-500/20 disabled:cursor-not-allowed"
               >
-                {isLoading ? "..." : "ADD MINUS"}
+                 {isLoading ? "..." : cooldown > 0 ? `WAIT ${cooldown}s` : "ADD MINUS"}
               </button>
               <button
                 onClick={() => processAction(onNeutralizePoint, true)}
-                disabled={isLoading || (selectedUser.rallyData?.minus_point || 0) === 0}
-                className="bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-800 text-[#3E344A] font-impact py-3 rounded-xl text-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg shadow-green-500/20"
+                disabled={isLoading || (selectedUser.rallyData?.minus_point || 0) === 0 || cooldown > 0}
+                className="bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-800 text-[#3E344A] font-impact py-3 rounded-xl text-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg shadow-green-500/20 disabled:cursor-not-allowed"
               >
-                {isLoading ? "..." : "NEUTRALIZE"}
+                {isLoading ? "..." : cooldown > 0 ? `WAIT ${cooldown}s` : "NEUTRALIZE"}
               </button>
             </div>
           </div>
