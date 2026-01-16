@@ -64,6 +64,25 @@ services:
       - "${DB_PORT_EXTERNAL}:5432"
     networks:
       - eternity_internal
+  studio:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: eternity-studio
+    command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    networks:
+      - global_proxy
+      - eternity_internal
+    depends_on:
+      db:
+        condition: service_started
+    profiles:
+      - manual
 
   app:
     build:
