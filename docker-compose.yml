@@ -1,9 +1,6 @@
 services:
   migrator:
     image: ghcr.io/the-developer-evolution/eternity:latest
-    build:
-      context: .
-      target: migrator
     command: npx prisma migrate deploy
     env_file:
       - .env
