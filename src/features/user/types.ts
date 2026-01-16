@@ -1,4 +1,4 @@
-import { BalanceTradingLog, CraftItem, RawItem, TradingData, User, RawUserAmount, CraftUserAmount } from "@/generated/prisma/client";
+import { BalanceTradingLog, CraftItem, RawItem, TradingData, User, RawUserAmount, CraftUserAmount } from "@prisma/client";
 
 
 export interface UserTrading extends User{

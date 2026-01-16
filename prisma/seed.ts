@@ -1,10 +1,5 @@
-import { RawStockPeriod } from "@/generated/prisma/browser";
-import { PrismaClient, Role } from "@/generated/prisma/client";
-import {
-  CraftStockPeriodCreateInput,
-  CraftStockPeriodCreateManyInput,
-  RawStockPeriodCreateManyInput,
-} from "@/generated/prisma/models";
+import { RawStockPeriod } from "@prisma/client";
+import { PrismaClient, Role, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
@@ -445,8 +440,8 @@ async function main() {
 
   // SEED BLACKMARKET STOCK and Price FOR EACH PERIOD
 
-  const rawStockData: RawStockPeriodCreateManyInput[] = [];
-  const craftStockData: CraftStockPeriodCreateManyInput[] = [];
+  const rawStockData: Prisma.RawStockPeriodCreateManyInput[] = [];
+  const craftStockData: Prisma.CraftStockPeriodCreateManyInput[] = [];
 
   for (const pData of CUSTOM_PERIOD_DATA) {
     // Process Raw Items
