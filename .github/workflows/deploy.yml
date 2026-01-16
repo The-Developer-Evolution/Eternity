@@ -43,3 +43,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ steps.prep.outputs.repo_lower }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args:
+            PUSHER_APP_ID=build_placeholder
+            PUSHER_KEY=build_placeholder
+            PUSHER_SECRET=build_placeholder
+            PUSHER_CLUSTER=ap1
+            DATABASE_URL=postgresql://db:db@localhost:5432/db
