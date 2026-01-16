@@ -6,7 +6,7 @@ services:
       target: migrator
     container_name: eternity-migration
     env_file:
-      - .env.prod
+      - .env
     networks:
       - global_proxy
       - eternity_internal
