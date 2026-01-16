@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma"
 import { ActionResult } from "@/types/actionResult"
 import { handlePrismaError } from "@/utils/prisma"
 import { revalidatePath } from "next/cache"
-import { BalanceLogType, BalanceTradingResource } from "@/generated/prisma/enums"
 import { getRunningTradingPeriod } from "../action"
 
 // For Talkshow: add trading point to user

@@ -2,8 +2,7 @@
 
 import { ActionResult } from "@/types/actionResult";
 import prisma from "@/lib/prisma";
-import { GameStatus } from "@/generated/prisma/enums";
-import { BalanceTradingLog, MasterTrading } from "@/generated/prisma/client";
+import { BalanceTradingLog } from "@prisma/client";
 import { getUserTradingById } from "@/features/user/trading.service";
 import { getRunningTradingPeriod } from "../action";
 

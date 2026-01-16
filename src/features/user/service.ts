@@ -1,9 +1,8 @@
 'use server'
 
-import { User } from "@/generated/prisma/client";
+import { User, Role } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
-import { Role } from "@/generated/prisma/client";
 //////////////////////
 // GET FUNCTION
 /////////////////////

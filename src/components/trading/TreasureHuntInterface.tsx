@@ -5,7 +5,7 @@ import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { addThuntItem } from "@/features/trading/services/thunt";
 import { Loader2, CheckCircle, AlertCircle, User, Gem, Package } from "lucide-react";
-import { RawItem } from "@/generated/prisma/client";
+import { RawItem } from "@prisma/client";
 
 interface TreasureHuntInterfaceProps {
     rawItems: RawItem[];

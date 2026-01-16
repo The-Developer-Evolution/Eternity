@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { getPusherClient } from "@/lib/pusher"; 
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 
 interface ContestState {
   status: RallyPeriodStatus | string;

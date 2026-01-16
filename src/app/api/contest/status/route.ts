@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getActiveContest } from "@/features/rally/services/timer";
-import { RallyPeriodStatus } from "@/generated/prisma/enums";
+import { RallyPeriodStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export async function GET() {
     // PERBAIKAN: Cek jika contest null (belum ada yg aktif)
     if (!contest) {
       return NextResponse.json({
-        status: "NOT_STARTED", // Default status jika tidak ada data
+        status: RallyPeriodStatus.NOT_STARTED,
         startTime: null,
         endTime: null,
         serverTime: new Date().toISOString(),

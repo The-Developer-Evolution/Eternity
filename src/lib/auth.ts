@@ -2,7 +2,7 @@ import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
 import prisma from "./prisma"
-import { Role } from "@/generated/prisma/enums"
+import { Role } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
   providers: [
