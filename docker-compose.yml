@@ -22,7 +22,7 @@ services:
     networks:
       - npm_default
 
-  d-stream:
+  app:
     build:
       context: ./
       dockerfile: Dockerfile
