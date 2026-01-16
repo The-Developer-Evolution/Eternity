@@ -30,7 +30,8 @@ export async function GET(request: Request) {
         },
         tradingData: {
           select: {
-            point: true
+            point: true,
+            idr: true,
           }
         }
       }
@@ -48,7 +49,7 @@ export async function GET(request: Request) {
       // Calculate Rally Point dynamically using the new formula
       const rallyPoint = (vault * (eonix + level)) - minusPoint;
       
-      const tradingPoint = Number(user.tradingData?.point || 0);
+      const tradingPoint = Number(user.tradingData?.idr)/ 1000000000 || 0;
       const talkshowPoint = user.talkshowPoints || 0;
 
       const totalScore = (rallyPoint * 0.45) + (tradingPoint * 0.40) + (talkshowPoint * 0.15);
