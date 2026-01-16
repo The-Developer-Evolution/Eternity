@@ -1,7 +1,8 @@
 services:
   migrator:
+    container_name: eternity-migrator
     image: ghcr.io/the-developer-evolution/eternity:latest
-    command: npx prisma migrate deploy
+    command: npx prisma migrate deploy --url $$DATABASE_URL
     env_file:
       - .env
     networks:
