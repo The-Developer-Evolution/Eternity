@@ -22,13 +22,14 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
 );
 
 export default function ContestTimer() {
-  const { data, error } = useSWR<ContestState>("/api/contest/status", fetcher, {
-    refreshInterval: 10000, // Refresh every second for accuracy
+  const { data } = useSWR<ContestState>("/api/contest/status", fetcher, {
+    refreshInterval: 60000,
+    revalidateOnFocus: false,
     shouldRetryOnError: false,
   });
+  
   const { mutate } = useSWRConfig();
   const [timeLeft, setTimeLeft] = useState(0);
-  const [hasAutoEnded, setHasAutoEnded] = useState(false);
 
   useEffect(() => {
     const pusher = getPusherClient();
@@ -37,9 +38,7 @@ export default function ContestTimer() {
     const channel = pusher.subscribe("contest-channel");
     
     const handleStatusUpdate = (updatedContest: ContestState) => {
-      console.log("Timer update received:", updatedContest);
       mutate("/api/contest/status", updatedContest, false);
-      setHasAutoEnded(false); // Reset auto-end flag on status update
     };
 
     channel.bind("status-update", handleStatusUpdate);
@@ -51,70 +50,48 @@ export default function ContestTimer() {
   }, [mutate]);
 
   useEffect(() => {
-    if (!data || !data.endTime || !data.serverTime) {
-      return;
-    }
+    if (!data || !data.endTime || !data.serverTime) return;
 
     const serverTime = new Date(data.serverTime).getTime();
-    if (isNaN(serverTime)) return;
-
-    const clientTime = Date.now();
-    const timeOffset = serverTime - clientTime;
+    const clientTimeNow = Date.now();
+    const timeOffset = serverTime - clientTimeNow; 
 
     const interval = setInterval(() => {
+      const nowBasedOnServer = new Date(Date.now() + timeOffset).getTime();
+      
       if (data.status === "ON_GOING") {
         const endTime = new Date(data.endTime).getTime();
-
+        
         if (isNaN(endTime)) {
           setTimeLeft(0);
           return;
         }
 
-        const now = new Date(Date.now() + timeOffset);
-        const remaining = Math.round((endTime - now.getTime()) / 1000);
-        const newTimeLeft = Math.max(0, remaining);
-        
-        setTimeLeft(newTimeLeft);
-
-        // Auto-end when timer reaches 0
-        if (newTimeLeft === 0 && !hasAutoEnded) {
-          setHasAutoEnded(true);
-          fetch('/api/contest/auto-end', { method: 'POST' })
-            .then(() => {
-              console.log("Contest auto-ended");
-              mutate("/api/contest/status");
-            })
-            .catch(err => console.error("Failed to auto-end:", err));
-        }
-      } else if (data.status === "PAUSED") {
-        // Keep current time when paused
+        const remaining = Math.max(0, Math.round((endTime - nowBasedOnServer) / 1000));
+        setTimeLeft(remaining);
       } else {
         setTimeLeft(0);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [data, hasAutoEnded, mutate]);
+  }, [data]);
 
   const h = Math.floor(timeLeft / 3600).toString().padStart(2, "0");
   const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, "0");
   const s = Math.floor(timeLeft % 60).toString().padStart(2, "0");
 
   const getStatusMessage = () => {
-    if (error) return "Error Loading Timer";
     if (!data) return "Loading...";
     
+    if (timeLeft === 0 && data.status === "ON_GOING") return "Finishing Contest...";
+
     switch (data.status) {
-      case "NOT_STARTED": 
-        return "Contest Starting Soon";
-      case "ON_GOING":
-        return null;
-      case "PAUSED":
-        return "Contest Paused";
-      case "ENDED":
-        return "Contest Finished";
-      default:
-        return data.status === "ON_GOING" ? null : "Standby";
+      case "NOT_STARTED": return "Contest Starting Soon";
+      case "PAUSED": return "Contest Paused";
+      case "ENDED": return "Contest Finished";
+      case "ON_GOING": return null;
+      default: return "Standby";
     }
   };
 
