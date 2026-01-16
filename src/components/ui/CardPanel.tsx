@@ -28,7 +28,7 @@ export default function CardPanel({
     '/api/rally/period',
     fetcher,
     {
-      refreshInterval: 5000, // Refresh every 5 seconds as fallback
+      refreshInterval: 60000, // Refresh every 5 seconds as fallback
       revalidateOnFocus: true,
     }
   );

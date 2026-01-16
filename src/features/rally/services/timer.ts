@@ -203,13 +203,14 @@ export async function StartContestTimer(
       status: "ON_GOING",
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
+      serverTime: new Date().toISOString(),
       periodName: updatedPeriod.name,
       periodId: updatedPeriod.id,
     });
   }
 
   revalidatePath("/admin/super");
-  revalidatePath("/peserta/rally");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest"); 
   return updatedPeriod;
 }
@@ -235,10 +236,12 @@ export async function pauseContest() {
   if (pusher) {
     await pusher.trigger("contest-channel", "status-update", {
       status: "PAUSED",
+      serverTime: new Date().toISOString(),
     });
   }
 
   revalidatePath("/admin/super");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
 }
 
@@ -270,10 +273,12 @@ export async function resumeContest() {
     await pusher.trigger("contest-channel", "status-update", {
       status: "ON_GOING",
       endTime: newEndTime.toISOString(),
+      serverTime: new Date().toISOString(),
     });
   }
 
   revalidatePath("/admin/super");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
 }
 
@@ -304,11 +309,12 @@ export async function endContest() {
       status: "ENDED",
       periodName: activeContest.name,
       periodId: activeContest.id,
+      serverTime: new Date().toISOString(),
     });
   }
 
   revalidatePath("/admin/super");
-  revalidatePath("/peserta/rally");
+  revalidatePath('/peserta/rally', 'layout');
   revalidateTag("active-contest");
   
   return { success: true, message: "Contest ended successfully." };
