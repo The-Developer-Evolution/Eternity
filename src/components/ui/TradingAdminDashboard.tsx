@@ -54,7 +54,19 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   const [duration, setDuration] = useState<number>(20);
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
+  const [cooldown, setCooldown] = useState<number>(0);
+
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setTimeout(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     if (!tradingData) return;
@@ -121,8 +133,12 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   }, [mutate]);
 
   const handleAction = useCallback(async (action: string) => {
+    if (cooldown > 0) return;
+
     setIsLoading(action);
     setError(null);
+    setCooldown(3);
+
     try {
       switch (action) {
         case "start":
@@ -144,7 +160,7 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
     } finally {
       setIsLoading(null);
     }
-  }, [selectedPeriodId, duration, mutate]);
+  }, [selectedPeriodId, duration, mutate, cooldown]);
 
   useEffect(() => {
     if (status === "ON_GOING" && !isLoading && tradingData?.endTime) {
@@ -161,6 +177,10 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
       }
     }
   }, [status, timeLeft, handleAction, isLoading, tradingData]);
+
+  const isButtonDisabled = (requiredStatus: boolean) => {
+    return isLoading !== null || cooldown > 0 || !requiredStatus;
+  };
 
   return (
     <div className="max-w-2xl mx-auto bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl mb-8">
@@ -214,40 +234,34 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={() => handleAction("start")}
-          disabled={
-            isLoading !== null ||
-            (status !== RallyPeriodStatus.NOT_STARTED && status !== RallyPeriodStatus.ENDED)
-          }
+          disabled={isButtonDisabled(status === RallyPeriodStatus.NOT_STARTED || status === RallyPeriodStatus.ENDED)}
           className="bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-green-500/20"
         >
-          {status === RallyPeriodStatus.ENDED ? "RESTART SELECTED" : "START TRADING"}
+          {cooldown > 0 ? `WAIT ${cooldown}s` : (status === RallyPeriodStatus.ENDED ? "RESTART SELECTED" : "START TRADING")}
         </button>
 
         <button
           onClick={() => handleAction("end")}
-          disabled={
-            isLoading !== null || 
-            (status !== RallyPeriodStatus.ON_GOING && status !== RallyPeriodStatus.PAUSED)
-          }
+          disabled={isButtonDisabled(status === RallyPeriodStatus.ON_GOING || status === RallyPeriodStatus.PAUSED)}
           className="bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-red-500/20"
         >
-          FORCE END
+          {cooldown > 0 ? `WAIT ${cooldown}s` : "FORCE END"}
         </button>
 
         <button
           onClick={() => handleAction("pause")}
-          disabled={isLoading !== null || status !== RallyPeriodStatus.ON_GOING}
+          disabled={isButtonDisabled(status === RallyPeriodStatus.ON_GOING)}
           className="bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
         >
-          PAUSE
+          {cooldown > 0 ? `${cooldown}s` : "PAUSE"}
         </button>
 
         <button
           onClick={() => handleAction("resume")}
-          disabled={isLoading !== null || status !== RallyPeriodStatus.PAUSED}
+          disabled={isButtonDisabled(status === RallyPeriodStatus.PAUSED)}
           className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
         >
-          RESUME
+          {cooldown > 0 ? `${cooldown}s` : "RESUME"}
         </button>
       </div>
 
