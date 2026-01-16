@@ -26,13 +26,9 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   const [activeTab, setActiveTab] = useState<"RAW" | "CRAFT">("RAW");
   
   // Multi-select state: Record<ITEM_ID, sell_amount>
-  // Split into RAW and CRAFT to ensure independent states
-  const [selectedRawItems, setSelectedRawItems] = useState<Record<string, number>>({});
-  const [selectedCraftItems, setSelectedCraftItems] = useState<Record<string, number>>({});
-
-  const selectedItems = activeTab === "RAW" ? selectedRawItems : selectedCraftItems;
-  const setSelectedItems = activeTab === "RAW" ? setSelectedRawItems : setSelectedCraftItems;
-
+  // Key format: `${type}-${itemId}` to ensure uniqueness across tabs
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
+  
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -78,35 +74,41 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
       }
   };
 
-  const toggleItem = (itemId: string, maxOwned: number) => {
+  const toggleItem = (item: BlackMarketItemDetail, maxOwned: number) => {
       if (maxOwned <= 0) return;
       
+      const key = `${item.type}-${item.itemId}`;
       setSelectedItems(prev => {
           const next = { ...prev };
-          if (next[itemId]) {
-              delete next[itemId];
+          if (next[key]) {
+              delete next[key];
           } else {
-              next[itemId] = 1;
+              next[key] = 1;
           }
           return next;
       });
   };
 
-  const updateItemAmount = (itemId: string, val: number, maxOwned: number) => {
+  const updateItemAmount = (item: BlackMarketItemDetail, val: number, maxOwned: number) => {
       if (val < 1 || val > maxOwned) return;
-      setSelectedItems(prev => ({ ...prev, [itemId]: val }));
+      const key = `${item.type}-${item.itemId}`;
+      setSelectedItems(prev => ({ ...prev, [key]: val }));
   };
 
   const handleSell = async () => {
     if (!selectedUser) return;
     
     // Prepare payload
-    const itemsToSell = Object.entries(selectedItems).map(([id, amount]) => {
-        const itemInfo = items.find(i => i.itemId === id); // items prop has itemId
+    const itemsToSell = Object.entries(selectedItems).map(([key, amount]) => {
+        
+        
+        const type = key.startsWith("RAW") ? "RAW" : "CRAFT";
+        const id = key.substring(type.length + 1);
+
         return {
             id: id,
             amount: amount,
-            type: itemInfo?.type || 'RAW' 
+            type: type as "RAW" | "CRAFT"
         };
     });
 
@@ -123,7 +125,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
       
       if (result.success && result.data) {
         setMessage({ type: "success", text: result.message || "Sold successfully!" });
-        setSelectedItems({}); // Clear selection for current tab
+        setSelectedItems({}); // Clear selection
         
         // Refresh inventory
         const amounts: Record<string, number> = {};
@@ -161,8 +163,14 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   let totalPay = 0;
   let totalCount = 0;
 
-  Object.entries(selectedItems).forEach(([id, qty]) => {
-      const item = items.find(i => i.itemId === id);
+  Object.entries(selectedItems).forEach(([key, qty]) => {
+      // Find item that matches this key
+      // We can iterate `items` but for performance with large lists might be slow?
+      // For now this is fine.
+      const type = key.startsWith("RAW") ? "RAW" : "CRAFT";
+      const id = key.substring(type.length + 1);
+      
+      const item = items.find(i => i.itemId === id && i.type === type);
       if (item) {
           totalCount += qty;
           totalPay += item.price * qty;
@@ -195,8 +203,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
                 if (selectedUser && e.target.value !== selectedUser.name) {
                   setSelectedUser(null);
                   setUserAmounts({}); // Clear inventory
-                  setSelectedRawItems({});
-                  setSelectedCraftItems({});
+                  setSelectedItems({});
                 }
               }}
             />
@@ -260,7 +267,8 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto p-1">
             {displayedItems.map(item => {
                 const owned = userAmounts[item.itemId] || 0;
-                const isSelected = !!selectedItems[item.itemId];
+                const key = `${item.type}-${item.itemId}`;
+                const isSelected = !!selectedItems[key];
                 
                 return (
                 <div
@@ -273,7 +281,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
                                 : "bg-gray-800/50 border-gray-700 opacity-50 cursor-not-allowed"
                     }`}
                 >
-                    <div className="cursor-pointer" onClick={() => owned > 0 && toggleItem(item.itemId, owned)}>
+                    <div className="cursor-pointer" onClick={() => owned > 0 && toggleItem(item, owned)}>
                         <div className="flex justify-between items-start w-full">
                             <span className={`text-sm font-bold truncate ${isSelected ? "text-white" : "text-gray-300"}`}>{item.name}</span>
                         </div>
@@ -292,14 +300,14 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
                          <div className="flex items-center gap-1 mt-auto bg-black/40 p-1 rounded justify-between z-10 border border-red-900/50">
                             <button 
                                 className="p-1 hover:bg-white/10 rounded"
-                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item.itemId, (selectedItems[item.itemId] || 0) - 1, owned); }}
+                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) - 1, owned); }}
                             >
                                 <Minus size={12} className="text-gray-300" />
                             </button>
-                            <span className="text-sm font-bold text-white font-mono">{selectedItems[item.itemId]}</span>
+                            <span className="text-sm font-bold text-white font-mono">{selectedItems[key]}</span>
                             <button 
                                 className="p-1 hover:bg-white/10 rounded"
-                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item.itemId, (selectedItems[item.itemId] || 0) + 1, owned); }}
+                                onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) + 1, owned); }}
                             >
                                 <Plus size={12} className="text-gray-300" />
                             </button>
