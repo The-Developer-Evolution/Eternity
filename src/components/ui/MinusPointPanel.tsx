@@ -12,10 +12,15 @@ interface User {
   };
 }
 
+interface ActionResult {
+  success: boolean;
+  error?: string;
+}
+
 interface MinusPointPanelProps {
   users?: User[];
-  onMinusPoint: (userId: string, points: number) => Promise<any>;
-  onNeutralizePoint: (userId: string, points: number) => Promise<any>;
+  onMinusPoint: (userId: string, points: number) => Promise<ActionResult>;
+  onNeutralizePoint: (userId: string, points: number) => Promise<ActionResult>;
 }
 
 export default function MinusPointPanel({
@@ -91,7 +96,7 @@ export default function MinusPointPanel({
     setSelectedUser(prev => prev?.id === userId ? { ...prev, rallyData: { ...prev.rallyData!, minus_point: newMinus } } : prev);
   };
 
-  const processAction = async (actionFn: any, isNeutralize: boolean) => {
+  const processAction = async (actionFn: (userId: string, points: number) => Promise<ActionResult>, isNeutralize: boolean) => {
     if (!selectedUser) return setError("Select a user");
     
     // 1. Cek Cooldown & Loading
@@ -123,7 +128,7 @@ export default function MinusPointPanel({
       } else {
         setError(result.error || "Operation Failed");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

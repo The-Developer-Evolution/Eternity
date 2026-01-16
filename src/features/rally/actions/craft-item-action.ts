@@ -1,10 +1,8 @@
 'use server'
 
-import { craftBigItem } from "@/features/rally/services/item";
+import { craftBigItem, craftTheVault, buySmallItem, buySpecialTicket } from "@/features/rally/services/item";
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
-import { craftTheVault, buySmallItem } from "@/features/rally/services/item";
-import { buySpecialTicket } from "@/features/rally/services/item";
 import { giveItemsToUser } from "@/features/rally/services/user";
 
 export async function buySpecialTicketAction(
@@ -54,7 +52,7 @@ export async function craftItemAction(userId: string, recipeId: string) {
 }
 export async function craftVaultAction(userId: string) {
   try {
-    const result = await craftTheVault(userId);
+    await craftTheVault(userId);
     
     // Get updated vault count
     const updatedData = await prisma.rallyData.findUnique({

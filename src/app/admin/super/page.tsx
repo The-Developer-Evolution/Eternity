@@ -21,7 +21,7 @@ export default async function Page() {
       initialContestStatus = contest.status;
       activePeriodId = contest.id;
     }
-  } catch (error) {
+  } catch {
     console.warn("No active contest found.");
   }
 

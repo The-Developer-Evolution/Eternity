@@ -36,7 +36,7 @@ interface GiveItemsPanelProps {
     userId: string,
     items: { id: string; type: 'big' | 'small'; amount: number }[],
     eonix?: number
-  ) => Promise<any>;
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function GiveItemsPanel({
@@ -52,6 +52,7 @@ export default function GiveItemsPanel({
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [eonixAmount, setEonixAmount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string>("");
 
@@ -63,7 +64,7 @@ export default function GiveItemsPanel({
       const updated = users.find(u => u.id === selectedUser.id);
       if (updated) setSelectedUser(updated);
     }
-  }, [users]);
+  }, [users, selectedUser]); // Added selectedUser dependency
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -74,6 +75,16 @@ export default function GiveItemsPanel({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Cooldown effect
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [cooldown]);
 
   const filteredUsers = localUsers.filter((u) =>
     u.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -147,6 +158,7 @@ export default function GiveItemsPanel({
         setSuccess(`Berhasil memberikan ${giveText} kepada ${selectedUser.name}!`);
         setSelectedItems([]);
         setEonixAmount(0);
+        setCooldown(5); // Start cooldown
 
         // Update local user eonix
         if (eonixAmount > 0) {
@@ -178,7 +190,7 @@ export default function GiveItemsPanel({
       } else {
         setError(res.error || "Gagal memberikan item/eonix");
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan sistem");
     } finally {
       setIsLoading(false);
@@ -365,11 +377,15 @@ export default function GiveItemsPanel({
       {selectedUser && (selectedItems.length > 0 || eonixAmount > 0) && (
         <button
           onClick={handleGiveItems}
-          disabled={isLoading}
+          disabled={isLoading || cooldown > 0}
           className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
         >
           <Gift size={24} />
-          {isLoading ? "Processing..." : "GIVE TO USER"}
+          {isLoading 
+            ? "Processing..." 
+            : cooldown > 0 
+              ? `Wait ${cooldown}s...` 
+              : "GIVE TO USER"}
         </button>
       )}
     </div>

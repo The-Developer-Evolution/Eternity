@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopRawItem, ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { buyCustomRawMaterials } from "@/features/trading/services/buyRaw";
-import { Loader2, CheckCircle, AlertCircle, ShoppingCart, User, Plus, Minus, Coins } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, ShoppingCart, User, Plus, Minus } from "lucide-react";
 
 interface ShopInterfaceProps {
   initialItems: ShopRawItem[];
@@ -17,15 +17,16 @@ export default function ShopInterface({ initialItems }: ShopInterfaceProps) {
   
   // Multi-select state: Record<itemId, amount>
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
-  const [transactionFee, setTransactionFee] = useState<string>("0");
+  // Transaction fee removed as input is commented out
+  const transactionFee = "0";
 
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -68,7 +69,7 @@ export default function ShopInterface({ initialItems }: ShopInterfaceProps) {
     if (!selectedUser) return;
 
     const itemsToBuy = Object.entries(selectedItems)
-        .filter(([_, amount]) => amount > 0)
+        .filter(([, amount]) => amount > 0)
         .map(([id, amount]) => ({ id, amount }));
 
     if (itemsToBuy.length === 0) {
@@ -95,7 +96,7 @@ export default function ShopInterface({ initialItems }: ShopInterfaceProps) {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);

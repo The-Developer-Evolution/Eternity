@@ -10,7 +10,7 @@ export const options: Options = {
   ],
 };
 
-export default function () {
+export default function loadTest() {
   // Ganti dengan endpoint yang melakukan query berat / update data
   // Contoh: Endpoint trading atau rally update
   const url = 'https://eternityuc.com/api/rally/period'; 

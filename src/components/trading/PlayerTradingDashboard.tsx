@@ -99,6 +99,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
       return () => clearInterval(interval);
     }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tradingData, status]);
 
   useEffect(() => {
@@ -144,7 +145,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
         {news && isRunning && (
           <div className="mt-4 bg-blue-900/40 border border-blue-500/30 p-3 rounded-lg animate-in fade-in slide-in-from-bottom-2">
             <p className="text-blue-200 text-sm font-bold uppercase tracking-wider mb-1">NEWS INFO</p>
-            <p className="text-white font-medium italic">"{news}"</p>
+            <p className="text-white font-medium italic">&quot;{news}&quot;</p>
           </div>
         )}
       </div>

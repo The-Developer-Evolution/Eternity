@@ -13,7 +13,7 @@ export const options: Options = {
 
 const BASE_URL = 'https://eternityuc.com';
 
-export default function () {
+export default function loadTest500() {
   // Test 1: Hit Contest Status API (Realtime Timer)
   const resStatus = http.get(`${BASE_URL}/api/contest/status`);
 
@@ -24,7 +24,7 @@ export default function () {
         try {
             const body = JSON.parse(r.body as string);
             return body.serverTime !== undefined;
-        } catch (e) {
+        } catch {
             return false;
         }
     },
@@ -32,7 +32,7 @@ export default function () {
         try {
             const body = JSON.parse(r.body as string);
             return body.status !== undefined;
-        } catch (e) {
+        } catch {
             return false;
         }
     }

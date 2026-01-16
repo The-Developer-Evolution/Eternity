@@ -38,7 +38,6 @@ export default async function Page() {
           <LeaderboardTrading 
             data={leaderboardData}
             title="Trading Leaderboard"
-            currentUserId={session?.user?.id}
           />
         </div>
       </div>

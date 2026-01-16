@@ -110,6 +110,7 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
       return () => clearInterval(interval);
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tradingData, status]);
 
   useEffect(() => {

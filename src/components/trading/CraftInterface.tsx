@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { CraftRecipeDetail, craftBulkItems } from "@/features/trading/services/craft";
@@ -24,8 +24,8 @@ export default function CraftInterface({ recipes }: CraftInterfaceProps) {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -68,7 +68,7 @@ export default function CraftInterface({ recipes }: CraftInterfaceProps) {
     if (!selectedUser) return;
 
     const itemsToCraft = Object.entries(selectedItems)
-        .filter(([_, amount]) => amount > 0)
+        .filter(([, amount]) => amount > 0)
         .map(([id, amount]) => ({ id, amount }));
     
     if (itemsToCraft.length === 0) {
@@ -95,8 +95,7 @@ export default function CraftInterface({ recipes }: CraftInterfaceProps) {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
-        console.error(error);
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);

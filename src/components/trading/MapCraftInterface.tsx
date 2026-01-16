@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { craftMapWithCustomRecipe } from "@/features/trading/services/map";
@@ -39,8 +39,8 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -112,7 +112,7 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
         return;
    }
 
-    const components = Object.entries(selectedItems).filter(([_, qty]) => qty > 0);
+    const components = Object.entries(selectedItems).filter(([, qty]) => qty > 0);
     if (components.length === 0) {
         setMessage({ type: "error", text: "Please select at least one material." });
         return;
@@ -130,13 +130,14 @@ export default function MapCraftInterface({ craftItems }: MapCraftInterfaceProps
         // We can just rely on the result data or re-fetch.
         // result.data contains fresh tradingData.
         if (result.data) {
-             setUserInventory((result.data as any).craftUserAmounts as unknown as UserInventoryItem[]);
+             const data = result.data as unknown as { craftUserAmounts: UserInventoryItem[] };
+             setUserInventory(data?.craftUserAmounts || []);
         }
       } else {
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Crafting failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);

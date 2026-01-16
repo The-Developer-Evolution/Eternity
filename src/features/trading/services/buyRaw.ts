@@ -224,14 +224,13 @@ export async function buyCustomRawMaterials(
              // Let's log a summary credit log or one per item? 
              // Existing code logged "Acquired X raw material: Y" per item type. 
              // Let's loop and create credit logs for items to be consistent with history tracking.
-             for(const item of items) {
-                  // Need name again, but avoiding re-fetch. We can store valid items in map above.
-                  // For simplicity/performance inside transaction, let's just log "Bulk Items" or re-use names if captured.
-                  // Let's assume just one generic log for RAW credit is enough, OR strict logging required?
-                  // Better to log detailed credit for clarity in admin panel.
-                  // We can't re-fetch efficiently inside loop without caching.
-                  // Let's capture names in loop above.
-             }
+             // Re-iterating to log specific credits might be expensive if many items, but usually small list.
+             // To optimize, I'll fetch names in the first loop.
+            
+             // Refined Loop 1:
+             // Map<id, {name, amount}>
+             
+            // Re-write logic slightly to capture names for logging:
              
              // Simpler: Just log "Acquired items from bulk purchase" as one credit entry?
              // But schema has 'amount' for resource. For RAW, amount usually means quantity. 
@@ -271,8 +270,8 @@ export async function buyCustomRawMaterials(
 
         });
 
-    } catch (e: any) {
+    } catch (e) {
         console.error("Buy Custom Error", e);
-        return { success: false, error: e.message || "Transaction failed" };
+        return { success: false, error: e instanceof Error ? e.message : "Transaction failed" };
     }
 }

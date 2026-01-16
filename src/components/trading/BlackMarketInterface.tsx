@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { buyBulkItemsBM, BlackMarketItemDetail } from "@/features/trading/services/blackmarket";
@@ -26,8 +26,8 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
   const craftItems = items.filter(i => i.type === 'CRAFT');
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -91,7 +91,7 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
     setMessage(null);
 
     try {
-      const result = await buyBulkItemsBM(selectedUser.id, itemsToBuy as any);
+      const result = await buyBulkItemsBM(selectedUser.id, itemsToBuy);
       
       if (result.success) {
         setMessage({ type: "success", text: result.message || "Purchase successful!" });

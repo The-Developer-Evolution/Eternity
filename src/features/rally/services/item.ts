@@ -212,7 +212,7 @@ export async function gachaItem(userId: string) {
     throw new Error("No small items available for gacha");
   }
 
-  const possibleGachaItems = smallItems;
+
 
   const rallyData = await prisma.rallyData.findUnique({
     where: {

@@ -20,8 +20,8 @@ export async function GET() {
 
     return NextResponse.json({
       status: contest.status,
-      startTime: contest.startTime?.toISOString(),
-      endTime: contest.endTime?.toISOString(),
+      startTime: contest.startTime ? new Date(contest.startTime).toISOString() : null,
+      endTime: contest.endTime ? new Date(contest.endTime).toISOString() : null,
       serverTime: new Date().toISOString(),
     });
   } catch (error) {

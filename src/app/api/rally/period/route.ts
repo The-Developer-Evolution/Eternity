@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { getActiveContest } from "@/features/rally/services/timer";
 
 export const dynamic = "force-dynamic";

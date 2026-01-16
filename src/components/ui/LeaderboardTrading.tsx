@@ -1,5 +1,6 @@
-'use client'
-import React, { useState } from 'react'
+"use client";
+
+import { useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 interface LeaderboardTradingEntry {
@@ -15,13 +16,11 @@ interface LeaderboardTradingEntry {
 interface LeaderboardTradingProps {
   data: LeaderboardTradingEntry[]
   title?: string
-  currentUserId?: string
 }
 
 export default function LeaderboardTrading({ 
   data, 
   title = "Trading Leaderboard",
-  currentUserId
 }: LeaderboardTradingProps) {
   const [currentPage, setCurrentPage] = useState(0)
   const itemsPerPage = 8

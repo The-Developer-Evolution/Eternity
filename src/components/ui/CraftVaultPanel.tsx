@@ -13,7 +13,7 @@ interface User {
 
 interface CraftVaultPanelProps {
   users?: User[];
-  onCraftVault: (userId: string) => Promise<any>;
+  onCraftVault: (userId: string) => Promise<{ success: boolean; error?: string; newVaultCount?: number }>;
 }
 
 export default function CraftVaultPanel({

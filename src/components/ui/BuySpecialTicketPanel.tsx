@@ -36,7 +36,7 @@ interface BuySpecialTicketPanelProps {
   smallItems: SmallItem[];
   ticketName: string;
   ticketStock: number;
-  onBuyTicket: (userId: string, items: { id: string; type: 'big' | 'small'; amount: number }[]) => Promise<any>;
+  onBuyTicket: (userId: string, items: { id: string; type: 'big' | 'small'; amount: number }[]) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function BuySpecialTicketPanel({
@@ -64,8 +64,8 @@ export default function BuySpecialTicketPanel({
       const updated = users.find(u => u.id === selectedUser.id);
       if (updated) setSelectedUser(updated);
     }
-  }, [users]);
-``
+  }, [users, selectedUser]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -162,9 +162,8 @@ export default function BuySpecialTicketPanel({
         toast.error(res.error || "Gagal membeli special ticket");
         setError(res.error || "Gagal membeli special ticket");
       }
-    } catch (err) {
-      toast.error("Terjadi kesalahan sistem");
-      setError("Terjadi kesalahan sistem");
+    } catch {
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }

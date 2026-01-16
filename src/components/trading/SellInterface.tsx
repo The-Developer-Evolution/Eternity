@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { sellItems, SellItemPayload, SellItem, getUserInventory } from "@/features/trading/services/sell";
-import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign } from "lucide-react";
+  import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus } from "lucide-react";
+
 import { getRunningTradingPeriod } from "@/features/trading/action";
 import { AllTradingData } from "@/features/user/types";
 
@@ -40,8 +41,8 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -147,7 +148,7 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);

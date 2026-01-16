@@ -19,7 +19,7 @@ export interface User {
 
 interface TalkshowAdminPanelProps {
   users: User[];
-  onUpdatePoints: (userId: string, amount: number) => Promise<any>;
+  onUpdatePoints: (userId: string, amount: number) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAdminPanelProps) {
@@ -120,7 +120,7 @@ export default function TalkshowAdminPanel({ users, onUpdatePoints }: TalkshowAd
         setMessage({ text: result.error || "Transaction Failed", type: 'error' });
         toast.error(result.error || "Transaction Failed");
       }
-    } catch (err) {
+    } catch {
       setMessage({ text: "Network Error", type: 'error' });
       toast.error("Network Error"); 
     } finally {

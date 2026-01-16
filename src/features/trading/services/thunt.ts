@@ -92,7 +92,7 @@ export async function addThuntItem(userId: string, rawItemName: string, amount: 
 
     // add item for the targeted userId
     try {
-        const ops: any[] = [];
+        const ops = [];
         
         // 1. Update/Create RawUserAmount
         const existing = tradingData.rawUserAmounts.find(r => r.rawItemId === rawItemMaster.id);
@@ -163,7 +163,7 @@ export async function giveEternityRewards(userId: string, amount: number): Promi
     }
 
     try {
-        const ops: any[] = [];
+        const ops = [];
         
         // 1. Update eternites
         ops.push(prisma.tradingData.update({

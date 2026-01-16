@@ -214,7 +214,11 @@ export async function upgradeAccessCard(userId: string) {
     }
   });
 
-  if (userData.enonix < requirements?.eonix_cost!) {
+  if (!requirements) {
+    throw new Error("Upgrade requirements not found");
+  }
+
+  if (userData.enonix < requirements.eonix_cost) {
     throw new Error("Insufficient Eonix balance");
   }
   
@@ -225,25 +229,25 @@ export async function upgradeAccessCard(userId: string) {
   const userSmallItemInventory = await prisma.userSmallItemInventory.findFirst({
     where: {
       user_id: userId,
-      small_item_id: requirements?.smallItem?.id
+      small_item_id: requirements.smallItem?.id
     }
   });
 
   const userBigItemInventory = await prisma.userBigItemInventory.findFirst({
     where: {
       user_id: userId,
-      big_item_id: requirements?.bigItem?.id
+      big_item_id: requirements.bigItem?.id
     }
   });
 
-  if(!userSmallItemInventory || userSmallItemInventory.amount < requirements?.small_item_amount_required!){
+  if(!userSmallItemInventory || userSmallItemInventory.amount < requirements.small_item_amount_required){
     throw new Error("Insufficient small item for upgrade");
   }
-  if(!userBigItemInventory || userBigItemInventory.amount < requirements?.big_item_amount_required!){
+  if(!userBigItemInventory || userBigItemInventory.amount < requirements.big_item_amount_required){
     throw new Error("Insufficient big item for upgrade");
   }
 
-  const updatedEnonix = userData.enonix - requirements?.eonix_cost!;
+  const updatedEnonix = userData.enonix - requirements.eonix_cost;
   
   const updatedData = await prisma.rallyData.update({
     where: {

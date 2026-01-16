@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { convertCurrency, CurrencyType } from "@/features/trading/services/currency";
@@ -28,8 +28,8 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
   // Note: Pure display estimation. Actual calculation happens on server.
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -67,7 +67,7 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);

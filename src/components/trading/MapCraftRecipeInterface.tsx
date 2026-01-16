@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers, getUserCraftInventory } from "@/features/trading/services/shop";
 import { craftToMap } from "@/features/trading/services/map";
@@ -56,8 +56,8 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
   };
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -118,7 +118,7 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);
@@ -152,7 +152,7 @@ export default function MapCraftRecipeInterface({ mapRecipes }: MapCraftRecipeIn
     return recipeStatus.find(s => s.recipeId === id);
   }, [recipeStatus]);
 
-  const qtyInt = parseInt(amount) || 0;
+
   
   return (
     <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4 mt-8 bg-gray-900/50 rounded-xl border border-purple-500/30">

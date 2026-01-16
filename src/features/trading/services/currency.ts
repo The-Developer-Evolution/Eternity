@@ -6,12 +6,7 @@ import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@prisma/client";
 import { getRunningTradingPeriod } from "../action";
 
-const CURRENCY_RATE = {
-    IDR: 1,
-    USD: 16000,
-    ETERNITE: 1000000
-}
-export type CurrencyType = keyof typeof CURRENCY_RATE;
+export type CurrencyType = 'IDR' | 'USD' | 'ETERNITE';
 
 export async function convertCurrency(
     userId: string, 
@@ -81,10 +76,13 @@ export async function convertCurrency(
     // Prepare update data
     // Values need to be BigInt for IDR/USD, Int for ETERNITE.
     // We used Math.floor above so numbers are integers.
-    const decrementValue = from === 'ETERNITE' ? Math.floor(amount) : BigInt(Math.floor(amount));
-    const incrementValue = to === 'ETERNITE' ? convertedAmount : BigInt(convertedAmount);
+    // Prepare update data
+    // Values need to be BigInt for IDR/USD, Int for ETERNITE.
+    // We used Math.floor above so numbers are integers.
+    // const decrementValue = from === 'ETERNITE' ? Math.floor(amount) : BigInt(Math.floor(amount));
+    // const incrementValue = to === 'ETERNITE' ? convertedAmount : BigInt(convertedAmount);
 
-    const [, updatedTradingData] = await prisma.$transaction([
+    const [] = await prisma.$transaction([
         // Update Balances (Single Update if possible? No, different fields)
         // Actually we can do one update with multiple field changes
         prisma.tradingData.update({

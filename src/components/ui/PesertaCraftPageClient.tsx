@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Package } from "lucide-react";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
-import { getAllBigItems, getMyInventory } from "@/features/rally/services/item";
 import CraftButton from "@/components/common/CraftButton";
 import CardPanel from "@/components/ui/CardPanel";
 import ModalTriggerButton from "@/components/common/ModalTriggerButton";

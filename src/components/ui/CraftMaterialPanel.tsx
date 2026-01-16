@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Hammer, ShoppingCart, ChevronDown, Package } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -38,8 +39,8 @@ interface CraftMaterialPanelProps {
   smallItems: SmallItem[];
   bigItems: BigItem[];
   bigItemsRecipe: Recipe[];
-  onBuyMaterial: (userId: string, itemId: string) => Promise<any>;
-  onCraftBigItem: (userId: string, recipeId: string) => Promise<any>;
+  onBuyMaterial: (userId: string, itemId: string) => Promise<{ success: boolean; error?: string }>;
+  onCraftBigItem: (userId: string, recipeId: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function CraftMaterialPanel({
@@ -66,7 +67,7 @@ export default function CraftMaterialPanel({
       const updated = users.find(u => u.id === selectedUser.id);
       if (updated) setSelectedUser(updated);
     }
-  }, [users]);
+  }, [users, selectedUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -90,7 +91,7 @@ export default function CraftMaterialPanel({
     setSuccess("");
   };
 
-  const handleAction = async (actionName: string, itemName: string, id: string, actionFn: any, isPurchase: boolean) => {
+  const handleAction = async (actionName: string, itemName: string, id: string, actionFn: (uid: string, itemId: string) => Promise<{ success: boolean; error?: string }>, isPurchase: boolean) => {
     if (!selectedUser) return;
 
     const confirmAction = window.confirm(`Apakah Anda yakin ingin melakukan ${actionName} untuk ${itemName}?`);
@@ -124,8 +125,8 @@ export default function CraftMaterialPanel({
       } else {
         setError(res.error || `Gagal melakukan ${actionName}`);
       }
-    } catch (err) {
-      setError("Terjadi kesalahan sistem");
+    } catch {
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(null);
     }

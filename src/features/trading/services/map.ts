@@ -61,7 +61,7 @@ export async function craftToMap(
   }
 
   // 3. Check Inventory & Prepare Transaction
-  const ops: any[] = [];
+  const ops = [];
   let totalItemsConsumed = 0;
 
   for (const component of recipe.mapRecipeComponents) {
@@ -177,7 +177,7 @@ export async function craftMapWithCustomRecipe(
     }
 
     // 3. Validate Components & Check Inventory
-    const ops: any[] = [];
+    const ops = [];
     let totalItemsConsumed = 0; // For logging purpose
     
     

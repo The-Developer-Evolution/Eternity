@@ -29,7 +29,7 @@ export async function payPitchingFee(userId: string, amount: number): Promise<Ac
     }
 
     try {
-        const [, updatedTradingData] = await prisma.$transaction([
+        const [] = await prisma.$transaction([
             prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,

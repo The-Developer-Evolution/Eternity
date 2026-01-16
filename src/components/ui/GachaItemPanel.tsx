@@ -20,7 +20,7 @@ interface SmallItem {
 interface GachaItemPanelProps {
   users?: User[];
   smallItems?: SmallItem[];
-  onGacha: (userId: string) => Promise<any>;
+  onGacha: (userId: string) => Promise<{ success: boolean; error?: string; item?: SmallItem }>;
 }
 
 export default function GachaItemPanel({
@@ -93,7 +93,7 @@ export default function GachaItemPanel({
           `Successfully performed gacha for ${selectedUser.name}!`
         );
         toast.success(`Gacha successful for ${selectedUser.name}!`);
-        setGachaResult(result.item);
+        setGachaResult(result.item || null);
 
         // Update local state - decrement eonix
         setAllUsers((prev) =>

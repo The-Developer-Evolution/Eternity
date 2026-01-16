@@ -2,13 +2,11 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import MapCraftRecipeInterface from "@/components/trading/MapCraftRecipeInterface";
-import { getAllCraftRecipes } from "@/features/trading/services/craft";
 import { getAllMapRecipes } from "@/features/trading/services/map";
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-  const craftItems = await getAllCraftRecipes();
   const mapRecipes = await getAllMapRecipes();
 
   const serializedMapRecipes = mapRecipes.map(r => ({

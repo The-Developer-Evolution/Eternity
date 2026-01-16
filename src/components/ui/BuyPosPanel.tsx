@@ -22,7 +22,7 @@ interface PosOption {
 interface BuyPosPanelProps {
   users?: User[];
   posOptions?: PosOption[];
-  onBuyAccess: (userId: string, posName: string, zoneId: string) => Promise<any>;
+  onBuyAccess: (userId: string, posName: string, zoneId: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function BuyPosPanel({
@@ -34,10 +34,17 @@ export default function BuyPosPanel({
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
+  // POS Search State
+  const [filteredPosOptions, setFilteredPosOptions] = useState<PosOption[]>(posOptions);
+  const [posSearchQuery, setPosSearchQuery] = useState("");
   const [selectedPos, setSelectedPos] = useState<PosOption | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showPosDropdown, setShowPosDropdown] = useState(false);
 
@@ -46,10 +53,29 @@ export default function BuyPosPanel({
     setFilteredUsers(users);
   }, [users]);
 
+  useEffect(() => {
+    setFilteredPosOptions(posOptions);
+  }, [posOptions]);
+
+  // Cooldown effect
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [cooldown]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setError(null);
     setSuccess(null);
+
+    // If we're searching, clear the selected user until they pick one from the list again
+    if (selectedUser && query !== selectedUser.name) {
+       setSelectedUser(null);
+    }
 
     if (query.trim() === "") {
       setFilteredUsers(allUsers);
@@ -62,6 +88,27 @@ export default function BuyPosPanel({
     setShowUserDropdown(true);
   };
 
+  const handlePosSearch = (query: string) => {
+    setPosSearchQuery(query);
+    setError(null);
+    setSuccess(null);
+
+    if (selectedPos && query !== `${selectedPos.name} (${selectedPos.zoneName})`) {
+        setSelectedPos(null);
+    }
+
+    if (query.trim() === "") {
+      setFilteredPosOptions(posOptions);
+    } else {
+      const filtered = posOptions.filter((pos) =>
+        pos.name.toLowerCase().includes(query.toLowerCase()) || 
+        pos.zoneName.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredPosOptions(filtered);
+    }
+    setShowPosDropdown(true);
+  };
+
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
     setSearchQuery(user.name);
@@ -72,6 +119,7 @@ export default function BuyPosPanel({
 
   const handleSelectPos = (pos: PosOption) => {
     setSelectedPos(pos);
+    setPosSearchQuery(`${pos.name} (${pos.zoneName})`);
     setShowPosDropdown(false);
     setError(null);
     setSuccess(null);
@@ -94,6 +142,13 @@ export default function BuyPosPanel({
       return;
     }
 
+    // Confirmation Alert
+    const confirmed = window.confirm(
+      `Confirm Purchase?\n\nUser: ${selectedUser.name}\nPOS: ${selectedPos.name}\nZone: ${selectedPos.zoneName}\nCost: ${selectedPos.eonix_cost} Eonix`
+    );
+
+    if (!confirmed) return;
+
     setIsLoading(true);
     setError(null);
     setSuccess(null);
@@ -110,6 +165,9 @@ export default function BuyPosPanel({
           `Successfully purchased access to ${selectedPos.name} for ${selectedUser.name}! Cost: ${selectedPos.eonix_cost} Eonix`
         );
         
+        // Start cooldown
+        setCooldown(5);
+
         // Update local state - decrement eonix
         setAllUsers((prev) =>
           prev.map((u) =>
@@ -232,34 +290,34 @@ export default function BuyPosPanel({
         </div>
       )}
 
-      {/* POS Selection Dropdown */}
+      {/* POS Selection Section (Searchable) */}
       {selectedUser && (
         <div className="mb-6 relative">
           <label className="block text-[#78CCEE] font-bold mb-2">
-            Select POS
+            Search POS
           </label>
-          <button
-            onClick={() => setShowPosDropdown(!showPosDropdown)}
-            className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] hover:border-[#78CCEE] transition-colors flex items-center justify-between"
-          >
-            <span>
-              {selectedPos 
-                ? `${selectedPos.name} (${selectedPos.zoneName}) - ${selectedPos.eonix_cost} Eonix` 
-                : "Choose a POS..."}
-            </span>
-            <ChevronDown 
-              className={`text-[#78CCEE] transition-transform ${showPosDropdown ? 'rotate-180' : ''}`}
+          <div className="relative">
+            <input
+              type="text"
+              value={posSearchQuery}
+              onChange={(e) => handlePosSearch(e.target.value)}
+              onFocus={() => setShowPosDropdown(true)}
+              placeholder="Search POS name or zone..."
+              className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors pr-10"
+            />
+             <ChevronDown 
+              className={`absolute right-3 top-1/2 -translate-y-1/2 text-[#78CCEE] transition-transform ${showPosDropdown ? 'rotate-180' : ''}`}
               size={20}
             />
-          </button>
+          </div>
 
           {/* POS Dropdown */}
           {showPosDropdown && (
             <div className="absolute z-50 w-full mt-2 max-h-64 overflow-y-auto bg-[#3E344A] rounded-lg border-2 border-[#684095] shadow-xl">
-              {posOptions.length === 0 ? (
-                <p className="text-slate-400 text-center py-4">No POS available</p>
+              {filteredPosOptions.length === 0 ? (
+                <p className="text-slate-400 text-center py-4">No POS found</p>
               ) : (
-                posOptions.map((pos) => (
+                filteredPosOptions.map((pos) => (
                   <button
                     key={pos.id}
                     onClick={() => handleSelectPos(pos)}
@@ -327,11 +385,15 @@ export default function BuyPosPanel({
         <div className="mb-6">
           <button
             onClick={handleBuyAccess}
-            disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < selectedPos.eonix_cost}
+            disabled={isLoading || cooldown > 0 || (selectedUser.rallyData?.enonix || 0) < selectedPos.eonix_cost}
             className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             <MapPin className="text-2xl" />
-            {isLoading ? "PROCESSING..." : `BUY ACCESS (${selectedPos.eonix_cost} EONIX)`}
+            {isLoading 
+              ? "PROCESSING..." 
+              : cooldown > 0 
+                ? `WAIT ${cooldown}s...` 
+                : `BUY ACCESS (${selectedPos.eonix_cost} EONIX)`}
           </button>
         </div>
       )}

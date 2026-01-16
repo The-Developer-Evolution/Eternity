@@ -1,4 +1,3 @@
-import { RawStockPeriod } from "@prisma/client";
 import { PrismaClient, Role, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
@@ -589,7 +588,7 @@ async function main() {
       console.log(
         `Created admin -> name: "${name}", password: "${plainPassword}"`
       );
-    } catch (error) {
+    } catch {
       console.log(`Admin ${name} already exists, skipping...`);
     }
   }

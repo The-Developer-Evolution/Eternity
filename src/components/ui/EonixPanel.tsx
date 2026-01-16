@@ -131,7 +131,7 @@ export default function EonixPanel({
         setError(result.error || "Operation Failed");
         toast.error(result.error || "Operation Failed");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
       toast.error("An unexpected error occurred");
     } finally {

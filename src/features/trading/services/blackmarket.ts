@@ -119,41 +119,45 @@ export async function buyItemBM(
 
     // 2. Fetch Stock Record & Validate
     // We need to know if it's Raw or Craft to query correct table
-    let stockRecord: any; // RawStockPeriod | CraftStockPeriod
+    let rawStockRecord = null;
+    let craftStockRecord = null;
     let itemName = "";
     let itemId = "";
 
     if (type === 'RAW') {
-        stockRecord = await prisma.rawStockPeriod.findUnique({
+        rawStockRecord = await prisma.rawStockPeriod.findUnique({
             where: { id: stockPeriodId },
             include: { rawItem: true }
         });
-        if (stockRecord) {
-            itemName = stockRecord.rawItem.name;
-            itemId = stockRecord.rawId;
+        if (rawStockRecord) {
+            itemName = rawStockRecord.rawItem.name;
+            itemId = rawStockRecord.rawId;
         }
     } else {
-        stockRecord = await prisma.craftStockPeriod.findUnique({
+        craftStockRecord = await prisma.craftStockPeriod.findUnique({
             where: { id: stockPeriodId },
             include: { craftItem: true }
         });
-        if(stockRecord) {
-            itemName = stockRecord.craftItem.name;
-            itemId = stockRecord.craftId;
+        if(craftStockRecord) {
+            itemName = craftStockRecord.craftItem.name;
+            itemId = craftStockRecord.craftId;
         }
     }
 
-    if (!stockRecord) {
+    if (!rawStockRecord && !craftStockRecord) {
         return { success: false, error: "Item no longer available." };
     }
 
-    if (stockRecord.stock < amount) {
+    const currentStock = rawStockRecord ? rawStockRecord.stock : craftStockRecord!.stock;
+    const currentPrice = rawStockRecord ? rawStockRecord.price : craftStockRecord!.price;
+
+    if (currentStock < amount) {
         return { success: false, error: `Insufficient stock for ${itemName}.` };
     }
 
     // 3. Calculate Price (BigInt safe)
     // Price is BigInt in DB. Amount is number.
-    const pricePerUnit = BigInt(stockRecord.price);
+    const pricePerUnit = BigInt(currentPrice);
     const totalPriceBigInt = pricePerUnit * BigInt(amount);
     
     // Convert User Balance (Int) to BigInt for comparison or cast Total to Int
@@ -173,7 +177,7 @@ export async function buyItemBM(
     // 4. Transaction
     try {
         // Prepare Operations
-        const ops: any[] = [];
+        const ops = [];
         
         // Deduct Stock
         if (type === 'RAW') {
@@ -272,37 +276,42 @@ export async function buyBulkItemsBM(
 
     try {
         let totalCost = BigInt(0);
-        const operations: any[] = [];
+        const operations = [];
 
         for (const item of items) {
-             let stockRecord: any;
+             let rawStockRecord = null;
+             let craftStockRecord = null;
              let itemName = "";
              let itemId = "";
 
              if (item.type === 'RAW') {
-                stockRecord = await prisma.rawStockPeriod.findUnique({
+                rawStockRecord = await prisma.rawStockPeriod.findUnique({
                     where: { id: item.stockPeriodId },
                     include: { rawItem: true }
                 });
-                 if (stockRecord) {
-                    itemName = stockRecord.rawItem.name;
-                    itemId = stockRecord.rawId;
+                 if (rawStockRecord) {
+                    itemName = rawStockRecord.rawItem.name;
+                    itemId = rawStockRecord.rawId;
                 }
              } else {
-                stockRecord = await prisma.craftStockPeriod.findUnique({
+                craftStockRecord = await prisma.craftStockPeriod.findUnique({
                     where: { id: item.stockPeriodId },
                     include: { craftItem: true }
                 });
-                if(stockRecord) {
-                    itemName = stockRecord.craftItem.name;
-                    itemId = stockRecord.craftId;
+                if(craftStockRecord) {
+                    itemName = craftStockRecord.craftItem.name;
+                    itemId = craftStockRecord.craftId;
                 }
              }
              
-             if (!stockRecord) throw new Error(`Item ${item.stockPeriodId} no longer available.`);
-             if (stockRecord.stock < item.amount) throw new Error(`Insufficient stock for ${itemName}.`);
+             if (!rawStockRecord && !craftStockRecord) throw new Error(`Item ${item.stockPeriodId} no longer available.`);
+             
+             const currentStock = rawStockRecord ? rawStockRecord.stock : craftStockRecord!.stock;
+             const currentPrice = rawStockRecord ? rawStockRecord.price : craftStockRecord!.price;
 
-             const cost = BigInt(stockRecord.price) * BigInt(item.amount);
+             if (currentStock < item.amount) throw new Error(`Insufficient stock for ${itemName}.`);
+
+             const cost = BigInt(currentPrice) * BigInt(item.amount);
              totalCost += cost;
 
              // Prepare Deduction Operation
@@ -382,9 +391,9 @@ export async function buyBulkItemsBM(
 
         return { success: true, data: finalData!, message: "Bulk Purchase Successful!" };
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Black Market Bulk Buy Error:", error);
-        return { success: false, error: error.message || "Transaction failed." };
+        return { success: false, error: error instanceof Error ? error.message : "Transaction failed." };
     }
 }
 
@@ -416,7 +425,7 @@ export async function sellBulkItemsBM(
 
     try {
         let totalPay = BigInt(0);
-        const operations: any[] = [];
+        const operations = [];
         
         for (const item of items) {
             let price = BigInt(0);
@@ -500,8 +509,8 @@ export async function sellBulkItemsBM(
 
         return { success: true, data: finalData!, message: "Items sold successfully!" };
 
-    } catch (error: any) {
+    } catch (error) {
          console.error("Black Market Bulk Sell Error:", error);
-        return { success: false, error: error.message || "Transaction failed." };
+        return { success: false, error: error instanceof Error ? error.message : "Transaction failed." };
     }
 }

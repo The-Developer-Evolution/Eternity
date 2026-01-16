@@ -70,7 +70,7 @@ export async function itemToCraft(
   }
 
   // 3. Validation: Check inventory
-  const transactionOps: any[] = [];
+  const transactionOps = [];
   let totalRawConsumed = 0;
 
   for (const recipe of craftItem.craftRecipes) {
@@ -338,8 +338,8 @@ export async function craftBulkItems(
             };
 
         });
-    } catch (e: any) {
+    } catch (e) {
         console.error("Bulk Craft Error", e);
-        return { success: false, error: e.message || "Crafting failed" };
+        return { success: false, error: e instanceof Error ? e.message : "Crafting failed" };
     }
 }

@@ -94,7 +94,7 @@ export async function sellItems(
     const tradingData = userResult.data.tradingData;
 
     try {
-        const ops: any[] = [];
+        const ops = [];
         let totalIDR = BigInt(0);
         let totalEternites = BigInt(0);
 

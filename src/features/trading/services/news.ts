@@ -24,7 +24,7 @@ export async function chargeEternities(userId: string, amount: number, reason: s
     }
 
     try {
-        const ops: any[] = [];
+        const ops = [];
         
         // 1. Update eternites
         ops.push(prisma.tradingData.update({

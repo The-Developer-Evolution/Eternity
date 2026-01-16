@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { sellBulkItemsBM, BlackMarketItemDetail } from "@/features/trading/services/blackmarket";
 import { getUserInventory } from "@/features/trading/services/sell"; 
-import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, DollarSign, ShoppingCart } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, User, Package, Minus, Plus, ShoppingCart } from "lucide-react";
 
 interface BlackMarketSellInterfaceProps {
     items: BlackMarketItemDetail[];
@@ -33,8 +33,8 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Debounced search
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (query: string) => {
       if (!query || query.length < 2) {
         setMatchingUsers([]);
         return;
@@ -62,11 +62,11 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
       if (data) {
           const amounts: Record<string, number> = {};
           
-          data.rawUserAmounts.forEach((ua: any) => {
-              amounts[ua.rawItemId] = ua.amount;
+          data.rawUserAmounts.forEach((ua) => {
+              amounts[ua.rawItemId] = Number(ua.amount);
           });
-          data.craftUserAmounts.forEach((ua: any) => {
-              amounts[ua.craftItemId] = ua.amount;
+          data.craftUserAmounts.forEach((ua) => {
+              amounts[ua.craftItemId] = Number(ua.amount);
           });
           
           setUserAmounts(amounts);
@@ -114,7 +114,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
     setMessage(null);
 
     try {
-      const result = await sellBulkItemsBM(selectedUser.id, itemsToSell as any);
+      const result = await sellBulkItemsBM(selectedUser.id, itemsToSell);
       
       if (result.success && result.data) {
         setMessage({ type: "success", text: result.message || "Sold successfully!" });
@@ -122,13 +122,16 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
         
         // Refresh inventory
         const amounts: Record<string, number> = {};
-        const data = result.data as any;
+        const data = result.data as unknown as { 
+            rawUserAmounts?: { rawItemId: string; amount: bigint }[], 
+            craftUserAmounts?: { craftItemId: string; amount: bigint }[] 
+        };
         
-        if (data.rawUserAmounts) {
-            data.rawUserAmounts.forEach((ua: any) => amounts[ua.rawItemId] = ua.amount);
+        if (data?.rawUserAmounts) {
+            data.rawUserAmounts.forEach((ua) => { amounts[ua.rawItemId] = Number(ua.amount); });
         }
-        if (data.craftUserAmounts) {
-             data.craftUserAmounts.forEach((ua: any) => amounts[ua.craftItemId] = ua.amount);
+        if (data?.craftUserAmounts) {
+             data.craftUserAmounts.forEach((ua) => { amounts[ua.craftItemId] = Number(ua.amount); });
         }
         setUserAmounts(amounts);
 
@@ -136,7 +139,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
         const errorMsg = Array.isArray(result.error) ? result.error.join(", ") : result.error;
         setMessage({ type: "error", text: errorMsg || "Transaction failed." });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "An unexpected error occurred." });
     } finally {
       setIsTransacting(false);
