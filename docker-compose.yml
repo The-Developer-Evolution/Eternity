@@ -19,7 +19,7 @@ services:
     container_name: eternity-seeder
     command: pnpm prisma db seed
     env_file:
-      - .env.prod
+      - .env
     networks:
       - global_proxy
       - eternity_internal
@@ -51,7 +51,7 @@ services:
         - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
     container_name: eternity
     env_file:
-      - ./.env.prod
+      - ./.env
     depends_on:
       migrate:
         condition: service_completed_successfully
