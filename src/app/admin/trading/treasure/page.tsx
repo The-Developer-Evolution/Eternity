@@ -5,6 +5,7 @@ import TreasureHuntStatusInterface from "@/components/trading/TreasureHuntStatus
 import TreasureHuntInterface from "@/components/trading/TreasureHuntInterface";
 import { getAllRawItems } from "@/features/trading/services/thunt";
 
+
 export default async function Page() {
   const rawItems = await getAllRawItems();
   return (
