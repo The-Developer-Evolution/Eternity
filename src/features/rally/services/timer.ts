@@ -7,21 +7,13 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 async function initializeRallyDataForAllUsers() {
   try {
     // Get all users
-    const allUsers = await prisma.user.findMany({
+    // Optimized: Only fetch users who DO NOT have rallyData
+    const usersNeedingRallyData = await prisma.user.findMany({
+      where: {
+        rallyData: null,
+      },
       select: { id: true },
     });
-
-    // Get users yang sudah punya rally data
-    const usersWithRallyData = await prisma.rallyData.findMany({
-      select: { user_id: true },
-    });
-
-    const existingUserIds = new Set(usersWithRallyData.map((rd) => rd.user_id));
-
-    // Filter users yang belum punya rally data
-    const usersNeedingRallyData = allUsers.filter(
-      (user) => !existingUserIds.has(user.id)
-    );
 
     if (usersNeedingRallyData.length === 0) {
       return {
@@ -32,6 +24,7 @@ async function initializeRallyDataForAllUsers() {
     }
 
     // Create rally data for users yang belum punya
+    // Create many is efficient
     const result = await prisma.rallyData.createMany({
       data: usersNeedingRallyData.map((user) => ({
         user_id: user.id,
@@ -41,6 +34,7 @@ async function initializeRallyDataForAllUsers() {
         point: 0,
         minus_point: 0,
       })),
+      skipDuplicates: true, 
     });
 
     return {
@@ -79,10 +73,16 @@ export async function addEonixToAllUsers(amount: number) {
     user_id: u.user_id,
   }));
 
-  await prisma.rallyActivityLog.createMany({
-    data: logs,
-    skipDuplicates: true,
-  });
+  const BATCH_SIZE = 1000;
+  
+  // Create logs in batches to prevent memory/query size issues
+  for (let i = 0; i < logs.length; i += BATCH_SIZE) {
+    const batch = logs.slice(i, i + BATCH_SIZE);
+    await prisma.rallyActivityLog.createMany({
+      data: batch,
+      skipDuplicates: true,
+    });
+  }
 
   return { success: true, updatedCount: updated.count, createdLogs: logs.length };
 }
@@ -286,7 +286,9 @@ export async function endContest() {
     },
   });
 
-  if (!activeContest) throw new Error("No active contest to end.");
+  if (!activeContest) {
+    return { success: false, message: "No active contest to end." };
+  }
 
   await prisma.rallyPeriod.update({
     where: { id: activeContest.id },
@@ -308,4 +310,6 @@ export async function endContest() {
   revalidatePath("/admin/super");
   revalidatePath("/peserta/rally");
   revalidateTag("active-contest");
+  
+  return { success: true, message: "Contest ended successfully." };
 }

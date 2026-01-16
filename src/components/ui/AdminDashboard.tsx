@@ -99,7 +99,10 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
           await resumeContest();
           break;
         case "end":
-          await endContest();
+          const endResult = await endContest();
+          if (!endResult.success) {
+            throw new Error(endResult.message);
+          }
           break;
       }
       mutate();

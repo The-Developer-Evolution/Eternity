@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FaDice } from "react-icons/fa";
+import { useState, useEffect, useMemo } from "react";
+import { Dices } from "lucide-react";
 import { toast } from "sonner";
+import debounce from "lodash/debounce";
 
 interface User {
   id: string;
@@ -42,20 +43,38 @@ export default function GachaItemPanel({
     setFilteredUsers(users);
   }, [users]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+
+  // Create a debounced search handler
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query: string) => {
+        if (!query) {
+          setFilteredUsers(allUsers); // Reset if empty
+          return;
+        }
+        const lowerQuery = query.toLowerCase();
+        const filtered = allUsers.filter((u) =>
+          u.name.toLowerCase().includes(lowerQuery)
+        );
+        setFilteredUsers(filtered);
+      }, 300),
+    [allUsers] // Recreate debounced function if allUsers changes
+  );
+
+  // Cleanup for debouncedSearch on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
     setError(null);
     setSuccess(null);
     setGachaResult(null);
-
-    if (query.trim() === "") {
-      setFilteredUsers(allUsers);
-    } else {
-      const filtered = allUsers.filter((user) =>
-        user.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    }
+    debouncedSearch(value);
   };
 
   const handleSelectUser = (user: User) => {
@@ -163,9 +182,9 @@ export default function GachaItemPanel({
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Type user name..."
-          className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors"
+          onChange={handleSearchChange}
+          placeholder="Type name..."
+          className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors pr-10"
         />
       </div>
 
@@ -254,7 +273,7 @@ export default function GachaItemPanel({
         gachaResult && (
           <div className="mb-6 p-6 bg-gradient-to-r from-[#41FFA3]/20 to-[#78CCEE]/20 rounded-lg border-2 border-[#41FFA3] animate-pulse">
             <div className="text-center">
-              <FaDice className="text-5xl text-[#41FFA3] mx-auto mb-3" />
+              <Dices className="text-5xl text-[#41FFA3] mx-auto mb-3" />
               <h3 className="text-2xl font-impact text-[#41FFA3] mb-2">
                 GACHA RESULT!
               </h3>
@@ -273,7 +292,7 @@ export default function GachaItemPanel({
               disabled={isLoading || (selectedUser.rallyData?.enonix || 0) < 3}
               className="w-full bg-[#41FFA3] hover:bg-[#2ee089] disabled:bg-slate-600 text-[#3E344A] font-impact py-4 px-6 rounded-lg transition-colors text-xl disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
-              <FaDice className="text-2xl" />
+              <Dices className="text-2xl" />
               {isLoading ? "SPINNING..." : "PERFORM GACHA (3 EONIX)"}
             </button>
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Hammer, ChevronDown } from "lucide-react";
+import debounce from "lodash/debounce";
 
 interface User {
   id: string;
@@ -34,20 +35,33 @@ export default function CraftVaultPanel({
     setFilteredUsers(users);
   }, [users]);
 
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => {
+      if (query.trim() === "") {
+        setFilteredUsers(allUsers);
+      } else {
+        const filtered = allUsers.filter((user) =>
+          user.name.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredUsers(filtered);
+      }
+    }, 300),
+    [allUsers]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setError(null);
     setSuccess(null);
-
-    if (query.trim() === "") {
-      setFilteredUsers(allUsers);
-    } else {
-      const filtered = allUsers.filter((user) =>
-        user.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    }
     setShowUserDropdown(true);
+    debouncedSearch(query);
   };
 
   const handleSelectUser = (user: User) => {
