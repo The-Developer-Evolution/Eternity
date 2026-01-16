@@ -26,8 +26,13 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   const [activeTab, setActiveTab] = useState<"RAW" | "CRAFT">("RAW");
   
   // Multi-select state: Record<ITEM_ID, sell_amount>
-  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
-  
+  // Split into RAW and CRAFT to ensure independent states
+  const [selectedRawItems, setSelectedRawItems] = useState<Record<string, number>>({});
+  const [selectedCraftItems, setSelectedCraftItems] = useState<Record<string, number>>({});
+
+  const selectedItems = activeTab === "RAW" ? selectedRawItems : selectedCraftItems;
+  const setSelectedItems = activeTab === "RAW" ? setSelectedRawItems : setSelectedCraftItems;
+
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -118,7 +123,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
       
       if (result.success && result.data) {
         setMessage({ type: "success", text: result.message || "Sold successfully!" });
-        setSelectedItems({}); // Clear selection
+        setSelectedItems({}); // Clear selection for current tab
         
         // Refresh inventory
         const amounts: Record<string, number> = {};
@@ -190,7 +195,8 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
                 if (selectedUser && e.target.value !== selectedUser.name) {
                   setSelectedUser(null);
                   setUserAmounts({}); // Clear inventory
-                  setSelectedItems({});
+                  setSelectedRawItems({});
+                  setSelectedCraftItems({});
                 }
               }}
             />
