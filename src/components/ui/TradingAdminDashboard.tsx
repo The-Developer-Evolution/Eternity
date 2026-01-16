@@ -122,14 +122,38 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
 
   useEffect(() => {
     const pusher = getPusherClient();
-    if (!pusher) return;
+    if (!pusher) {
+        console.warn("Pusher client not initialized in Dashboard");
+        return;
+    }
+
+    console.log("Subscribing to trading-channel...");
+    
+    // Debug connection state
+    pusher.connection.bind("state_change", (states: any) => {
+        console.log("Pusher Connection State:", states);
+    });
+    
+    pusher.connection.bind("error", (err: any) => {
+        console.error("Pusher Connection Error:", err);
+    });
 
     const channel = pusher.subscribe("trading-channel");
-    channel.bind("status-update", () => {
-      mutate();
+    
+    channel.bind("pusher:subscription_succeeded", () => {
+        console.log("Successfully subscribed to trading-channel");
     });
+
+    channel.bind("status-update", (data: any) => {
+        console.log("Received status-update event:", data);
+        mutate();
+    });
+    
     return () => {
+      console.log("Unsubscribing from trading-channel");
       pusher.unsubscribe("trading-channel");
+      pusher.connection.unbind("state_change");
+      pusher.connection.unbind("error");
     };
   }, [mutate]);
 

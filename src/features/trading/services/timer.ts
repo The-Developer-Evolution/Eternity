@@ -60,13 +60,15 @@ export async function StartTradingTimer(periodId: string, durationMinutes: numbe
   const pusher = getPusherServer();
   if (pusher) {
     try {
+      console.log("Triggering trading-channel/status-update (START)...");
       await pusher.trigger("trading-channel", "status-update", {
         status: "ON_GOING",
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
       });
+      console.log("Pusher trigger success (START).");
     } catch (error) {
-      console.error("Failed to trigger Pusher event:", error);
+      console.error("Failed to trigger Pusher event (START):", error);
     }
   }
 
@@ -94,11 +96,13 @@ export async function pauseTrading() {
   const pusher = getPusherServer();
   if (pusher) {
     try {
+      console.log("Triggering trading-channel/status-update (PAUSE)...");
       await pusher.trigger("trading-channel", "status-update", {
         status: "PAUSED",
       });
+      console.log("Pusher trigger success (PAUSE).");
     } catch (error) {
-      console.error("Failed to trigger Pusher event:", error);
+      console.error("Failed to trigger Pusher event (PAUSE):", error);
     }
   }
 
@@ -131,12 +135,14 @@ export async function resumeTrading() {
   const pusher = getPusherServer();
   if (pusher) {
     try {
+      console.log("Triggering trading-channel/status-update (RESUME)...");
       await pusher.trigger("trading-channel", "status-update", {
         status: "ON_GOING",
         endTime: newEndTime.toISOString(),
       });
+      console.log("Pusher trigger success (RESUME).");
     } catch (error) {
-      console.error("Failed to trigger Pusher event:", error);
+      console.error("Failed to trigger Pusher event (RESUME):", error);
     }
   }
 
@@ -165,11 +171,13 @@ export async function endTrading() {
   const pusher = getPusherServer();
   if (pusher) {
     try {
+      console.log("Triggering trading-channel/status-update (END)...");
       await pusher.trigger("trading-channel", "status-update", {
         status: "ENDED",
       });
+      console.log("Pusher trigger success (END).");
     } catch (error) {
-      console.error("Failed to trigger Pusher event:", error);
+      console.error("Failed to trigger Pusher event (END):", error);
     }
   }
 

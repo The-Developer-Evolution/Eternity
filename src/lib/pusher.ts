@@ -18,17 +18,25 @@ export const getPusherClient = () => {
 
     console.log("[PusherConfig] Initializing with:", { key, forceTLS, port, host: process.env.NEXT_PUBLIC_SOKETI_HOST });
 
+    // Enable Pusher logging
+    PusherClient.logToConsole = true;
+
     pusherClientInstance = new PusherClient(
       key,
       {
         cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
         wsHost: process.env.NEXT_PUBLIC_SOKETI_HOST!,
+        // For standard 443 wss, we can omit ports or keep them. 
+        // If port is 443, wsPort=443 might be confusing for 'ws'. 
+        // Best to let library defaults handle standard ports if possible, or force them if using custom.
+        // But since we want to try both:
         wsPort: port,
         wssPort: port,
         forceTLS: forceTLS,
         wsPath: process.env.NEXT_PUBLIC_SOKETI_PATH, 
         disableStats: true,
-        enabledTransports: forceTLS ? ["wss"] : ["ws", "wss"], 
+        // Allow both transports to avoid 'failed' state if one is blocked/misconfigured
+        enabledTransports: ["ws", "wss"], 
       }
     );
   }

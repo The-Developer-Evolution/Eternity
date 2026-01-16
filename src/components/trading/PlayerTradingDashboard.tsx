@@ -104,14 +104,52 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
 
   useEffect(() => {
     const pusher = getPusherClient();
-    if (!pusher) return;
+    if (!pusher) {
+       console.warn("Pusher client not initialized in PlayerDashboard");
+       return;
+    }
+
+    // Log current state immediately (in case it's already connected)
+    console.log("PlayerDashboard: Current Pusher State:", pusher.connection.state);
+
+    console.log("PlayerDashboard: Subscribing to trading-channel...");
+    
+    // Debug connection state
+    pusher.connection.bind("state_change", (states: any) => {
+        console.log("PlayerDashboard Pusher Connection State:", states);
+    });
+
+    pusher.connection.bind("error", (err: any) => {
+        console.error("PlayerDashboard Pusher Connection Error:", err);
+    });
 
     const channel = pusher.subscribe("trading-channel");
-    channel.bind("status-update", () => {
-      mutate();
+
+    channel.bind("pusher:subscription_succeeded", () => {
+        console.log("PlayerDashboard: Successfully subscribed to trading-channel");
     });
+
+    channel.bind("status-update", (data: any) => {
+        console.log("PlayerDashboard: Received status-update event:", data);
+        
+        // Optimistic update - trust the Pusher event data completely
+        mutate((currentData) => {
+            if (!currentData) return currentData;
+            return {
+                ...currentData,
+                status: data.status,
+                startTime: data.startTime ?? currentData.startTime,
+                endTime: data.endTime ?? currentData.endTime,
+                serverTime: new Date().toISOString(), // Use current client time
+            };
+        }, { revalidate: false }); // Don't refetch - the Pusher data is the source of truth
+    });
+
     return () => {
+      console.log("PlayerDashboard: Unsubscribing from trading-channel");
       pusher.unsubscribe("trading-channel");
+      pusher.connection.unbind("state_change");
+      pusher.connection.unbind("error");
     };
   }, [mutate]);
 
