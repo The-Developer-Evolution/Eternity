@@ -6,9 +6,7 @@ import {
 } from "@/features/rally/services/timer";
 import { AdminDashboard } from "@/components/ui/AdminDashboard";
 import { RallyPeriodStatus } from "@prisma/client";
-import { getAllTradingPeriods } from "@/features/trading/services/timer";
 
-// Add this line to prevent pre-rendering at build time
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
@@ -16,7 +14,6 @@ export default async function Page() {
   let activePeriodId: string | null = null;
 
   const allRallyPeriods = await getAllRallyPeriods();
-  const allTradingPeriods = await getAllTradingPeriods();
 
   try {
     const contest = await getActiveContest();

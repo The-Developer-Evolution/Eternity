@@ -8,7 +8,7 @@
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
-    "k6": "esbuild k6/load-test.ts --bundle --outfile=k6/dist/test.js --target=es2015 && k6 run k6/dist/test.js"
+    "k6": "esbuild k6/load-test.ts --bundle --outfile=k6/dist/test.js --target=es2015 --external:k6 --external:k6/* && k6 run k6/dist/test.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

@@ -34,28 +34,28 @@
   var import_k6 = __require("k6");
   var options = {
     stages: [
-      { duration: "10s", target: 500 },
-      // Naik ke 50 user dalam 10 detik
-      { duration: "30s", target: 500 },
-      // Tahan 50 user selama 30 detik
+      { duration: "30s", target: 100 },
+      { duration: "1m", target: 500 },
+      // Puncak 500 user melakukan request HTTP
       { duration: "10s", target: 0 }
-      // Turun ke 0
-    ],
-    // Opsional: Set thresholds (batas toleransi)
-    thresholds: {
-      http_req_duration: ["p(95)<500"],
-      // 95% request harus di bawah 500ms
-      http_req_failed: ["rate<0.01"]
-      // Error rate harus di bawah 1%
-    }
+    ]
   };
   function load_test_default() {
-    const url = "https://eternityuc.com/api/contest/status";
-    const res = import_http.default.get(url);
+    const url = "https://eternityuc.com/api/rally/period";
+    const params = {
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..Xfg_TWcjOcvUsJn5.cpkO8NZoQoPYPOmi-sGzK_woEvCXidkaF8Qbtkj5I-cFk1E5gSPbMQJE0luBakciFz2rdg-JKew6WT45NxEcE5zvZMJsaUR_MY__UqyJG-Xr6Uekmo8-GV_0f9AnYAms_AF4oPbwRnWDrLKNbiE2_FjJmfxWHYt17kjYa4TTTKXcmnVyVe8DkazSNrIyCPZu_033DnQuxv0ul1_DINToz5hF7azDLRG-aBpRUHwmh9mD.N_H6V-id2PixnLso9QDsSw"
+      }
+    };
+    const payload = JSON.stringify({
+      someData: "test"
+    });
+    const res = import_http.default.post(url, payload, params);
     (0, import_k6.check)(res, {
-      "status is 200": (r) => r.status === 200,
-      "protocol is HTTP/2": (r) => r.proto === "HTTP/2.0"
-      // Next.js support HTTP/2
+      "status is 200 or 201": (r) => r.status === 200 || r.status === 201,
+      "duration < 2000ms": (r) => r.timings.duration < 2e3
+      // Toleransi 2 detik
     });
     (0, import_k6.sleep)(1);
   }

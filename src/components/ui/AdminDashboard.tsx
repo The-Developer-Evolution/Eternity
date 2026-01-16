@@ -40,6 +40,9 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
     activePeriodId || periods[0]?.id || ""
   );
   const [duration, setDuration] = useState<number>(20);
+  
+  // 1. State untuk cooldown
+  const [cooldown, setCooldown] = useState<number>(0);
 
   const status = contestData?.status ?? RallyPeriodStatus.NOT_STARTED;
 
@@ -49,6 +52,17 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
       setDuration(period.duration);
     }
   }, [selectedPeriodId, periods]);
+
+  // 2. Effect untuk hitung mundur cooldown
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setTimeout(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     const pusher = getPusherClient();
@@ -64,8 +78,15 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
   }, [mutate]);
 
   const handleAction = async (action: string) => {
+    // Cegah eksekusi jika sedang cooldown
+    if (cooldown > 0) return;
+
     setIsLoading(action);
     setError(null);
+    
+    // 3. Set cooldown ke 5 detik setiap kali aksi dimulai
+    setCooldown(5); 
+
     try {
       switch (action) {
         case "start":
@@ -87,6 +108,11 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
     } finally {
       setIsLoading(null);
     }
+  };
+
+  // Helper untuk mengecek disabled state agar kode JSX lebih bersih
+  const isButtonDisabled = (requiredStatus: boolean) => {
+    return isLoading !== null || cooldown > 0 || !requiredStatus;
   };
 
   return (
@@ -132,43 +158,38 @@ export function AdminDashboard({ initialContestState, periods, activePeriodId }:
         </div>
       )}
 
+      {/* 4. Implementasi UI pada tombol */}
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={() => handleAction("start")}
-          disabled={
-            isLoading !== null ||
-            (status !== RallyPeriodStatus.NOT_STARTED && status !== RallyPeriodStatus.ENDED)
-          }
-          className="bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-green-500/20"
+          disabled={isButtonDisabled(status === RallyPeriodStatus.NOT_STARTED || status === RallyPeriodStatus.ENDED)}
+          className="bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-green-500/20"
         >
-          {status === RallyPeriodStatus.ENDED ? "RESTART SELECTED" : "START EVENT"}
+          {cooldown > 0 ? `WAIT ${cooldown}s` : (status === RallyPeriodStatus.ENDED ? "RESTART SELECTED" : "START EVENT")}
         </button>
 
         <button
           onClick={() => handleAction("end")}
-          disabled={
-            isLoading !== null || 
-            (status !== RallyPeriodStatus.ON_GOING && status !== RallyPeriodStatus.PAUSED)
-          }
-          className="bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-red-500/20"
+          disabled={isButtonDisabled(status === RallyPeriodStatus.ON_GOING || status === RallyPeriodStatus.PAUSED)}
+          className="bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-lg font-impact tracking-wider text-xl text-white transition-all shadow-lg hover:shadow-red-500/20"
         >
-          FORCE END
+           {cooldown > 0 ? `WAIT ${cooldown}s` : "FORCE END"}
         </button>
 
         <button
           onClick={() => handleAction("pause")}
-          disabled={isLoading !== null || status !== RallyPeriodStatus.ON_GOING}
-          className="bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
+          disabled={isButtonDisabled(status === RallyPeriodStatus.ON_GOING)}
+          className="bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
         >
-          PAUSE
+           {cooldown > 0 ? `${cooldown}s` : "PAUSE"}
         </button>
 
         <button
           onClick={() => handleAction("resume")}
-          disabled={isLoading !== null || status !== RallyPeriodStatus.PAUSED}
-          className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
+          disabled={isButtonDisabled(status === RallyPeriodStatus.PAUSED)}
+          className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed py-3 rounded-lg font-bold text-white transition-all"
         >
-          RESUME
+           {cooldown > 0 ? `${cooldown}s` : "RESUME"}
         </button>
       </div>
 
