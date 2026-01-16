@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { pusherServer } from "@/lib/pusher";
+import { getPusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
 
 export async function getAllTradingPeriods() {
@@ -57,11 +57,14 @@ export async function StartTradingTimer(periodId: string, durationMinutes: numbe
     },
   });
 
-  await pusherServer.trigger("trading-channel", "status-update", {
-    status: "ON_GOING",
-    startTime: startTime.toISOString(),
-    endTime: endTime.toISOString(),
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("trading-channel", "status-update", {
+      status: "ON_GOING",
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    });
+  }
 
   revalidatePath("/admin/trading", "layout");
   return updatedPeriod;
@@ -84,9 +87,12 @@ export async function pauseTrading() {
     },
   });
 
-  await pusherServer.trigger("trading-channel", "status-update", {
-    status: "PAUSED",
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("trading-channel", "status-update", {
+      status: "PAUSED",
+    });
+  }
 
   revalidatePath("/admin/trading", "layout");
 }
@@ -114,10 +120,13 @@ export async function resumeTrading() {
     },
   });
 
-  await pusherServer.trigger("trading-channel", "status-update", {
-    status: "ON_GOING",
-    endTime: newEndTime.toISOString(),
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("trading-channel", "status-update", {
+      status: "ON_GOING",
+      endTime: newEndTime.toISOString(),
+    });
+  }
 
   revalidatePath("/admin/trading", "layout");
 }
@@ -141,9 +150,12 @@ export async function endTrading() {
     },
   });
 
-  await pusherServer.trigger("trading-channel", "status-update", {
-    status: "ENDED",
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("trading-channel", "status-update", {
+      status: "ENDED",
+    });
+  }
 
   revalidatePath("/admin/trading");
 }

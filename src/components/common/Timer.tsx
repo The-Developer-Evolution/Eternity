@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { pusherClient } from "@/lib/pusher"; 
+import { getPusherClient } from "@/lib/pusher"; 
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
 
 interface ContestState {
@@ -31,7 +31,10 @@ export default function ContestTimer() {
   const [hasAutoEnded, setHasAutoEnded] = useState(false);
 
   useEffect(() => {
-    const channel = pusherClient.subscribe("contest-channel");
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channel = pusher.subscribe("contest-channel");
     
     const handleStatusUpdate = (updatedContest: ContestState) => {
       console.log("Timer update received:", updatedContest);
@@ -43,7 +46,7 @@ export default function ContestTimer() {
 
     return () => {
       channel.unbind("status-update", handleStatusUpdate);
-      pusherClient.unsubscribe("contest-channel");
+      pusher.unsubscribe("contest-channel");
     };
   }, [mutate]);
 

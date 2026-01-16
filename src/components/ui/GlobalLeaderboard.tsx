@@ -3,7 +3,7 @@
 import { FaChevronLeft, FaChevronRight, FaEye, FaEyeSlash } from 'react-icons/fa'
 import useSWR, { useSWRConfig } from "swr";
 import { useEffect, useState } from "react";
-import { pusherClient } from "@/lib/pusher";
+import { getPusherClient } from "@/lib/pusher";
 import { Role } from '@/generated/prisma/enums';
 import { useSession } from 'next-auth/react';
 
@@ -71,7 +71,10 @@ export default function GlobalLeaderboard({
 
     // --- PUSHER (Realtime Update) ---
     useEffect(() => {
-        const channel = pusherClient.subscribe("leaderboard-channel");
+        const pusher = getPusherClient();
+        if (!pusher) return;
+
+        const channel = pusher.subscribe("leaderboard-channel");
         const handleUpdate = () => {
             // Re-fetch data saat ada event update
             mutate(`/api/global-leaderboard?page=${currentPage}&limit=${limit}`);
@@ -79,7 +82,7 @@ export default function GlobalLeaderboard({
         channel.bind("leaderboard-update", handleUpdate);
         return () => {
             channel.unbind("leaderboard-update", handleUpdate);
-            pusherClient.unsubscribe("leaderboard-channel");
+            pusher.unsubscribe("leaderboard-channel");
         };
     }, [mutate, currentPage, limit]);
 

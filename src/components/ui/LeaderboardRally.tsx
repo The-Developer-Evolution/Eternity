@@ -3,7 +3,7 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import useSWR, { useSWRConfig } from "swr";
 import { useEffect, useState } from "react";
-import { pusherClient } from "@/lib/pusher";
+import { getPusherClient } from "@/lib/pusher";
 
 // --- Interfaces ---
 interface LeaderboardRallyEntry {
@@ -58,22 +58,25 @@ export default function LeaderboardRally({
 
   // 3. PUSHER EFFECT
   useEffect(() => {
-    pusherClient.subscribe("leaderboard-channel");
-    pusherClient.subscribe("contest-channel");
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    pusher.subscribe("leaderboard-channel");
+    pusher.subscribe("contest-channel");
 
     const handleUpdate = () => {
       // Refresh data halaman saat ini ketika ada update
       mutate(`/api/leaderboard?page=${currentPage}&limit=${limit}`);
     };
 
-    pusherClient.bind("leaderboard-update", handleUpdate);
-    pusherClient.bind("status-update", handleUpdate);
+    pusher.bind("leaderboard-update", handleUpdate);
+    pusher.bind("status-update", handleUpdate);
 
     return () => {
-      pusherClient.unbind("leaderboard-update", handleUpdate);
-      pusherClient.unbind("status-update", handleUpdate);
-      pusherClient.unsubscribe("leaderboard-channel");
-      pusherClient.unsubscribe("contest-channel");
+      pusher.unbind("leaderboard-update", handleUpdate);
+      pusher.unbind("status-update", handleUpdate);
+      pusher.unsubscribe("leaderboard-channel");
+      pusher.unsubscribe("contest-channel");
     };
   }, [mutate, currentPage]);
 

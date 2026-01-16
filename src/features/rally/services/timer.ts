@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { pusherServer } from "@/lib/pusher";
+import { getPusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
 
 async function initializeRallyDataForAllUsers() {
@@ -184,13 +184,16 @@ export async function StartContestTimer(
   });
 
   // Trigger Pusher dengan period name
-  await pusherServer.trigger("contest-channel", "status-update", {
-    status: "ON_GOING",
-    startTime: startTime.toISOString(),
-    endTime: endTime.toISOString(),
-    periodName: updatedPeriod.name,
-    periodId: updatedPeriod.id,
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("contest-channel", "status-update", {
+      status: "ON_GOING",
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      periodName: updatedPeriod.name,
+      periodId: updatedPeriod.id,
+    });
+  }
 
   revalidatePath("/admin/super");
   revalidatePath("/peserta/rally");
@@ -214,9 +217,12 @@ export async function pauseContest() {
     },
   });
 
-  await pusherServer.trigger("contest-channel", "status-update", {
-    status: "PAUSED",
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("contest-channel", "status-update", {
+      status: "PAUSED",
+    });
+  }
 
   revalidatePath("/admin/super");
 }
@@ -244,10 +250,13 @@ export async function resumeContest() {
     },
   });
 
-  await pusherServer.trigger("contest-channel", "status-update", {
-    status: "ON_GOING",
-    endTime: newEndTime.toISOString(),
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("contest-channel", "status-update", {
+      status: "ON_GOING",
+      endTime: newEndTime.toISOString(),
+    });
+  }
 
   revalidatePath("/admin/super");
 }
@@ -271,11 +280,14 @@ export async function endContest() {
     },
   });
 
-  await pusherServer.trigger("contest-channel", "status-update", {
-    status: "ENDED",
-    periodName: activeContest.name,
-    periodId: activeContest.id,
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger("contest-channel", "status-update", {
+      status: "ENDED",
+      periodName: activeContest.name,
+      periodId: activeContest.id,
+    });
+  }
 
   revalidatePath("/admin/super");
   revalidatePath("/peserta/rally");

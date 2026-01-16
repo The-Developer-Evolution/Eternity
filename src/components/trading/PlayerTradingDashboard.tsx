@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
-import { pusherClient } from "@/lib/pusher";
+import { getPusherClient } from "@/lib/pusher";
 import Link from "next/link";
 import LinkButton from "@/components/common/LinkButton";
 import { FaBox, FaChartBar } from "react-icons/fa";
@@ -104,12 +104,15 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
   }, [tradingData, status]);
 
   useEffect(() => {
-    const channel = pusherClient.subscribe("trading-channel");
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channel = pusher.subscribe("trading-channel");
     channel.bind("status-update", () => {
       mutate();
     });
     return () => {
-      pusherClient.unsubscribe("trading-channel");
+      pusher.unsubscribe("trading-channel");
     };
   }, [mutate]);
 

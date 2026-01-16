@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Timer from '@/components/common/Timer'
 import useSWR from 'swr'
-import { pusherClient } from '@/lib/pusher'
+import { getPusherClient } from '@/lib/pusher'
 
 interface PeriodData {
   periodName: string;
@@ -43,7 +43,10 @@ export default function CardPanel({
 
   // Subscribe to Pusher for real-time updates
   useEffect(() => {
-    const channel = pusherClient.subscribe("contest-channel");
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channel = pusher.subscribe("contest-channel");
     
     const handleStatusUpdate = () => {
       // Revalidate period data when contest status changes
@@ -54,7 +57,7 @@ export default function CardPanel({
 
     return () => {
       channel.unbind("status-update", handleStatusUpdate);
-      pusherClient.unsubscribe("contest-channel");
+      pusher.unsubscribe("contest-channel");
     };
   }, [mutate]);
 

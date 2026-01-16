@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { useState, useEffect, useCallback } from "react";
 import { StartTradingTimer, pauseTrading, resumeTrading, endTrading } from "@/features/trading/services/timer";
 import { RallyPeriodStatus } from "@/generated/prisma/enums";
-import { pusherClient } from "@/lib/pusher";
+import { getPusherClient } from "@/lib/pusher";
 
 interface TradingPeriod {
   id: string;
@@ -108,12 +108,15 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   }, [selectedPeriodId, periods]);
 
   useEffect(() => {
-    const channel = pusherClient.subscribe("trading-channel");
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channel = pusher.subscribe("trading-channel");
     channel.bind("status-update", () => {
       mutate();
     });
     return () => {
-      pusherClient.unsubscribe("trading-channel");
+      pusher.unsubscribe("trading-channel");
     };
   }, [mutate]);
 
