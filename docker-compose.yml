@@ -10,6 +10,10 @@ services:
     networks:
       - global_proxy
       - eternity_internal
+    depends_on:
+      db:
+        condition: service_started
+
   migrate_reset:
     build:
       context: ./
@@ -22,6 +26,12 @@ services:
     networks:
       - global_proxy
       - eternity_internal
+    depends_on:
+      db:
+        condition: service_started
+    profiles:
+      - manual
+
   seeder:
     build:
       context: ./
@@ -34,6 +44,11 @@ services:
     networks:
       - global_proxy
       - eternity_internal
+    depends_on:
+      db:
+        condition: service_started
+    profiles:
+      - manual
 
   db:
     image: postgres:15-alpine
