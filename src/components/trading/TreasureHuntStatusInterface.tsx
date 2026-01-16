@@ -130,8 +130,12 @@ export default function TreasureHuntStatusInterface() {
                 <span className="text-gray-400">Action</span>
                 <span className="text-white">Mark as Played</span>
             </div>
+             <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400">Cost</span>
+                <span className="text-red-400 font-bold">100 Eternities</span>
+            </div>
             <p className="text-xs text-gray-500 mt-2">
-                This will mark the user as having participated in the Treasure Hunt.
+                This will mark the user as having participated in the Treasure Hunt and deduct 100 Eternities from their balance.
             </p>
         </div>
 
@@ -142,7 +146,7 @@ export default function TreasureHuntStatusInterface() {
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
             !selectedUser || isTransacting
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-cyan-600 to-blue-700 text-white hover:scale-[1.02] hover:shadow-cyan-500/50"
+              : "bg-gradient-to-r from-red-900 to-red-700 text-white hover:scale-[1.02] hover:shadow-red-500/50"
           }`}
         >
           {isTransacting ? (
@@ -181,6 +185,10 @@ export default function TreasureHuntStatusInterface() {
              <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded">
                 <span className="text-gray-400 text-sm">NEW STATUS</span>
                 <span className="font-bold text-lg text-green-400">PLAYED</span>
+            </div>
+             <div className="flex justify-between items-center bg-gray-800/80 p-4 rounded border border-red-500/30">
+                <span className="text-gray-400 text-sm">COST</span>
+                <span className="font-bold text-lg text-red-400">100 ET</span>
             </div>
         </div>
         

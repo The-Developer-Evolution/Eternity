@@ -8,14 +8,16 @@ import { Loader2, CheckCircle, AlertCircle, User, Gem, Coins, Layers } from "luc
 
 // Hardcoded reward mapping
 const REWARD_OPTIONS = [
-    { items: 1, eternities: 20 },
-    { items: 2, eternities: 25 },
-    { items: 3, eternities: 28 },
-    { items: 4, eternities: 30 },
-    { items: 5, eternities: 34 },
-    { items: 6, eternities: 36 },
-    { items: 7, eternities: 40 },
-    { items: 8, eternities: 42 },
+    { items: 1, eternities: 200 },
+    { items: 2, eternities: 500 },
+    { items: 3, eternities: 800 },
+    { items: 4, eternities: 1000 },
+    { items: 5, eternities: 1300 },
+    { items: 6, eternities: 1500 },
+    { items: 7, eternities: 1800 },
+    { items: 8, eternities: 2000 },
+    { items: 9, eternities: 2200 },
+    { items: 10, eternities: 2500 },
 ];
 
 export default function RewardEternitiesInterface() {

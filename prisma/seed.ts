@@ -197,30 +197,14 @@ const CRAFT_ID_MAP: Record<string, string> = {
   dividers: "5", // "dividers"
 };
 
-const passwords = [
-  "Alpha123!",
-  "Bravo456@",
-  "Charlie789#",
-  "Delta321$",
-  "Echo654%",
-  "Foxtrot987^",
-  "Golf246&",
-  "Hotel135*",
-  "India864(",
-  "Juliet753)", //pitching
-  "Kilo987!", // PITCHING GUARD
-  "Lima246@",
-  "Mike753#",
-  "November468$",
-  "Oscar159%",
-];
+
 
 async function main() {
   // =========================
   // Trading Master Data
   // =========================
 
-  // Trading Duration
+  // Trading Duration PERIODE
   // SEED Price Forbidden Map, USD/IDR rate usd
   await prisma.periodeTrading.createMany({
     data: [
@@ -230,6 +214,7 @@ async function main() {
         price_map: 120000,
         duration: 30,
         usdidr_rate: 16500,
+        news: "Stabil."
       },
       {
         periode: 2,
@@ -237,6 +222,7 @@ async function main() {
         price_map: 118000,
         duration: 20,
         usdidr_rate: 16830,
+        news: "Pajak naik."
       },
       {
         periode: 3,
@@ -244,6 +230,7 @@ async function main() {
         price_map: 116000,
         duration: 20,
         usdidr_rate: 15989,
+        news: "Musim hujan."
       },
       {
         periode: 4,
@@ -251,6 +238,7 @@ async function main() {
         price_map: 114000,
         duration: 20,
         usdidr_rate: 16628,
+        news: "Bencana karena hujan."
       },
       {
         periode: 5,
@@ -258,6 +246,7 @@ async function main() {
         price_map: 112000,
         duration: 20,
         usdidr_rate: 17293,
+        news: "Banjir berakhir."
       },
       {
         periode: 6,
@@ -265,6 +254,7 @@ async function main() {
         price_map: 110000,
         duration: 20,
         usdidr_rate: 18677,
+        news: "Munculnya pabrik baru dan adanya pabrik pesaing yang bangkrut."
       },
       {
         periode: 7,
@@ -272,6 +262,7 @@ async function main() {
         price_map: 108000,
         duration: 20,
         usdidr_rate: 17743,
+        news: "Cuaca stabil dan pembangunan besar-besaran perusahaan yang membutuhkan kayu, logam, dan kaca."
       },
       {
         periode: 8,
@@ -279,6 +270,7 @@ async function main() {
         price_map: 106000,
         duration: 20,
         usdidr_rate: 15969,
+        news: "Gunung berapi meletus dan terjadi kebakaran hutan."
       },
     ],
     skipDuplicates: true,
@@ -295,22 +287,22 @@ async function main() {
   // Seed RawItem
   await prisma.rawItem.createMany({
     data: [
-      { id: "1", name: "wood" },
-      { id: "2", name: "glass" },
-      { id: "3", name: "water" },
-      { id: "4", name: "coal" },
-      { id: "5", name: "metal" },
+      { id: "1", name: "Wood" },
+      { id: "2", name: "Glass" },
+      { id: "3", name: "Water" },
+      { id: "4", name: "Coal" },
+      { id: "5", name: "Metal" },
     ],
     skipDuplicates: true,
   });
   // seed craftItem
   await prisma.craftItem.createMany({
     data: [
-      { id: "1", name: "brown paper" },
-      { id: "2", name: "pen" },
-      { id: "3", name: "magnifying glass" },
-      { id: "4", name: "ink" },
-      { id: "5", name: "dividers" },
+      { id: "1", name: "Brown Paper" },
+      { id: "2", name: "Pen" },
+      { id: "3", name: "Magnifying Glass" },
+      { id: "4", name: "Ink" },
+      { id: "5", name: "Dividers" },
     ],
     skipDuplicates: true,
   });
@@ -541,20 +533,38 @@ async function main() {
   const roles: Role[] = [
     Role.SUPER,
     Role.BLACKMARKET,
-    Role.BUYRAW,
-    Role.SELL,
-    Role.CRAFT,
-    Role.CURRENCY,
+    Role.BUYRAW, //done
+    Role.SELL, 
+    Role.CRAFT, // done
+    Role.CURRENCY, //done
     Role.EXCHANGE,
-    Role.MAP,
+    Role.MAP, // done
     Role.MONSTER,
-    Role.PITCHING,
-    Role.PITCHINGGUARD,
-    Role.POSTGUARD,
-    Role.TALKSHOW,
-    Role.THUNT,
-    Role.UPGRADE,
+    Role.PITCHING, // done
+    Role.PITCHINGGUARD, // done
+    Role.POSTGUARD, 
+    Role.TALKSHOW, 
+    Role.THUNT, // done
+    Role.UPGRADE, 
   ];
+
+  const passwords = [
+  "Alpha123!", //super
+  "Bravo456@",
+  "Charlie789#", //buyraw
+  "Delta321$", // sell
+  "Echo654%", // craft
+  "Foxtrot987^", //currency
+  "Golf246&", // exchange (rally)
+  "Hotel135*", // map
+  "India864(", // monstel (rally)
+  "Juliet753)", //pitching
+  "Kilo987!", // PITCHING GUARD
+  "Lima246@", // postguard (rally)
+  "Mike753#", 
+  "November468$", // THUNT
+  "Oscar159%",
+];
 
   for (let i = 0; i < roles.length; i++) {
     const role = roles[i];
@@ -704,7 +714,9 @@ async function main() {
         name,
         password: await bcrypt.hash("12345678", 10),
         tradingData: {
-          create: {},
+          create: {
+            eternites: 10000
+          },
         },
       },
     });

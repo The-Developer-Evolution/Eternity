@@ -8,12 +8,14 @@ datasource db {
 }
 
 model PeriodeTrading {
-  id                  String             @id @default(cuid())
-  periode             Int                @unique
-  cost_map            Int
-  price_map           Int
-  usdidr_rate         Int
-  duration            Int
+  id          String @id @default(cuid())
+  periode     Int    @unique
+  cost_map    Int
+  price_map   Int
+  usdidr_rate Int
+  duration    Int
+  news        String
+
   endTime             DateTime?
   pausedTime          DateTime?
   startTime           DateTime?
@@ -51,7 +53,7 @@ model TradingData {
   userId             String              @unique
   idr                BigInt              @default(-10000000000)
   usd                BigInt              @default(0)
-  eternites          Int                 @default(0)
+  eternites          Int                 @default(10000)
   map                Int                 @default(0)
   point              Int                 @default(0)
   isPlayedThunt      Boolean             @default(false)

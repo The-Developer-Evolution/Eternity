@@ -177,7 +177,7 @@ export default function NavigationBar() {
                   Buy Raw Material
                 </Link>
                 <Link
-                  href="/admin/trading/shop/sell"
+                  href="/admin/trading/sell"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >

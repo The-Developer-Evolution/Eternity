@@ -5,7 +5,13 @@ import { Role } from "@/generated/prisma/enums";
 const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin/talkshow": [Role.SUPER, Role.TALKSHOW],
   "/admin/trading/blackmarket": [Role.SUPER, Role.BLACKMARKET],
-  "/admin/trading/convert": [Role.SUPER, Role.CURRENCY],
+  "/admin/trading/shop": [Role.SUPER, Role.BUYRAW],
+  "/admin/trading/sell": [Role.SUPER, Role.SELL],
+
+  "/admin/trading/convert/material": [Role.SUPER, Role.CRAFT],
+  "/admin/trading/convert/currency": [Role.SUPER, Role.CURRENCY],
+  "/admin/trading/convert/map": [Role.SUPER, Role.MAP],
+
   "/admin/trading/pitching": [Role.SUPER, Role.PITCHING, Role.PITCHINGGUARD],
   "/admin/trading/pressure": [Role.SUPER, Role.PRESSURE],
   "/admin/trading/treasure": [Role.SUPER, Role.THUNT],
@@ -13,6 +19,7 @@ const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "admin/trading/news": [Role.SUPER],
   "/admin": [Role.SUPER],
 };
+
 
 export default withAuth(
   async function middleware(req) {

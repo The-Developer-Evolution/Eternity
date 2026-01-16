@@ -15,7 +15,7 @@ export default function BlackmarketGuardInterface() {
   const [isTransacting, setIsTransacting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const BM_FEE = 20000;
+  const BM_FEE = 1000;
 
   // Debounced search
   const performSearch = useCallback(

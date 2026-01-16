@@ -29,7 +29,7 @@ export async function payBlackMarketFee(userId: string): Promise<ActionResult<Tr
   const tradingData = userResult.data.tradingData;
 
   // Deduct Blackmarket Fee
-  const blackmarketFee = BigInt(20000);
+  const blackmarketFee = BigInt(1000);
   if (tradingData.eternites < Number(blackmarketFee)) {
     return { success: false, error: "Insufficient Eternites for Blackmarket Fee." };
   }
@@ -271,24 +271,9 @@ export async function buyBulkItemsBM(
     const tradingData = userResult.data.tradingData;
 
     try {
-        // 2. Fetch all stocks and validate availability & cost
-        // We can do this in parallel or map
-        // To be safe and consistent, let's fetch one by one or group by type.
-        // Grouping by type is efficient.
-        
         let totalCost = BigInt(0);
         const operations: any[] = [];
 
-        // We need to fetch details to check stock and price.
-        // Let's loop and validation. Ideally we want to prevent partial failure before transaction.
-        
-        // Optimization: Fetch all Raw and Craft needed.
-        // Actually since we have ID, we can just `findUnique` inside a map.
-        // Prisma transaction prevents race conditions if we use `update`.
-        // But we need to check total user balance first.
-        
-        // Let's build a plan.
-        
         for (const item of items) {
              let stockRecord: any;
              let itemName = "";
@@ -332,16 +317,6 @@ export async function buyBulkItemsBM(
                     data: { stock: { decrement: item.amount } }
                  }));
              }
-             
-             // Prepare Inventory Update (Upsert-like logic, but we need to check existence if we want update vs create)
-             // Using upsert with prisma is cleaner if we had a unique constraint on (tradingDataId, itemId).
-             // Assuming schema has it (usually yes).
-             // However, current code uses check-then-update/create. We must stick to it or use upsert if schema allows.
-             // To be safe inside a loop without making it too complex, let's just push a check-operation or optimistic update?
-             // No, inside transaction we can't easily read-then-write conditionally based on read from SAME transaction unless we chain carefully.
-             // Actually, Prisma `upsert` is best here.
-             // Let's check schema via what `buyItemBM` did: it did a javascript find on `tradingData.rawUserAmounts` (which was loaded).
-             // Since we loaded `tradingData` (via `getUserTradingById`), we have the array!
              
              if (item.type === 'RAW') {
                 const existing = tradingData.rawUserAmounts.find(u => u.rawItemId === itemId);
@@ -409,6 +384,124 @@ export async function buyBulkItemsBM(
 
     } catch (error: any) {
         console.error("Black Market Bulk Buy Error:", error);
+        return { success: false, error: error.message || "Transaction failed." };
+    }
+}
+
+export async function sellBulkItemsBM(
+    userId: string,
+    items: { id: string; amount: number; type: 'RAW' | 'CRAFT'; }[] // id is the ITEM ID, not Stock ID
+): Promise<ActionResult<TradingData>> {
+    const period = await getRunningTradingPeriod()
+    if (!period) return { success: false, error: "The game is PAUSED" };
+
+    if (!items || items.length === 0) return { success: false, error: "No items selected." };
+    if (items.some(i => i.amount <= 0)) return { success: false, error: "Invalid amount." };
+
+    // 1. Get User
+    const userResult = await getUserTradingById(userId);
+    if (!userResult.success || !userResult.data?.tradingData) {
+        return { success: false, error: "User not found." };
+    }
+    const tradingData = userResult.data.tradingData;
+
+    // 2. Fetch Active Stock Periods to get Prices
+    const activePeriod = await getActiveTradingPeriod();
+    if (!activePeriod) return { success: false, error: "No active trading period." };
+
+    const [rawStocks, craftStocks] = await Promise.all([
+        prisma.rawStockPeriod.findMany({ where: { periode: activePeriod.periode }, include: { rawItem: true } }),
+        prisma.craftStockPeriod.findMany({ where: { periode: activePeriod.periode }, include: { craftItem: true } })
+    ]);
+
+    try {
+        let totalPay = BigInt(0);
+        const operations: any[] = [];
+        
+        for (const item of items) {
+            let price = BigInt(0);
+            let itemName = "";
+            
+            // Check Price & Validity
+            if (item.type === 'RAW') {
+                const stock = rawStocks.find(s => s.rawId === item.id);
+                if (!stock) throw new Error(`Item ${item.id} is not currently tradable in Black Market.`);
+                price = BigInt(stock.price);
+                itemName = stock.rawItem.name;
+
+                // Check User Ownership
+                const userOwned = tradingData.rawUserAmounts.find(u => u.rawItemId === item.id);
+                if (!userOwned || userOwned.amount < item.amount) {
+                    throw new Error(`Insufficient ${itemName} in user inventory.`);
+                }
+                
+                // Deduct from User
+                operations.push(prisma.rawUserAmount.update({
+                    where: { id: userOwned.id },
+                    data: { amount: { decrement: item.amount } }
+                }));
+
+            } else {
+                const stock = craftStocks.find(s => s.craftId === item.id);
+                if (!stock) throw new Error(`Item ${item.id} is not currently tradable in Black Market.`);
+                price = BigInt(stock.price);
+                itemName = stock.craftItem.name;
+
+                // Check User Ownership
+                 const userOwned = tradingData.craftUserAmounts.find(u => u.craftItemId === item.id);
+                if (!userOwned || userOwned.amount < item.amount) {
+                     throw new Error(`Insufficient ${itemName} in user inventory.`);
+                }
+                
+                // Deduct from User
+                operations.push(prisma.craftUserAmount.update({
+                     where: { id: userOwned.id },
+                    data: { amount: { decrement: item.amount } }
+                }));
+            }
+
+            // Calculate Pay
+            totalPay += price * BigInt(item.amount);
+            
+            // NOTE: Selling does NOT update Stock Period stock, per requirements.
+        }
+
+        const totalPayNumber = Number(totalPay);
+
+        // Add Money to User
+        operations.push(
+            prisma.tradingData.update({
+                where: { id: tradingData.id },
+                data: { eternites: { increment: totalPayNumber } }
+            }),
+             prisma.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: BigInt(Math.floor(totalPayNumber)),
+                    type: BalanceLogType.CREDIT,
+                    resource: BalanceTradingResource.ETERNITES,
+                    message: `Sold ${items.length} items (BM Bulk)`
+                }
+            })
+        );
+
+        // Execute Transaction
+        await prisma.$transaction(operations);
+
+        // Return updated data
+        const finalData = await prisma.tradingData.findUnique({
+            where: { id: tradingData.id },
+            include: {
+                rawUserAmounts: { include: { rawItem: true } },
+                craftUserAmounts: { include: { craftItem: true } },
+                balanceTradingLogs: true,
+            },
+        });
+
+        return { success: true, data: finalData!, message: "Items sold successfully!" };
+
+    } catch (error: any) {
+         console.error("Black Market Bulk Sell Error:", error);
         return { success: false, error: error.message || "Transaction failed." };
     }
 }

@@ -21,8 +21,8 @@ export async function getUserTradingById(userId: string): Promise<ActionResult<U
         include: { 
             tradingData: {
                 include:{
-                    rawUserAmounts: true,
-                    craftUserAmounts: true,
+                    rawUserAmounts: { include: { rawItem: true } },
+                    craftUserAmounts: { include: { craftItem: true } },
                     balanceTradingLogs: true
                 }
             },
