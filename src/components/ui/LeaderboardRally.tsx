@@ -12,6 +12,7 @@ interface LeaderboardRallyEntry {
   vault: number
   minus_point: number
   eonix: number
+  score: number
   isCurrentUser?: boolean
 }
 
@@ -135,6 +136,11 @@ export default function LeaderboardRally({
             {entry.eonix}
           </span>
         </td>
+        <td className="px-4 py-4 text-center">
+          <span className="font-impact text-lg text-yellow-400">
+            {entry.score.toLocaleString()}
+          </span>
+        </td>
       </tr>
     )
   }
@@ -172,6 +178,7 @@ export default function LeaderboardRally({
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Vault</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Minus Point</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Eonix</th>
+                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,7 +186,7 @@ export default function LeaderboardRally({
 
                 {leaderboardData.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center">
+                    <td colSpan={7} className="px-4 py-12 text-center">
                       <p className="text-slate-400 text-lg font-futura">
                         No data available
                       </p>

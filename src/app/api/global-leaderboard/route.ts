@@ -39,7 +39,15 @@ export async function GET(request: Request) {
     // 2. Kalkulasi Total Point untuk SEMUA user
     // Rumus: (Rally * 45%) + (Trading * 40%) + (Talkshow * 15%)
     const processedUsers = users.map((user) => {
-      const rallyPoint = Number(user.rallyData?.point || 0);
+      const rallyData = user.rallyData;
+      const vault = rallyData?.vault || 0;
+      const eonix = rallyData?.enonix || 0;
+      const level = rallyData?.access_card_level || 0;
+      const minusPoint = rallyData?.minus_point || 0;
+
+      // Calculate Rally Point dynamically using the new formula
+      const rallyPoint = (vault * (eonix + level)) - minusPoint;
+      
       const tradingPoint = Number(user.tradingData?.point || 0);
       const talkshowPoint = user.talkshowPoints || 0;
 
