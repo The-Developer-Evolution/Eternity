@@ -158,7 +158,7 @@ export async function craftBigItem(userId: string, resultItemId: string) {
         },
       });
       await tx.userSmallItemInventory.update({
-        where: { id: userSmallItem!!.id },
+        where: { id: userSmallItem!.id },
         data: { amount: { decrement: recipe.quantity } },
       });
     }

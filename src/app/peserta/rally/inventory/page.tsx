@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { getMyInventory } from "@/features/rally/services/item";
@@ -11,8 +11,9 @@ import { authOptions } from "@/lib/auth";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
+  const params = await searchParams;
   const session = await getServerSession(authOptions);
   if(!session?.user?.id){
     return null;
@@ -42,7 +43,7 @@ export default async function Page({
   const allItems = [...bigItemsNormalized, ...smallItemsNormalized];
 
   const itemsPerPage = 8;
-  const currentPage = Number(searchParams.page) || 1;
+  const currentPage = Number(params.page) || 1;
   const totalPages = Math.ceil(allItems.length / itemsPerPage) || 1;
 
   const startIndex = (currentPage - 1) * itemsPerPage;

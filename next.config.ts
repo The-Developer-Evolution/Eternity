@@ -2,12 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  reactCompiler: true,
   output: "standalone",
-  
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // Configure webpack to externalize Prisma to fix __internal error during build
+  serverExternalPackages: ["@prisma/client", "prisma"],
 };
 
 export default nextConfig;

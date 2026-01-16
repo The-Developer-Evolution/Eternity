@@ -485,7 +485,7 @@ export default function UpgradeAccessCardPanel({
       <div className="w-full flex gap-4">
         <button
           onClick={handleUpgrade}
-          disabled={!selectedUser || isLoading || (selectedUser?.rallyData?.access_card_level || 0) >= 5 || selectedUser.smallItemInventory!!.length <= 0}
+          disabled={!selectedUser || isLoading || (selectedUser?.rallyData?.access_card_level || 0) >= 5 || selectedUser.smallItemInventory!.length <= 0}
           className="flex-1 px-6 py-3 bg-[#41FFA3] hover:bg-[#2dd981] disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-black font-impact text-xl rounded-lg transition-all shadow-lg hover:shadow-[#41FFA3]/30"
         >
           {isLoading ? "Upgrading..." : "UPGRADE"}

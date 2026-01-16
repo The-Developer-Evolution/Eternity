@@ -4,10 +4,8 @@ import useSWR from "swr";
 import { useState, useEffect } from "react";
 import { RallyPeriodStatus } from "@prisma/client";
 import { getPusherClient } from "@/lib/pusher";
-import Link from "next/link";
 import LinkButton from "@/components/common/LinkButton";
 import { FaBox, FaChartBar } from "react-icons/fa";
-// import { formatCurrency } from "@/utils/format"; // Removed unused import
 
 interface TradingStatusResponse {
   status: RallyPeriodStatus;

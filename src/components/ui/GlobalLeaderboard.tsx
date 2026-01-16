@@ -40,22 +40,11 @@ export default function GlobalLeaderboard({
     const { data: session } = useSession();
     const [canRevealTop10, setCanRevealTop10] = useState(false);
 
-    useEffect(() => {
-        if (session?.user?.role === Role.SUPER) {
-            setCanRevealTop10(true);
-        } else {
-            setCanRevealTop10(false);
-        }
-    }, [session]);
-
-    if (!session || !session.user) {
-        return null;
-    }
-
     const limit = 10;
 
+    // Move useSWR before any conditional returns
     const { data: apiResponse, error, isLoading } = useSWR<LeaderboardResponse>(
-        `/api/global-leaderboard?page=${currentPage}&limit=${limit}`,
+        session ? `/api/global-leaderboard?page=${currentPage}&limit=${limit}` : null,
         fetcher,
         {
             refreshInterval: 10000,
@@ -67,6 +56,16 @@ export default function GlobalLeaderboard({
     const totalPages = apiResponse?.totalPages || 1;
 
     useEffect(() => {
+        if (session?.user?.role === Role.SUPER) {
+            setCanRevealTop10(true);
+        } else {
+            setCanRevealTop10(false);
+        }
+    }, [session]);
+
+    useEffect(() => {
+        if (!session) return;
+        
         const pusher = getPusherClient();
         if (!pusher) return;
 
@@ -79,7 +78,12 @@ export default function GlobalLeaderboard({
             channel.unbind("leaderboard-update", handleUpdate);
             pusher.unsubscribe("leaderboard-channel");
         };
-    }, [mutate, currentPage, limit]);
+    }, [mutate, currentPage, limit, session]);
+
+    // Now check session after all hooks
+    if (!session || !session.user) {
+        return null;
+    }
 
     const renderTableRow = (entry: LeaderboardEntry) => {
         const shouldBlur = entry.rank <= 10 && isTop10Blurred;

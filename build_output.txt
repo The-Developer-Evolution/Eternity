@@ -1,0 +1,313 @@
+
+> eternity@0.1.0 build D:\Devo\Eternity
+> prisma generate && next build
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.2 -> 7.2.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+✔ Generated Prisma Client (v6.19.2) to .\node_modules\.pnpm\@prisma+client@6.19.2_prism_6b2b1af085fe6797f5a5ea830937a8e3\node_modules\@prisma\client in 123ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+   ▲ Next.js 15.5.9
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.8s
+   Linting and checking validity of types ...
+
+./src/app/admin/super/page.tsx
+19:9  Warning: 'allTradingPeriods' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+27:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/admin/trading/convert/map/page.tsx
+11:9  Warning: 'craftItems' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/api/rally/initialize/route.ts
+7:28  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/BlackmarketGuardInterface.tsx
+21:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+59:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/BlackMarketInterface.tsx
+29:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+94:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/trading/BlackMarketSellInterface.tsx
+8:73  Warning: 'DollarSign' is defined but never used.  @typescript-eslint/no-unused-vars
+36:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+65:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+68:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+117:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+125:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+128:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+131:49  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+139:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/CraftInterface.tsx
+27:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+71:19  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/CurrencyConvertInterface.tsx
+31:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+70:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/MapCraftInterface.tsx
+42:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+115:63  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars
+133:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+139:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/MapCraftRecipeInterface.tsx
+59:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+121:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+155:9  Warning: 'qtyInt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/NewsChargeInterface.tsx
+21:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+65:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/PitchingInterface.tsx
+26:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+64:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/PitchingRewardInterface.tsx
+7:58  Warning: 'DollarSign' is defined but never used.  @typescript-eslint/no-unused-vars
+22:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+61:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+233:43  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/trading/PlayerTradingDashboard.tsx
+92:5  Warning: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Devo\Eternity\src\components\trading\PlayerTradingDashboard.tsx:92:5
+  90 |     };
+  91 |
+> 92 |     setTimeLeft(calculateTimeLeft());
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  93 |
+  94 |     // Only set interval if running
+  95 |     if (status === "ON_GOING") {  react-hooks/set-state-in-effect
+102:6  Warning: React Hook useEffect has a missing dependency: 'timeLeft'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+147:58  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+147:65  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/trading/RewardEternitiesInterface.tsx
+35:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+76:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/SellInterface.tsx
+7:73  Warning: 'DollarSign' is defined but never used.  @typescript-eslint/no-unused-vars
+43:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+150:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/ShopInterface.tsx
+7:78  Warning: 'Coins' is defined but never used.  @typescript-eslint/no-unused-vars
+20:26  Warning: 'setTransactionFee' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+27:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+71:19  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars
+98:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/TreasureHuntInterface.tsx
+27:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+71:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/trading/TreasureHuntStatusInterface.tsx
+19:25  Warning: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  react-hooks/exhaustive-deps
+57:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/BuyPosPanel.tsx
+25:77  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/BuySpecialTicketPanel.tsx
+39:108  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+67:6  Warning: React Hook useEffect has a missing dependency: 'selectedUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+68:1  Warning: Expected an assignment or function call and instead saw an expression.  @typescript-eslint/no-unused-expressions
+165:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/CraftMaterialPanel.tsx
+41:62  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+42:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+69:6  Warning: React Hook useEffect has a missing dependency: 'selectedUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+93:91  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+127:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/CraftVaultPanel.tsx
+16:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/GachaItemPanel.tsx
+23:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/GiveItemsPanel.tsx
+39:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+66:6  Warning: React Hook useEffect has a missing dependency: 'selectedUser'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+181:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/GlobalLeaderboard.tsx
+60:13  Warning: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Devo\Eternity\src\components\ui\GlobalLeaderboard.tsx:60:13
+  58 |     useEffect(() => {
+  59 |         if (session?.user?.role === Role.SUPER) {
+> 60 |             setCanRevealTop10(true);
+     |             ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  61 |         } else {
+  62 |             setCanRevealTop10(false);
+  63 |         }  react-hooks/set-state-in-effect
+
+./src/components/ui/LeaderboardTrading.tsx
+24:3  Warning: 'currentUserId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/LoginForm.tsx
+34:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/MinusPointPanel.tsx
+17:61  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+18:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+78:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+94:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/PesertaCraftPageClient.tsx
+7:10  Warning: 'getAllBigItems' is defined but never used.  @typescript-eslint/no-unused-vars
+7:26  Warning: 'getMyInventory' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/TalkshowAdminPanel.tsx
+22:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+101:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/TradingAdminDashboard.tsx
+101:6  Warning: React Hook useEffect has a missing dependency: 'timeLeft'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/rally/actions/craft-item-action.ts
+57:11  Warning: 'result' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/rally/services/item.ts
+215:9  Warning: 'possibleGachaItems' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/rally/services/user.ts
+217:25  Warning: Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong.  @typescript-eslint/no-non-null-asserted-optional-chain
+239:65  Warning: Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong.  @typescript-eslint/no-non-null-asserted-optional-chain
+242:61  Warning: Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong.  @typescript-eslint/no-non-null-asserted-optional-chain
+246:43  Warning: Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong.  @typescript-eslint/no-non-null-asserted-optional-chain
+
+./src/features/trading/services/blackmarket.ts
+122:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+176:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+275:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+278:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+385:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+419:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+503:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/buyRaw.ts
+227:24  Warning: 'item' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+274:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/craft.ts
+73:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+341:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/currency.ts
+9:7  Warning: 'CURRENCY_RATE' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars
+84:11  Warning: 'decrementValue' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+85:11  Warning: 'incrementValue' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+87:14  Warning: 'updatedTradingData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/trading/services/map.ts
+64:14  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+180:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/news.ts
+27:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/pitching.ts
+32:18  Warning: 'updatedTradingData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/trading/services/sell.ts
+97:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/features/trading/services/thunt.ts
+95:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+166:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/31) ...
+   Generating static pages (7/31) 
+   Generating static pages (15/31) 
+   Generating static pages (23/31) 
+ ✓ Generating static pages (31/31)
+   Finalizing page optimization ...
+   Collecting build traces ...
+ ⚠ Failed to copy traced files for D:\Devo\Eternity\.next\server\pages\_app.js [Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\react@19.2.0\node_modules\react' -> 'D:\Devo\Eternity\.next\standalone\node_modules\react'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\react@19.2.0\\node_modules\\react',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\react'
+}
+ ⚠ Failed to copy traced files for D:\Devo\Eternity\.next\server\pages\_error.js [Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\react@19.2.0\node_modules\react' -> 'D:\Devo\Eternity\.next\standalone\node_modules\.pnpm\next@15.5.9_@babel+core@7.2_25c30f97ac4fd65cc8b068e3ec92f516\node_modules\react'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\react@19.2.0\\node_modules\\react',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\.pnpm\\next@15.5.9_@babel+core@7.2_25c30f97ac4fd65cc8b068e3ec92f516\\node_modules\\react'
+}
+ ⚠ Failed to copy traced files for D:\Devo\Eternity\.next\server\pages\_document.js [Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\client-only@0.0.1\node_modules\client-only' -> 'D:\Devo\Eternity\.next\standalone\node_modules\.pnpm\styled-jsx@5.1.6_@babel+core@7.28.5_react@19.2.0\node_modules\client-only'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\client-only@0.0.1\\node_modules\\client-only',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\.pnpm\\styled-jsx@5.1.6_@babel+core@7.28.5_react@19.2.0\\node_modules\\client-only'
+}
+ ⚠ Failed to copy traced files for D:\Devo\Eternity\.next\server\app\_not-found\page.js [Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\@prisma+client@6.19.2_prism_6b2b1af085fe6797f5a5ea830937a8e3\node_modules\@prisma\client' -> 'D:\Devo\Eternity\.next\standalone\node_modules\@prisma\client'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\@prisma+client@6.19.2_prism_6b2b1af085fe6797f5a5ea830937a8e3\\node_modules\\@prisma\\client',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\@prisma\\client'
+}
+ ⚠ Failed to copy traced files for D:\Devo\Eternity\.next\server\app\admin\rally\exchange\page.js [Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\bcrypt@6.0.0\node_modules\bcrypt' -> 'D:\Devo\Eternity\.next\standalone\node_modules\bcrypt'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\bcrypt@6.0.0\\node_modules\\bcrypt',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\bcrypt'
+}
+
+> Build error occurred
+[Error: EPERM: operation not permitted, symlink 'D:\Devo\Eternity\node_modules\.pnpm\@babel+helper-string-parser@7.27.1\node_modules\@babel\helper-string-parser' -> 'D:\Devo\Eternity\.next\standalone\node_modules\.pnpm\@babel+types@7.28.5\node_modules\@babel\helper-string-parser'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'symlink',
+  path: 'D:\\Devo\\Eternity\\node_modules\\.pnpm\\@babel+helper-string-parser@7.27.1\\node_modules\\@babel\\helper-string-parser',
+  dest: 'D:\\Devo\\Eternity\\.next\\standalone\\node_modules\\.pnpm\\@babel+types@7.28.5\\node_modules\\@babel\\helper-string-parser'
+}
+ ELIFECYCLE  Command failed with exit code 1.

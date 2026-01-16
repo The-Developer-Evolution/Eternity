@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Timer from '@/components/common/Timer'
 import useSWR from 'swr'
 import { getPusherClient } from '@/lib/pusher'
@@ -33,13 +33,8 @@ export default function CardPanel({
     }
   );
 
-  const [period, setPeriod] = useState<string>("Loading...");
-
-  useEffect(() => {
-    if (periodData) {
-      setPeriod(periodData.periodName);
-    }
-  }, [periodData]);
+  // Derive period directly from data instead of using setState in effect
+  const period = periodData?.periodName ?? "Loading...";
 
   // Subscribe to Pusher for real-time updates
   useEffect(() => {

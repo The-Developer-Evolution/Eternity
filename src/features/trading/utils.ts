@@ -1,6 +1,5 @@
-import prisma from "@/lib/prisma";
 import { UserTrading } from "../user/types";
-import { CraftAmountMap, CraftItem, RawAmountMap, RawMaterial, Recipe, RECIPES, TradingAmounts } from "./types/craft";
+import { CraftAmountMap, RawAmountMap, RawMaterial, TradingAmounts } from "./types/craft";
 
 export function getRandomRawMaterial(): RawMaterial {
   const values = Object.values(RawMaterial);

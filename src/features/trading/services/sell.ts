@@ -3,7 +3,6 @@
 import { getUserTradingById } from "@/features/user/trading.service";
 import { BalanceLogType, BalanceTradingResource } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@prisma/client";
 import { getActiveTradingPeriod } from "./timer";

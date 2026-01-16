@@ -1,4 +1,3 @@
-import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import LoginForm from "@/components/ui/LoginForm";

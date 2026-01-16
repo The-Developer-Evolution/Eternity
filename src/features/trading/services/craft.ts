@@ -199,7 +199,7 @@ export async function craftBulkItems(
             const rawInventory = new Map<string, number>();
             tradingData.rawUserAmounts.forEach(ura => rawInventory.set(ura.rawItemId, Number(ura.amount)));
 
-            let totalEternitesRequired = customCost;
+            const totalEternitesRequired = customCost;
             const logMessages: string[] = [];
 
             // 2. Process Items

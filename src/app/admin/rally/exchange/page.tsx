@@ -12,15 +12,6 @@ import { craftItemAction, craftVaultAction, buyItemAction, buySpecialTicketActio
 import CardPanel from "@/components/ui/CardPanel"
 import CraftMaterialPanel from "@/components/ui/CraftMaterialPanel";
 
-type UserWithRallyData = {
-    id: string;
-    name: string;
-    rallyData: {
-      enonix: number;
-      vault: number;
-    } | null;
-  };
-
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
@@ -95,7 +86,7 @@ export default async function Page() {
     }
   });
 
-  const mappedUsers = users.map((user: UserWithRallyData) => ({
+  const mappedUsers = users.map((user) => ({
     ...user,
     rallyData: user.rallyData || undefined,
   }));
