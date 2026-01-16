@@ -5,7 +5,6 @@ import useSWR, { useSWRConfig } from "swr";
 import { useEffect, useState } from "react";
 import { getPusherClient } from "@/lib/pusher";
 
-// --- Interfaces ---
 interface LeaderboardRallyEntry {
   rank: number
   name: string
@@ -16,7 +15,6 @@ interface LeaderboardRallyEntry {
   isCurrentUser?: boolean
 }
 
-// Sesuaikan struktur ini dengan respons API backend Anda
 interface LeaderboardResponse {
   data: LeaderboardRallyEntry[]
   totalPages: number
@@ -25,62 +23,59 @@ interface LeaderboardResponse {
 
 interface LeaderboardRallyProps {
   title?: string
-  currentUserId?: string
-  // Hapus 'data' dari props karena kita mengambilnya via SWR
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch data');
+  return res.json();
+};
 
 export default function LeaderboardRally({
   title = "Rally Leaderboard",
-  currentUserId
 }: LeaderboardRallyProps) {
-
-  // 1. STATE DEFINITION (Harus paling atas)
   const [currentPage, setCurrentPage] = useState(1);
   const { mutate } = useSWRConfig();
   const limit = 8;
 
-  // 2. DATA FETCHING
-  // Menggunakan alias 'apiResponse' untuk menghindari konflik nama variabel
   const { data: apiResponse, error, isLoading } = useSWR<LeaderboardResponse>(
     `/api/leaderboard?page=${currentPage}&limit=${limit}`,
     fetcher,
     {
       refreshInterval: 19000,
-      keepPreviousData: true // UX agar tidak flickering saat ganti halaman
+      keepPreviousData: true
     }
   );
 
-  // Extract data aman dari response
   const leaderboardData = apiResponse?.data || [];
   const totalPages = apiResponse?.totalPages || 1;
 
-  // 3. PUSHER EFFECT
   useEffect(() => {
     const pusher = getPusherClient();
     if (!pusher) return;
 
-    pusher.subscribe("leaderboard-channel");
-    pusher.subscribe("contest-channel");
+    const leaderboardChannel = pusher.subscribe("leaderboard-channel");
+    const contestChannel = pusher.subscribe("contest-channel");
 
     const handleUpdate = () => {
-      // Refresh data halaman saat ini ketika ada update
-      mutate(`/api/leaderboard?page=${currentPage}&limit=${limit}`);
+      mutate(
+        (key) => typeof key === 'string' && key.startsWith('/api/leaderboard'),
+        undefined,
+        { revalidate: true }
+      );
     };
 
-    pusher.bind("leaderboard-update", handleUpdate);
-    pusher.bind("status-update", handleUpdate);
+    leaderboardChannel.bind("leaderboard-update", handleUpdate);
+    contestChannel.bind("status-update", handleUpdate);
 
     return () => {
-      pusher.unbind("leaderboard-update", handleUpdate);
-      pusher.unbind("status-update", handleUpdate);
+      leaderboardChannel.unbind("leaderboard-update", handleUpdate);
+      contestChannel.unbind("status-update", handleUpdate);
       pusher.unsubscribe("leaderboard-channel");
       pusher.unsubscribe("contest-channel");
     };
-  }, [mutate, currentPage]);
+  }, [mutate]);
 
-  // 4. HANDLERS
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(prev => prev - 1);
   }
@@ -98,16 +93,12 @@ export default function LeaderboardRally({
     }
   }
 
-  // 5. RENDER HELPERS
   const renderTableRow = (entry: LeaderboardRallyEntry) => {
-    // Cek apakah row ini milik user yang sedang login (opsional logic)
-    // Jika backend sudah mengirim flag 'isCurrentUser', gunakan itu.
-    // Jika tidak, kita cek manual via props currentUserId (jika ada field id di entry)
     const isUserRow = entry.isCurrentUser;
 
     return (
       <tr
-        key={entry.rank} // Sebaiknya gunakan entry.id jika ada, rank bisa duplikat kalau bug
+        key={entry.rank}
         className={`border-b border-[#684095]/30 transition-colors hover:bg-[#3E344A]/30 ${isUserRow ? 'bg-[#78CCEE]/20' : ''
           }`}
       >
@@ -148,10 +139,9 @@ export default function LeaderboardRally({
     )
   }
 
-  // 6. MAIN RENDER
   if (error) {
     return (
-      <div className="bg-black/40 backdrop-blur-md text-center rounded-2xl border-3 border-[#684095] shadow-2xl overflow-hidden p-4 w-[80%] h-[400px] text-2xl font-impact flex items-center justify-center">
+      <div className="bg-black/40 backdrop-blur-md text-center rounded-2xl border-3 border-[#684095] shadow-2xl overflow-hidden p-4 w-[80%] h-[400px] text-2xl font-impact flex items-center justify-center text-white">
         No Player Earned Or Made Something Yet
       </div>
     );
@@ -201,7 +191,6 @@ export default function LeaderboardRally({
           )}
         </div>
 
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="bg-[#3E344A]/50 p-4 gap-4 border-t-3 border-[#684095] flex items-center justify-between">
             <button
@@ -213,7 +202,6 @@ export default function LeaderboardRally({
             </button>
 
             <div className="flex gap-2">
-              {/* Simple Pagination: Show current page info */}
               <span className="text-white font-impact flex items-center px-4">
                 Page {currentPage} of {totalPages}
               </span>
