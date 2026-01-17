@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { ShopUser, searchUsers } from "@/features/trading/services/shop";
 import { getUserTradingLogs, TradingLogEntry } from "@/features/trading/services/history";
-import { Loader2, User, Search, ArrowUpCircle, ArrowDownCircle, History, Filter } from "lucide-react";
+import { Loader2, User, Search, ArrowUpCircle, ArrowDownCircle, History, Filter, RefreshCw } from "lucide-react";
 import { BalanceTradingResource } from "@prisma/client";
 
 const RESOURCE_OPTIONS: (BalanceTradingResource | "ALL")[] = [
@@ -32,6 +32,16 @@ export default function HistoryLogInterface() {
   
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [reloadCooldown, setReloadCooldown] = useState(0);
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (reloadCooldown <= 0) return;
+    const timer = setTimeout(() => {
+      setReloadCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [reloadCooldown]);
 
   // Debounced user search
   const performSearch = useMemo(
@@ -178,10 +188,24 @@ export default function HistoryLogInterface() {
                   <div className="text-white font-bold">{userName}</div>
                   <div className="text-xs text-gray-400">ID: {selectedUser.id}</div>
                 </div>
+                
+                {/* RELOAD BUTTON */}
+                <button
+                  onClick={() => {
+                    if (reloadCooldown > 0) return;
+                    setReloadCooldown(3);
+                    fetchLogsForUser(selectedUser.id);
+                  }}
+                  disabled={isLoadingLogs || reloadCooldown > 0}
+                  className="ml-2 p-2 rounded-full hover:bg-purple-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={reloadCooldown > 0 ? `Wait ${reloadCooldown}s` : "Reload data"}
+                >
+                  <RefreshCw size={18} className={`text-gray-300 ${isLoadingLogs ? 'animate-spin' : ''}`} />
+                </button>
               </div>
               
               {/* BALANCE DISPLAY */}
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="bg-black/30 px-4 py-2 rounded">
                   <div className="text-xs text-gray-400">Eternites</div>
                   <div className="text-lg font-bold text-[#75E8F0]">{userBalance.toLocaleString()}</div>
