@@ -154,6 +154,14 @@ export default function NavigationBar() {
                 </Link>
 
                 <Link
+                  href="/admin/trading/history"
+                  onClick={closeMenu}
+                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                >
+                  History Log
+                </Link>
+
+                <Link
                   href="/admin/trading/blackmarket"
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
