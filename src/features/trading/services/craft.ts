@@ -124,10 +124,7 @@ export async function itemToCraft(
       prisma.balanceTradingLog.create({
           data: {
               tradingDataId: tradingData.id,
-              amount: BigInt(-totalRawConsumed), // Just a simplistic count of total items? Or specific?
-              // The schema says 'amount' corresponds to resource.
-              // If resource is RAW, it might mean generic count.
-              // For consistent logging with previous code:
+              amount: BigInt(totalRawConsumed),
               type: BalanceLogType.DEBIT,
               resource: BalanceTradingResource.RAW,
               message: `Consumed materials to craft ${craftItem.name}`,
@@ -282,7 +279,7 @@ export async function craftBulkItems(
                 await tx.balanceTradingLog.create({
                     data: {
                         tradingDataId: tradingData.id,
-                        amount: BigInt(-totalEternitesRequired),
+                        amount: BigInt(totalEternitesRequired),
                         type: BalanceLogType.DEBIT,
                         resource: BalanceTradingResource.ETERNITES,
                         message: `Crafting Transaction Fee`,
@@ -301,20 +298,10 @@ export async function craftBulkItems(
                 }
             });
             
-            // Consumed Log? 
-            // We decremented Raw amounts but didn't log the RAW resource usage in logs explicitly in the loop above to avoid noise?
-            // Existing `itemToCraft` logged explicit RAW Debit.
-            // Let's allow explicit RAW Debit logs for correctness.
-            // Since we didn't track "Total Consumed per Raw Item" in a map for logging, we can't easily do one summary log without extra steps.
-            // Given the complexity, a "Consumed materials" generic log might be sufficient or we accept we are modifying balances without a strictly matching "Amount" log for every single raw item unit. 
-            // However, Balance logs are important.
-            // Let's add a generic RAW Debit log.
             await tx.balanceTradingLog.create({
                  data: {
                     tradingDataId: tradingData.id,
-                    amount: BigInt(0), // Placeholder or 0? Ideally sum of consumed. 
-                    // Let's roughly calculate sum of all consumed raw items count? 
-                    // It's mixed types so count is meaningless physically but meaningful statistically.
+                    amount: BigInt(0), 
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.RAW,
                     message: `Consumed raw materials for crafting`,

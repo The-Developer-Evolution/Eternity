@@ -95,7 +95,7 @@ export async function craftToMap(
       ops.push(prisma.balanceTradingLog.create({
           data: {
               tradingDataId: tradingData.id,
-              amount: BigInt(-cost),
+              amount: BigInt(cost),
               type: BalanceLogType.DEBIT,
               resource: BalanceTradingResource.ETERNITES,
               message: `Paid cost for Map Recipe`
@@ -111,7 +111,7 @@ export async function craftToMap(
       prisma.balanceTradingLog.create({
           data: {
               tradingDataId: tradingData.id,
-              amount: BigInt(-totalItemsConsumed), // Just a simplistic log, better to log credited Map separately? Existing logic logged debit & credit.
+              amount: BigInt(totalItemsConsumed),
               type: BalanceLogType.DEBIT,
               resource: BalanceTradingResource.CRAFT,
               message: `Consumed items for ${amount} Map(s)`
@@ -217,7 +217,7 @@ export async function craftMapWithCustomRecipe(
         ops.push(prisma.balanceTradingLog.create({
             data: {
                 tradingDataId: tradingData.id,
-                amount: BigInt(-cost),
+                amount: BigInt(cost),
                 type: BalanceLogType.DEBIT,
                 resource: BalanceTradingResource.ETERNITES,
                 message: `Paid cost for custom map crafting`
@@ -236,7 +236,7 @@ export async function craftMapWithCustomRecipe(
         ops.push(prisma.balanceTradingLog.create({
             data: {
                 tradingDataId: tradingData.id,
-                amount: BigInt(-totalItemsConsumed),
+                amount: BigInt(totalItemsConsumed),
                 type: BalanceLogType.DEBIT,
                 resource: BalanceTradingResource.CRAFT,
                 message: `Consumed items for ${amount} Custom Map(s)`

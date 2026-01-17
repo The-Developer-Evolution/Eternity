@@ -98,7 +98,7 @@ export async function buyMaterial(
     await tx.balanceTradingLog.create({
       data: {
         tradingDataId: tradingData.id,
-        amount: BigInt(-totalPrice),
+        amount: BigInt(totalPrice),
         message: `Spent ${totalPrice} eternites to buy ${amount}x ${materialName}`,
         type: BalanceLogType.DEBIT,
         resource: BalanceTradingResource.ETERNITES,
@@ -205,51 +205,20 @@ export async function buyCustomRawMaterials(
                 data: { eternites: { decrement: totalDeduction } }
             });
 
-            // 4. Logs
-            // Log Fee + Items Cost separatel? Or combined?
-            // "Spent X eternites to buy ..." 
+            // 4. Logs 
             
             // Log Debit
             await tx.balanceTradingLog.create({
                  data: {
                     tradingDataId: tradingData.id,
-                    amount: BigInt(-totalDeduction),
+                    amount: BigInt(totalDeduction),
                     message: `Bulk Purchase: ${logMessages.join(", ")}. (Items Cost: ${totalItemCost} + Fee: ${transactionFee})`,
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.ETERNITES,
                 }
             });
 
-             // Log Credit Items (Generic log or separate? Existing code logged separate logs per purchase usually, but here it's bulk)
-             // Let's log a summary credit log or one per item? 
-             // Existing code logged "Acquired X raw material: Y" per item type. 
-             // Let's loop and create credit logs for items to be consistent with history tracking.
-             // Re-iterating to log specific credits might be expensive if many items, but usually small list.
-             // To optimize, I'll fetch names in the first loop.
-            
-             // Refined Loop 1:
-             // Map<id, {name, amount}>
              
-            // Re-write logic slightly to capture names for logging:
-             
-             // Simpler: Just log "Acquired items from bulk purchase" as one credit entry?
-             // But schema has 'amount' for resource. For RAW, amount usually means quantity. 
-             // If we mix types, what is amount?
-             // Existing code: resource: RAW, amount: amount.
-             // So we should log per item type for clarity if we want to track "how much raw material total".
-             // We can do it.
-             
-             // Re-iterating to log specific credits might be expensive if many items, but usually small list.
-             // To optimize, I'll fetch names in the first loop.
-            
-             // Refined Loop 1:
-             // Map<id, {name, amount}>
-             
-            // Re-write logic slightly to capture names for logging:
-            // But wait, I'm inside async(tx). 
-            // I'll stick to the logMessages I built: "10x Wood, 5x Iron".
-            // For the CREDIT log (Resource: RAW), what AMOUNT to put? 
-            // Sum of all item quantities? Sure.
             const totalQuantity = items.reduce((acc, curr) => acc + curr.amount, 0);
             
             await tx.balanceTradingLog.create({

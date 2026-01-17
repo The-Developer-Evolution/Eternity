@@ -159,12 +159,6 @@ export async function buyItemBM(
     // Price is BigInt in DB. Amount is number.
     const pricePerUnit = BigInt(currentPrice);
     const totalPriceBigInt = pricePerUnit * BigInt(amount);
-    
-    // Convert User Balance (Int) to BigInt for comparison or cast Total to Int
-    // Eternites is Int.
-    // If totalPrice exceeds Int range, it's definitely unaffordable since balance is Int.
-    // Max Safe Integer is 9e15. Int (32) is 2e9.
-    // So converting BigInt price to Number is SAFE FOR COMPARISON with Int balance.
     const totalPriceNumber = Number(totalPriceBigInt);
 
     if (tradingData.eternites < totalPriceNumber) {
@@ -201,7 +195,7 @@ export async function buyItemBM(
             prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
-                    amount: BigInt(-Math.floor(totalPriceNumber)),
+                    amount: BigInt(Math.floor(totalPriceNumber)),
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.ETERNITES,
                     message: `Bought ${amount} ${itemName} (BM)`
@@ -368,7 +362,7 @@ export async function buyBulkItemsBM(
              prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
-                    amount: BigInt(-Math.floor(totalCostNumber)),
+                    amount: BigInt(Math.floor(totalCostNumber)),
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.ETERNITES,
                     message: `Bought ${items.length} items (BM Bulk)`

@@ -41,7 +41,7 @@ export async function updateThunt(userId: string): Promise<ActionResult<TradingD
             await tx.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
-                    amount: BigInt(-PRICE),
+                    amount: BigInt(PRICE),
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.ETERNITES,
                     message: `Treasure Hunt Participation Fee`
