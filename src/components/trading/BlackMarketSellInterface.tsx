@@ -72,15 +72,29 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
           const amounts: Record<string, number> = {};
           
           data.rawUserAmounts.forEach((ua) => {
-              amounts[ua.rawItemId] = Number(ua.amount);
+              // Use RAW- prefix to avoid collision with craft IDs
+              amounts[`RAW-${ua.rawItemId}`] = Number(ua.amount);
           });
           data.craftUserAmounts.forEach((ua) => {
-              amounts[ua.craftItemId] = Number(ua.amount);
+              // Use CRAFT- prefix to avoid collision with raw IDs
+              amounts[`CRAFT-${ua.craftItemId}`] = Number(ua.amount);
           });
           
           setUserAmounts(amounts);
       }
   };
+
+  // Fetch inventory when user is selected
+  useEffect(() => {
+      if (selectedUser) {
+          fetchUserInventory(selectedUser.id);
+          setSelectedItems({}); // Clear previous selections
+      } else {
+          setUserAmounts({});
+          setSelectedItems({});
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUser]);
 
   const toggleItem = (item: BlackMarketItemDetail, maxOwned: number) => {
       if (maxOwned <= 0) return;
@@ -148,10 +162,10 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
         };
         
         if (data?.rawUserAmounts) {
-            data.rawUserAmounts.forEach((ua) => { amounts[ua.rawItemId] = Number(ua.amount); });
+            data.rawUserAmounts.forEach((ua) => { amounts[`RAW-${ua.rawItemId}`] = Number(ua.amount); });
         }
         if (data?.craftUserAmounts) {
-             data.craftUserAmounts.forEach((ua) => { amounts[ua.craftItemId] = Number(ua.amount); });
+             data.craftUserAmounts.forEach((ua) => { amounts[`CRAFT-${ua.craftItemId}`] = Number(ua.amount); });
         }
         setUserAmounts(amounts);
 
@@ -279,8 +293,8 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
          {/* ITEM GRID */}
          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto p-1">
             {displayedItems.map(item => {
-                const owned = userAmounts[item.itemId] || 0;
                 const key = `${item.type}-${item.itemId}`;
+                const owned = userAmounts[key] || 0;
                 const isSelected = !!selectedItems[key];
                 
                 return (
@@ -317,7 +331,14 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
                             >
                                 <Minus size={12} className="text-gray-300" />
                             </button>
-                            <span className="text-sm font-bold text-white font-mono">{selectedItems[key]}</span>
+                            <input 
+                                type="number"
+                                min="1"
+                                className="w-12 text-sm font-bold text-white font-mono bg-transparent text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                value={selectedItems[key]}
+                                onChange={(e) => { e.stopPropagation(); updateItemAmount(item, parseInt(e.target.value) || 1, owned); }}
+                                onClick={(e) => e.stopPropagation()}
+                            />
                             <button 
                                 className="p-1 hover:bg-white/10 rounded"
                                 onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) + 1, owned); }}

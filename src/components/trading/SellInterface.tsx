@@ -329,7 +329,14 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
                             >
                                 <Minus size={12} className="text-gray-300" />
                             </button>
-                            <span className="text-sm font-bold text-white font-mono">{selectedItems[key]}</span>
+                            <input 
+                                type="number"
+                                min="1"
+                                className="w-12 text-sm font-bold text-white font-mono bg-transparent text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                value={selectedItems[key]}
+                                onChange={(e) => { e.stopPropagation(); updateItemAmount(item, parseInt(e.target.value) || 1); }}
+                                onClick={(e) => e.stopPropagation()}
+                            />
                             <button 
                                 className="p-1 hover:bg-white/10 rounded"
                                 onClick={(e) => { e.stopPropagation(); updateItemAmount(item, (selectedItems[key] || 0) + 1); }}

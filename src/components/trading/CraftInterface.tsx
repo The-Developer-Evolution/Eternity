@@ -215,7 +215,14 @@ export default function CraftInterface({ recipes }: CraftInterfaceProps) {
                                     >
                                         <Minus size={14} className="text-gray-400" />
                                     </button>
-                                    <span className="text-sm font-bold text-white font-mono">{selectedItems[item.id]}</span>
+                                    <input 
+                                        type="number"
+                                        min="1"
+                                        className="w-12 text-sm font-bold text-white font-mono bg-transparent text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        value={selectedItems[item.id]}
+                                        onChange={(e) => updateItemAmount(item.id, parseInt(e.target.value) || 1)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
                                     <button 
                                         className="p-1 hover:bg-white/10 rounded"
                                         onClick={() => updateItemAmount(item.id, selectedItems[item.id] + 1)}
