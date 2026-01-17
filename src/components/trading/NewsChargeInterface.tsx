@@ -15,7 +15,15 @@ export default function NewsChargeInterface() {
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Debounced search
   const performSearch = useMemo(
@@ -50,7 +58,12 @@ export default function NewsChargeInterface() {
          return;
     }
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to charge ${selectedUser.name} for ${qty} Eternities?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -68,6 +81,8 @@ export default function NewsChargeInterface() {
       setIsTransacting(false);
     }
   };
+
+  const isDisabled = !selectedUser || isTransacting || cooldown > 0;
 
   return (
     <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
@@ -148,9 +163,9 @@ export default function NewsChargeInterface() {
         {/* ACTION BUTTON */}
         <button
           onClick={handleCharge}
-          disabled={!selectedUser || isTransacting}
+          disabled={isDisabled}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-            !selectedUser || isTransacting
+            isDisabled
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-purple-600 to-blue-700 text-white hover:scale-[1.02] hover:shadow-purple-500/50"
           }`}
@@ -159,6 +174,8 @@ export default function NewsChargeInterface() {
             <>
               <Loader2 className="animate-spin" /> CHARGING...
             </>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s`
           ) : (
             <>
               <Zap size={20} /> CHARGE USER
@@ -211,3 +228,4 @@ export default function NewsChargeInterface() {
     </div>
   );
 }
+

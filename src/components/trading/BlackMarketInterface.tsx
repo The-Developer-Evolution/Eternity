@@ -20,7 +20,15 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const rawItems = items.filter(i => i.type === 'RAW');
   const craftItems = items.filter(i => i.type === 'CRAFT');
@@ -87,7 +95,12 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
         return;
     }
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to buy from Black Market for ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -283,14 +296,14 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
         <div className="flex justify-end pt-4">
              <button
                 onClick={handleBuy}
-                disabled={!selectedUser || Object.keys(selectedItems).length === 0 || isTransacting}
+                disabled={!selectedUser || Object.keys(selectedItems).length === 0 || isTransacting || cooldown > 0}
                 className={`w-full md:w-auto py-3 px-8 rounded font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 h-[50px] ${
-                    !selectedUser || Object.keys(selectedItems).length === 0 || isTransacting
+                    !selectedUser || Object.keys(selectedItems).length === 0 || isTransacting || cooldown > 0
                     ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                     : "bg-red-600 text-white hover:bg-red-500"
                 }`}
             >
-                 {isTransacting ? <Loader2 className="animate-spin" /> : <ShoppingCart size={20} />} BUY SELECTED
+                 {isTransacting ? <Loader2 className="animate-spin" /> : <ShoppingCart size={20} />} {cooldown > 0 ? `Wait ${cooldown}s` : "BUY SELECTED"}
             </button>
         </div>
 

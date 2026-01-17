@@ -38,7 +38,15 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Debounced search
   const performSearch = useMemo(
@@ -109,7 +117,12 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
         return;
     }
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to sell these items for ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -350,15 +363,15 @@ export default function SellInterface({ rawItems, craftItems, mapPrice }: SellIn
             <div className="flex gap-4 items-center w-full md:w-auto">
                 <button
                 onClick={handleSell}
-                disabled={!selectedUser || totalCount === 0 || isTransacting}
+                disabled={!selectedUser || totalCount === 0 || isTransacting || cooldown > 0}
                 className={`px-8 py-3 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center gap-2 ${
-                    !selectedUser || totalCount === 0 || isTransacting
+                    !selectedUser || totalCount === 0 || isTransacting || cooldown > 0
                     ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                     : "bg-green-600 text-white hover:scale-[1.02] hover:shadow-green-500/50"
                 }`}
                 >
                 {isTransacting ? <Loader2 className="animate-spin" /> : ""} 
-                SELL ITEMS
+                {cooldown > 0 ? `Wait ${cooldown}s` : "SELL ITEMS"}
                 </button>
             </div>
          </div>

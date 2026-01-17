@@ -21,7 +21,15 @@ export default function TreasureHuntInterface({ rawItems }: TreasureHuntInterfac
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Debounced search
   const performSearch = useMemo(
@@ -56,7 +64,12 @@ export default function TreasureHuntInterface({ rawItems }: TreasureHuntInterfac
          return;
     }
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to add ${qty} ${selectedItemName} to ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -180,9 +193,9 @@ export default function TreasureHuntInterface({ rawItems }: TreasureHuntInterfac
         {/* ACTION BUTTON */}
         <button
           onClick={handleAddItem}
-          disabled={!selectedUser || !selectedItemName || isTransacting}
+          disabled={!selectedUser || !selectedItemName || isTransacting || cooldown > 0}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-            !selectedUser || !selectedItemName || isTransacting
+            !selectedUser || !selectedItemName || isTransacting || cooldown > 0
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-cyan-600 to-blue-700 text-white hover:scale-[1.02] hover:shadow-cyan-500/50"
           }`}
@@ -191,6 +204,8 @@ export default function TreasureHuntInterface({ rawItems }: TreasureHuntInterfac
             <>
               <Loader2 className="animate-spin" /> ADDING...
             </>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s`
           ) : (
             <>
               <Gem size={20} /> ADD REWARD

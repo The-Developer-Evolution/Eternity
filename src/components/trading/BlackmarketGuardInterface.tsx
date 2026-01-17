@@ -13,9 +13,17 @@ export default function BlackmarketGuardInterface() {
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const BM_FEE = 1000;
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Debounced search
   const performSearch = useMemo(
@@ -44,7 +52,12 @@ export default function BlackmarketGuardInterface() {
   const handlePayFee = async () => {
     if (!selectedUser) return;
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to charge ${BM_FEE} Eternites entry fee for ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -141,9 +154,9 @@ export default function BlackmarketGuardInterface() {
         {/* ACTION BUTTON */}
         <button
           onClick={handlePayFee}
-          disabled={!selectedUser || isTransacting}
+          disabled={!selectedUser || isTransacting || cooldown > 0}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-            !selectedUser || isTransacting
+            !selectedUser || isTransacting || cooldown > 0
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-red-600 to-red-800 text-white hover:scale-[1.02] hover:shadow-red-500/50"
           }`}
@@ -152,6 +165,8 @@ export default function BlackmarketGuardInterface() {
             <>
               <Loader2 className="animate-spin" /> PROCESSING...
             </>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s`
           ) : (
             <>
               <ShieldAlert size={20} /> CHARGE ENTRY FEE

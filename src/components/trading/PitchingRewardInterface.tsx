@@ -16,7 +16,15 @@ export default function PitchingRewardInterface() {
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Debounced search
   const performSearch = useMemo(
@@ -45,7 +53,12 @@ export default function PitchingRewardInterface() {
   const handleGiveReward = async () => {
     if (!selectedUser || amount <= 0) return;
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to send ${amount} ${currency} to ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -176,9 +189,9 @@ export default function PitchingRewardInterface() {
         {/* ACTION BUTTON */}
         <button
           onClick={handleGiveReward}
-          disabled={!selectedUser || amount <= 0 || isTransacting}
+          disabled={!selectedUser || amount <= 0 || isTransacting || cooldown > 0}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-            !selectedUser || amount <= 0 || isTransacting
+            !selectedUser || amount <= 0 || isTransacting || cooldown > 0
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-[#F0A500] to-[#D68900] text-black hover:scale-[1.02] hover:shadow-[#F0A500]/50"
           }`}
@@ -187,6 +200,8 @@ export default function PitchingRewardInterface() {
             <>
               <Loader2 className="animate-spin" /> PROCESSING...
             </>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s`
           ) : (
             <>
               <Award size={20} /> SEND REWARD

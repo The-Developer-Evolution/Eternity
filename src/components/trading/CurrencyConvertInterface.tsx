@@ -21,7 +21,15 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
   
   const [isSearching, setIsSearching] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const toCurrency: CurrencyType = fromCurrency === "IDR" ? "USD" : "IDR";
   const exchangeRate = fromCurrency === "IDR" ? (1 / usdidrRate) : usdidrRate;
@@ -54,7 +62,12 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
   const handleConvert = async () => {
     if (!selectedUser || amount <= 0) return;
 
+    // Confirmation
+    const confirmed = window.confirm(`Are you sure you want to convert ${amount} ${fromCurrency} for ${selectedUser.name}?`);
+    if (!confirmed) return;
+
     setIsTransacting(true);
+    setCooldown(3);
     setMessage(null);
 
     try {
@@ -208,9 +221,9 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
         {/* ACTION BUTTON */}
         <button
           onClick={handleConvert}
-          disabled={!selectedUser || amount <= 0 || isTransacting}
+          disabled={!selectedUser || amount <= 0 || isTransacting || cooldown > 0}
           className={`w-full py-4 rounded-lg font-impact tracking-wider text-xl transition-all shadow-lg ${
-            !selectedUser || amount <= 0 || isTransacting
+            !selectedUser || amount <= 0 || isTransacting || cooldown > 0
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-[#AE00DE] to-[#7116C9] text-white hover:scale-[1.02] hover:shadow-[#AE00DE]/50"
           }`}
@@ -219,6 +232,8 @@ export default function CurrencyConvertInterface({ usdidrRate }: CurrencyConvert
             <div className="flex items-center justify-center gap-2">
               <Loader2 className="animate-spin" /> PROCESSING...
             </div>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s`
           ) : (
             "CONVERT CURRENCY"
           )}
