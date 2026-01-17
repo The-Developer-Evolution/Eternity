@@ -196,6 +196,10 @@ export async function craftBulkItems(
             const rawInventory = new Map<string, number>();
             tradingData.rawUserAmounts.forEach(ura => rawInventory.set(ura.rawItemId, Number(ura.amount)));
 
+            // Track consumption per raw item for detailed logging
+            // Map<RawItemId, { name: string, consumed: number }>
+            const rawConsumptionLog = new Map<string, { name: string, consumed: number }>();
+
             const totalEternitesRequired = customCost;
             const logMessages: string[] = [];
 
@@ -232,12 +236,16 @@ export async function craftBulkItems(
                         });
                     }
                     
-                    // Log specific consumption? Or generic? 
-                    // Existing uses generic RAW debit.
-                    // Let's create a consumption log per crafting operation (or grouped).
-                    // To avoid spamming logs, maybe we group by raw item?
-                    // For now, let's allow "Consumed materials..." per craft item type or just one big log.
-                    // The existing system logs per item type crafted. Let's stick to that.
+                    // Track consumption for detailed logging
+                    const existing = rawConsumptionLog.get(recipe.rawItemId);
+                    if (existing) {
+                        existing.consumed += requiredAmount;
+                    } else {
+                        rawConsumptionLog.set(recipe.rawItemId, {
+                            name: recipe.rawItem.name,
+                            consumed: requiredAmount
+                        });
+                    }
                 }
 
                 // Grant Craft Item
@@ -298,15 +306,18 @@ export async function craftBulkItems(
                 }
             });
             
-            await tx.balanceTradingLog.create({
-                 data: {
-                    tradingDataId: tradingData.id,
-                    amount: BigInt(0), 
-                    type: BalanceLogType.DEBIT,
-                    resource: BalanceTradingResource.RAW,
-                    message: `Consumed raw materials for crafting`,
-                }
-            });
+            // 5. Log consumed raw materials - one log per raw item type for traceability
+            for (const [, { name, consumed }] of rawConsumptionLog) {
+                await tx.balanceTradingLog.create({
+                    data: {
+                        tradingDataId: tradingData.id,
+                        amount: BigInt(consumed),
+                        type: BalanceLogType.DEBIT,
+                        resource: BalanceTradingResource.RAW,
+                        message: `Consumed ${consumed}x ${name} for crafting`,
+                    }
+                });
+            }
 
             // Return updated data
             const finalData = await tx.tradingData.findUnique({
