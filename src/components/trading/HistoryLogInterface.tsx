@@ -93,12 +93,15 @@ export default function HistoryLogInterface() {
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
-    return date.toLocaleString('id-ID', {
+    // Use undefined for locale to auto-detect user's browser locale
+    // timeZone defaults to the user's local timezone
+    return date.toLocaleString(undefined, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: false,
     });
   };
 
