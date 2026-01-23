@@ -205,7 +205,7 @@ async function main() {
       {
         periode: 1,
         cost_map: 1000,
-        price_map: 120000,
+        price_map: 120000000,
         duration: 30,
         usdidr_rate: 16500,
         news: "Stabil."
@@ -213,7 +213,7 @@ async function main() {
       {
         periode: 2,
         cost_map: 1300,
-        price_map: 118000,
+        price_map: 118000000,
         duration: 20,
         usdidr_rate: 16830,
         news: "Pajak naik."
@@ -221,7 +221,7 @@ async function main() {
       {
         periode: 3,
         cost_map: 1600,
-        price_map: 116000,
+        price_map: 116000000,
         duration: 20,
         usdidr_rate: 15989,
         news: "Musim hujan."
@@ -229,7 +229,7 @@ async function main() {
       {
         periode: 4,
         cost_map: 1900,
-        price_map: 114000,
+        price_map: 114000000,
         duration: 20,
         usdidr_rate: 16628,
         news: "Bencana karena hujan."
@@ -237,7 +237,7 @@ async function main() {
       {
         periode: 5,
         cost_map: 2200,
-        price_map: 112000,
+        price_map: 112000000,
         duration: 20,
         usdidr_rate: 17293,
         news: "Banjir berakhir."
@@ -245,7 +245,7 @@ async function main() {
       {
         periode: 6,
         cost_map: 2500,
-        price_map: 110000,
+        price_map: 110000000,
         duration: 20,
         usdidr_rate: 18677,
         news: "Munculnya pabrik baru dan adanya pabrik pesaing yang bangkrut."
@@ -253,7 +253,7 @@ async function main() {
       {
         periode: 7,
         cost_map: 2800,
-        price_map: 108000,
+        price_map: 108000000,
         duration: 20,
         usdidr_rate: 17743,
         news: "Cuaca stabil dan pembangunan besar-besaran perusahaan yang membutuhkan kayu, logam, dan kaca."
@@ -261,7 +261,7 @@ async function main() {
       {
         periode: 8,
         cost_map: 3100,
-        price_map: 106000,
+        price_map: 106000000,
         duration: 20,
         usdidr_rate: 15969,
         news: "Gunung berapi meletus dan terjadi kebakaran hutan."
@@ -359,54 +359,54 @@ async function main() {
   await prisma.craftPeriod.createMany({
     data: [
       // id 1: Brown Paper
-      { craftId: "1", periode: 1, price: 4200 },
-      { craftId: "1", periode: 2, price: 4568 },
-      { craftId: "1", periode: 3, price: 4463 },
-      { craftId: "1", periode: 4, price: 4568 },
-      { craftId: "1", periode: 5, price: 4673 },
-      { craftId: "1", periode: 6, price: 4463 },
-      { craftId: "1", periode: 7, price: 4620 },
-      { craftId: "1", periode: 8, price: 4935 },
+      { craftId: "1", periode: 1, price: 2200 },
+      { craftId: "1", periode: 2, price: 2400 },
+      { craftId: "1", periode: 3, price: 2000 },
+      { craftId: "1", periode: 4, price: 2100 },
+      { craftId: "1", periode: 5, price: 2200 },
+      { craftId: "1", periode: 6, price: 1875 },
+      { craftId: "1", periode: 7, price: 2500 },
+      { craftId: "1", periode: 8, price: 2550 },
 
       // id 2: Pen
-      { craftId: "2", periode: 1, price: 7875 },
-      { craftId: "2", periode: 2, price: 8474 },
-      { craftId: "2", periode: 3, price: 8999 },
-      { craftId: "2", periode: 4, price: 9146 },
-      { craftId: "2", periode: 5, price: 8379 },
-      { craftId: "2", periode: 6, price: 8169 },
-      { craftId: "2", periode: 7, price: 8915 },
-      { craftId: "2", periode: 8, price: 8421 },
+      { craftId: "2", periode: 1, price: 3300 },
+      { craftId: "2", periode: 2, price: 3550 },
+      { craftId: "2", periode: 3, price: 3600 },
+      { craftId: "2", periode: 4, price: 3000 },
+      { craftId: "2", periode: 5, price: 3100 },
+      { craftId: "2", periode: 6, price: 3550 },
+      { craftId: "2", periode: 7, price: 3700 },
+      { craftId: "2", periode: 8, price: 3450 },
 
       // id 3: Magnifyin glass
-      { craftId: "3", periode: 1, price: 6825 },
-      { craftId: "3", periode: 2, price: 7403 },
-      { craftId: "3", periode: 3, price: 8033 },
-      { craftId: "3", periode: 4, price: 8453 },
-      { craftId: "3", periode: 5, price: 7613 },
-      { craftId: "3", periode: 6, price: 7088 },
-      { craftId: "3", periode: 7, price: 7928 },
-      { craftId: "3", periode: 8, price: 7613 },
+      { craftId: "3", periode: 1, price: 4025 },
+      { craftId: "3", periode: 2, price: 4450 },
+      { craftId: "3", periode: 3, price: 4450 },
+      { craftId: "3", periode: 4, price: 4200 },
+      { craftId: "3", periode: 5, price: 4000 },
+      { craftId: "3", periode: 6, price: 3700 },
+      { craftId: "3", periode: 7, price: 4300 },
+      { craftId: "3", periode: 8, price: 4000 },
 
       // id 4: ink
-      { craftId: "4", periode: 1, price: 6300 },
-      { craftId: "4", periode: 2, price: 6762 },
-      { craftId: "4", periode: 3, price: 7308 },
-      { craftId: "4", periode: 4, price: 6762 },
-      { craftId: "4", periode: 5, price: 6279 },
-      { craftId: "4", periode: 6, price: 7077 },
-      { craftId: "4", periode: 7, price: 7392 },
-      { craftId: "4", periode: 8, price: 6993 },
+      { craftId: "4", periode: 1, price: 2650 },
+      { craftId: "4", periode: 2, price: 2850 },
+      { craftId: "4", periode: 3, price: 2300 },
+      { craftId: "4", periode: 4, price: 2000 },
+      { craftId: "4", periode: 5, price: 2350 },
+      { craftId: "4", periode: 6, price: 2800 },
+      { craftId: "4", periode: 7, price: 2500 },
+      { craftId: "4", periode: 8, price: 2600 },
 
       // id 5: dividers
-      { craftId: "5", periode: 1, price: 5040 },
-      { craftId: "5", periode: 2, price: 5387 },
-      { craftId: "5", periode: 3, price: 5114 },
-      { craftId: "5", periode: 4, price: 4589 },
-      { craftId: "5", periode: 5, price: 5093 },
-      { craftId: "5", periode: 6, price: 5597 },
-      { craftId: "5", periode: 7, price: 5376 },
-      { craftId: "5", periode: 8, price: 5418 },
+      { craftId: "5", periode: 1, price: 3575 },
+      { craftId: "5", periode: 2, price: 3900 },
+      { craftId: "5", periode: 3, price: 4000 },
+      { craftId: "5", periode: 4, price: 4100 },
+      { craftId: "5", periode: 5, price: 3950 },
+      { craftId: "5", periode: 6, price: 3250 },
+      { craftId: "5", periode: 7, price: 3800 },
+      { craftId: "5", periode: 8, price: 3600 },
     ],
   });
 
