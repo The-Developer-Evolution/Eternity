@@ -31,7 +31,7 @@ const RECIPES: RecipePattern[] = [
 
 // Forbidden MAP's REICPE
 const MAP_RECIPES = [
-  { brownPaper: 2, pen: 1, ink: 2, dividers: 1, magnifyingGlass: 1 },
+  { brownPaper: 4, pen: 1, ink: 2, dividers: 1, magnifyingGlass: 1 },
 ];
 
 // stock and price in BlackMarket

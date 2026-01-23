@@ -26,7 +26,7 @@ export async function payPitchingFee(userId: string, amount: number): Promise<Ac
 
     // Check if user has already paid pitching fee
     if (tradingData.hadPitching) {
-        return { success: false, error: "User has already paid the pitching fee" };
+        return { success: false, error: "The user has already pitched" };
     }
 
     if (tradingData.eternites < FEE) {
