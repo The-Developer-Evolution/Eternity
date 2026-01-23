@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
       target: migrator
     container_name: eternity-migration
+    # Perintah default untuk migrasi (pastikan schema terupdate ke DB)
+    command: pnpm prisma migrate deploy
     env_file:
       - .env
     networks:
@@ -40,6 +42,7 @@ services:
       - eternity_internal
     profiles:
       - manual
+
   studio:
     build:
       context: ./
@@ -54,9 +57,8 @@ services:
     networks:
       - global_proxy
       - eternity_internal
-    depends_on:
-      db:
-        condition: service_started
+    # "depends_on: db" SAYA HAPUS karena service 'db' tidak ada di file ini 
+    # (Database anda ada di container 'postgres' external)
     profiles:
       - manual
 
@@ -66,6 +68,12 @@ services:
       dockerfile: Dockerfile
       target: runner
       args:
+        # --- FIX BUILD STUCK ---
+        # Menggunakan IP Gateway (172.17.0.1) dan Port Host (5434)
+        # Agar saat build bisa tembus ke database lewat jalur luar
+        - DATABASE_URL=${DATABASE_URL_FOR_BUILD}
+        
+        # Args lainnya sesuai kode anda
         - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
         - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
         - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
@@ -73,6 +81,9 @@ services:
     container_name: eternity
     env_file:
       - ./.env
+    # Pastikan di file .env server isinya: 
+    # DATABASE_URL="postgresql://postgres:PASSWORD_ANDA@postgres:5432/eternity"
+    
     depends_on:
       migrate:
         condition: service_completed_successfully
