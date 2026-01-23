@@ -122,10 +122,12 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
   };
 
   // Calculations
+  const TRANSACTION_FEE = 1000;
   const totalCost = Object.entries(selectedItems).reduce((acc, [id, amount]) => {
       const item = items.find(i => i.id === id);
       return acc + (item ? item.price * amount : 0);
   }, 0);
+  const grandTotal = Object.keys(selectedItems).length > 0 ? totalCost + TRANSACTION_FEE : 0;
 
   return (
     <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-4">
@@ -365,9 +367,19 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
                         })
                     )}
                 </div>
-                 <div className="flex justify-between text-sm items-center mt-2 pt-2 border-t border-gray-700 font-bold">
-                    <span className="text-gray-400">Total</span>
-                    <span className="text-yellow-500">{totalCost.toLocaleString("en-US")} E</span>
+                 <div className="flex justify-between text-sm items-center mt-2 pt-2 border-t border-gray-700">
+                    <span className="text-gray-400">Subtotal</span>
+                    <span className="text-gray-300">{totalCost.toLocaleString("en-US")} E</span>
+                </div>
+                {Object.keys(selectedItems).length > 0 && (
+                    <div className="flex justify-between text-sm items-center text-red-400">
+                        <span>Fee</span>
+                        <span>{TRANSACTION_FEE.toLocaleString("en-US")} E</span>
+                    </div>
+                )}
+                <div className="flex justify-between text-sm items-center font-bold">
+                    <span className="text-gray-300">Grand Total</span>
+                    <span className="text-yellow-500">{grandTotal.toLocaleString("en-US")} E</span>
                 </div>
             </div>
         </div>

@@ -187,6 +187,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   }, [items, activeTab]);
 
   // Calculate totals
+  const TRANSACTION_FEE = 1000;
   let totalPay = 0;
   let totalCount = 0;
 
@@ -203,6 +204,8 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
           totalPay += item.price * qty;
       }
   });
+  
+  const netPayout = totalCount > 0 ? Math.max(0, totalPay - TRANSACTION_FEE) : 0;
 
   return (
     <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 p-8 mt-8 bg-black/40 backdrop-blur-md rounded-xl border border-red-900/30">
@@ -358,10 +361,14 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
          <div className="mt-auto border-t border-gray-700 pt-4 flex flex-col md:flex-row gap-4 items-end justify-between">
             
             {/* SUMMARY */}
-             <div className="flex flex-col text-sm text-gray-300">
+             <div className="flex flex-col text-sm text-gray-300 gap-1">
                 <div>Selected Items: <span className="text-white font-bold">{totalCount}</span></div>
                 {totalPay > 0 && (
-                     <div>Total Payout: <span className="text-yellow-500 font-bold">{totalPay.toLocaleString()} E</span></div>
+                    <>
+                        <div>Gross Payout: <span className="text-gray-400">{totalPay.toLocaleString()} E</span></div>
+                        <div>Fee: <span className="text-red-400">-{TRANSACTION_FEE.toLocaleString()} E</span></div>
+                        <div className="border-t border-gray-600 pt-1">Net Payout: <span className="text-yellow-500 font-bold">{netPayout.toLocaleString()} E</span></div>
+                    </>
                 )}
              </div>
 

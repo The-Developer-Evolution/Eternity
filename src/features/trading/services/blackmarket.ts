@@ -348,24 +348,38 @@ export async function buyBulkItemsBM(
              }
         }
 
+        // Transaction Fee: 1000 Eternites
+        const transactionFee = 1000;
         const totalCostNumber = Number(totalCost);
-        if (tradingData.eternites < totalCostNumber) {
-            return { success: false, error: `Insufficient Eternites. Cost: ${totalCostNumber.toLocaleString()}, Balance: ${tradingData.eternites.toLocaleString()}` };
+        const grandTotal = totalCostNumber + transactionFee;
+        
+        if (tradingData.eternites < grandTotal) {
+            return { success: false, error: `Insufficient Eternites. Cost: ${totalCostNumber.toLocaleString()} + Fee: ${transactionFee.toLocaleString()} = ${grandTotal.toLocaleString()}, Balance: ${tradingData.eternites.toLocaleString()}` };
         }
 
-        // Add Balance Deduction
+        // Add Balance Deduction (items cost)
         operations.push(
             prisma.tradingData.update({
                 where: { id: tradingData.id },
-                data: { eternites: { decrement: totalCostNumber } }
+                data: { eternites: { decrement: grandTotal } }
             }),
-             prisma.balanceTradingLog.create({
+            prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
                     amount: BigInt(Math.floor(totalCostNumber)),
                     type: BalanceLogType.DEBIT,
                     resource: BalanceTradingResource.ETERNITES,
                     message: `Bought ${items.length} items (BM Bulk)`
+                }
+            }),
+            // Separate log for transaction fee
+            prisma.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: BigInt(transactionFee),
+                    type: BalanceLogType.DEBIT,
+                    resource: BalanceTradingResource.ETERNITES,
+                    message: `BM Transaction Fee (Buy)`
                 }
             })
         );
@@ -469,21 +483,39 @@ export async function sellBulkItemsBM(
             // NOTE: Selling does NOT update Stock Period stock, per requirements.
         }
 
+        // Transaction Fee: 1000 Eternites
+        const transactionFee = 1000;
         const totalPayNumber = Number(totalPay);
+        const netPayout = totalPayNumber - transactionFee;
+        
+        // Check if user can afford the fee (payout must cover it)
+        if (netPayout < 0) {
+            throw new Error(`Transaction fee (${transactionFee.toLocaleString()} E) exceeds payout (${totalPayNumber.toLocaleString()} E).`);
+        }
 
-        // Add Money to User
+        // Add Money to User (net of fee)
         operations.push(
             prisma.tradingData.update({
                 where: { id: tradingData.id },
-                data: { eternites: { increment: totalPayNumber } }
+                data: { eternites: { increment: netPayout } }
             }),
-             prisma.balanceTradingLog.create({
+            prisma.balanceTradingLog.create({
                 data: {
                     tradingDataId: tradingData.id,
                     amount: BigInt(Math.floor(totalPayNumber)),
                     type: BalanceLogType.CREDIT,
                     resource: BalanceTradingResource.ETERNITES,
                     message: `Sold ${items.length} items (BM Bulk)`
+                }
+            }),
+            // Separate log for transaction fee
+            prisma.balanceTradingLog.create({
+                data: {
+                    tradingDataId: tradingData.id,
+                    amount: BigInt(transactionFee),
+                    type: BalanceLogType.DEBIT,
+                    resource: BalanceTradingResource.ETERNITES,
+                    message: `BM Transaction Fee (Sell)`
                 }
             })
         );
