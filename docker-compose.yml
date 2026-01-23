@@ -10,9 +10,6 @@ services:
     networks:
       - global_proxy
       - eternity_internal
-    depends_on:
-      db:
-        condition: service_started
 
   migrate_reset:
     build:
@@ -26,44 +23,23 @@ services:
     networks:
       - global_proxy
       - eternity_internal
-    depends_on:
-      db:
-        condition: service_started
     profiles:
       - manual
 
-  seeder:
+  seed:
     build:
       context: ./
       dockerfile: Dockerfile
       target: migrator
-    container_name: eternity-seeder
-    command: pnpm prisma db seed
+    container_name: eternity-seed
+    command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
     env_file:
       - .env
     networks:
       - global_proxy
       - eternity_internal
-    depends_on:
-      db:
-        condition: service_started
     profiles:
       - manual
-
-  db:
-    image: postgres:15-alpine
-    container_name: eternity_db
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    ports:
-      - "${DB_PORT_EXTERNAL}:5432"
-    networks:
-      - eternity_internal
   studio:
     build:
       context: ./
@@ -100,8 +76,6 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-      db:
-        condition: service_started
     expose:
       - "3000"
     networks:
@@ -113,6 +87,3 @@ networks:
     external: true
   eternity_internal:
     driver: bridge
-
-volumes:
-  pg_data:
