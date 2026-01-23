@@ -24,6 +24,11 @@ export async function payPitchingFee(userId: string, amount: number): Promise<Ac
     const tradingData = userResult.data.tradingData;
     const FEE = amount;
 
+    // Check if user has already paid pitching fee
+    if (tradingData.hadPitching) {
+        return { success: false, error: "User has already paid the pitching fee" };
+    }
+
     if (tradingData.eternites < FEE) {
         return { success: false, error: "Insufficient Eternites" };
     }
@@ -42,7 +47,8 @@ export async function payPitchingFee(userId: string, amount: number): Promise<Ac
             prisma.tradingData.update({
                 where: { id: tradingData.id },
                 data: {
-                    eternites: { decrement: FEE }
+                    eternites: { decrement: FEE },
+                    hadPitching: true  // Mark as having paid pitching fee
                 }
             })
         ]);
