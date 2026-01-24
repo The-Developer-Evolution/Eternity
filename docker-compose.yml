@@ -4,8 +4,6 @@ services:
       context: ./
       dockerfile: Dockerfile
       target: migrator
-    # Service khusus untuk reset database (Wipe data + Migrate Schema)
-    # Jalankan manual: docker compose run --rm migrate_reset
     container_name: eternity_migrate_reset
     command: pnpm prisma migrate reset --force
     env_file:
@@ -20,10 +18,7 @@ services:
       context: ./
       dockerfile: Dockerfile
       target: migrator
-    # Service khusus untuk seeding database
-    # Jalankan manual: docker compose run --rm seed
     container_name: eternity_seed
-    # Generate client dulu untuk memastikan schema terbaru ada, baru jalankan seed script
     command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
     env_file:
       - .env
@@ -48,7 +43,6 @@ services:
       - eternity_internal
     profiles:
       - manual
-
   app:
     build:
       context: ./
@@ -59,6 +53,7 @@ services:
         - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
         - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
         - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
+        - DATABASE_URL=${DATABASE_URL}
     container_name: eternity
     env_file:
       - .env
