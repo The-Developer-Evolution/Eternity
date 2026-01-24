@@ -122,7 +122,7 @@ export default function BlackMarketInterface({ items }: BlackMarketInterfaceProp
   };
 
   // Calculations
-  const TRANSACTION_FEE = 1000;
+  const TRANSACTION_FEE = 0;
   const totalCost = Object.entries(selectedItems).reduce((acc, [id, amount]) => {
       const item = items.find(i => i.id === id);
       return acc + (item ? item.price * amount : 0);

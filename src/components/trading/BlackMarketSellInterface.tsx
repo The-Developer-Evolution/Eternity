@@ -187,7 +187,7 @@ export default function BlackMarketSellInterface({ items }: BlackMarketSellInter
   }, [items, activeTab]);
 
   // Calculate totals
-  const TRANSACTION_FEE = 1000;
+  const TRANSACTION_FEE = 0;
   let totalPay = 0;
   let totalCount = 0;
 

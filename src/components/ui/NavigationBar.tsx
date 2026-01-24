@@ -166,7 +166,7 @@ export default function NavigationBar() {
                   onClick={closeMenu}
                   className="text-white hover:text-[#78CCEE] transition-colors text-xl"
                 >
-                  Blackmarket Guard
+                  Blackmarket Registration
                 </Link>
 
                 <Link

@@ -349,7 +349,7 @@ export async function buyBulkItemsBM(
         }
 
         // Transaction Fee: 1000 Eternites
-        const transactionFee = 1000;
+        const transactionFee = 0;
         const totalCostNumber = Number(totalCost);
         const grandTotal = totalCostNumber + transactionFee;
         
@@ -484,7 +484,7 @@ export async function sellBulkItemsBM(
         }
 
         // Transaction Fee: 1000 Eternites
-        const transactionFee = 1000;
+        const transactionFee = 0;
         const totalPayNumber = Number(totalPay);
         const netPayout = totalPayNumber - transactionFee;
         
