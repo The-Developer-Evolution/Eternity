@@ -35,7 +35,7 @@ RUN ls -la .next && ls -la .next/standalone
 
 
 # -------- Stage 2: Runtime --------
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
