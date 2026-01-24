@@ -18,7 +18,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             # Update this path to your project directory on the VPS
-            cd /var/www/devo/Eternity
+            cd /var/www/websites/Eternity
             
             echo "Deploying update..."
             
