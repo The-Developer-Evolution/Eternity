@@ -60,7 +60,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 
 # Install CLI tools and regenerate Prisma client for runtime
-RUN pnpm add prisma@7.2.0 tsx dotenv @prisma/client@7.2.0 @prisma/adapter-pg pg \
+RUN pnpm add prisma@6.19.2 tsx dotenv @prisma/client@6.19.2 @prisma/adapter-pg pg \
     && pnpm prisma generate
 
 EXPOSE 3000
