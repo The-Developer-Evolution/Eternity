@@ -13,7 +13,7 @@ services:
     container_name: eternity-seed
     env_file:
       - .env
-    command: prisma db seed
+    command: prisma migrate reset
     depends_on:
       - migration
     networks:
