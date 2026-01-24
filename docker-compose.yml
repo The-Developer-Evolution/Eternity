@@ -1,6 +1,6 @@
 services:
   migration:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-migration
     env_file:
       - .env
@@ -9,7 +9,7 @@ services:
       - npm_default
 
   seed:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-seed
     env_file:
       - .env
@@ -20,7 +20,7 @@ services:
       - npm_default
 
   web:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity
     expose:
       - 3000
