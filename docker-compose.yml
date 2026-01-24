@@ -1,41 +1,101 @@
 services:
-  migration:
-    image: ghcr.io/the-developer-evolution/eternity:felix
+  migrate:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
     container_name: eternity-migration
+    # Perintah default untuk migrasi (pastikan schema terupdate ke DB)
+    command: pnpm prisma migrate deploy
     env_file:
       - .env
-    command: prisma migrate deploy
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+
+  migrate_reset:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: eternity-migrate-reset
+    command: pnpm prisma migrate reset --force
+    env_file:
+      - .env
+    networks:
+      - global_proxy
+      - eternity_internal
+    profiles:
+      - manual
 
   seed:
-    image: ghcr.io/the-developer-evolution/eternity:felix
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
     container_name: eternity-seed
+    command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
     env_file:
       - .env
-    command: prisma db seed
-    depends_on:
-      - migration
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+    profiles:
+      - manual
 
-  web:
-    image: ghcr.io/the-developer-evolution/eternity:felix
-    container_name: eternity
-    expose:
-      - 3000
+  studio:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: eternity-studio
+    command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
     env_file:
       - .env
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '0.90'
-    depends_on:
-      - seed
+    expose:
+      - "5555"
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+    # "depends_on: db" SAYA HAPUS karena service 'db' tidak ada di file ini
+    # (Database anda ada di container 'postgres' external)
+    profiles:
+      - manual
+
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        # --- FIX BUILD STUCK ---
+        # Menggunakan IP Gateway (172.17.0.1) dan Port Host (5434)
+        # Agar saat build bisa tembus ke database lewat jalur luar
+        - DATABASE_URL=${DATABASE_URL_FOR_BUILD}
+
+        # Args lainnya sesuai kode anda
+        - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
+        - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
+        - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
+        - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
+    container_name: eternity
+    env_file:
+      - ./.env
+    # Pastikan di file .env server isinya:
+    # DATABASE_URL="postgresql://postgres:PASSWORD_ANDA@postgres:5432/eternity"
+
+
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - "3000"
+    networks:
+      - global_proxy
+      - eternity_internal
 
 networks:
-  npm_default:
+  global_proxy:
     external: true
+  eternity_internal:
+    driver: bridge
