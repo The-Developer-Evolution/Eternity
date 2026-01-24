@@ -1,6 +1,8 @@
 # -------- Stage 1: Build --------
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat
+FROM node:20-slim AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml* ./
