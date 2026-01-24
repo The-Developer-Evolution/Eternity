@@ -49,6 +49,25 @@ export async function GET(request: Request) {
       });
     }
 
+    // Auto-end trading if endTime has passed but status is still ON_GOING
+    if (trading.status === "ON_GOING" && trading.endTime && trading.endTime < new Date()) {
+      // Import and call endTrading dynamically to avoid circular dependencies
+      const { endTrading } = await import("@/features/trading/services/timer");
+      try {
+        await endTrading();
+        console.log("Auto-ended trading period as time expired");
+        return NextResponse.json({
+          status: "ENDED",
+          startTime: trading.startTime?.toISOString(),
+          endTime: trading.endTime?.toISOString(),
+          pausedTime: trading.pausedTime?.toISOString(),
+          serverTime: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Failed to auto-end trading:", error);
+      }
+    }
+
     return NextResponse.json({
       status: trading.status,
       startTime: trading.startTime?.toISOString(),

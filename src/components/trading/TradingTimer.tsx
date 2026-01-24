@@ -87,7 +87,14 @@ export default function TradingTimer() {
     // Only set interval if running
     if (status === "ON_GOING") {
       const interval = setInterval(() => {
-        setTimeLeft(calculateTimeLeft());
+        const newTimeLeft = calculateTimeLeft();
+        setTimeLeft(newTimeLeft);
+        
+        // When timer reaches 0, trigger a refetch to check/update status
+        if (newTimeLeft <= 0) {
+          console.log("Timer reached 0, triggering status refetch...");
+          mutate(); // This will refetch from server, which auto-ends trading
+        }
       }, 1000);
       return () => clearInterval(interval);
     }
