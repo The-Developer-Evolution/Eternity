@@ -151,6 +151,66 @@ export async function resumeTrading() {
   revalidatePath("/admin/trading", "layout");
 }
 
+// Conversion rates for period 8 final calculation
+const CONVERSION_RATES = {
+  ETERNITE_TO_IDR: BigInt(1_000_000),        // 1 eternite = 1,000,000 IDR
+  MAP_TO_IDR: BigInt(106_000_000_000),       // 1 map = 106,000,000,000 IDR
+  USD_TO_IDR: BigInt(15_969),                 // 1 USD = 15,969 IDR
+};
+
+const LAST_PERIOD = 8;
+
+/**
+ * Calculate final IDR for all players at the end of period 8.
+ * Converts eternites, maps, and USD to IDR.
+ * Raw items and craft items are NOT converted.
+ */
+async function calculateFinalIDR() {
+  console.log("Starting final IDR calculation for all players...");
+  
+  // Get all trading data for participants
+  const allTradingData = await prisma.tradingData.findMany({
+    include: {
+      user: {
+        select: { role: true }
+      }
+    }
+  });
+
+  // Filter only participants
+  const participantData = allTradingData.filter(td => td.user.role === "PARTICIPANT");
+  
+  console.log(`Processing ${participantData.length} participants...`);
+
+  for (const trading of participantData) {
+    // Calculate conversion amounts (using BigInt for precision)
+    const eternitesValue = BigInt(trading.eternites) * CONVERSION_RATES.ETERNITE_TO_IDR;
+    const mapValue = BigInt(trading.map) * CONVERSION_RATES.MAP_TO_IDR;
+    const usdValue = trading.usd * CONVERSION_RATES.USD_TO_IDR;
+    
+    // Total conversion amount
+    const totalConversion = eternitesValue + mapValue + usdValue;
+    
+    // Calculate final IDR value (current IDR + all conversions)
+    const finalIdrValue = trading.idr + totalConversion;
+    
+    // Store in finalIDR string field and reset converted resources
+    await prisma.tradingData.update({
+      where: { id: trading.id },
+      data: {
+        finalIDR: finalIdrValue.toString(), // Store as string to handle large values
+        eternites: 0,
+        map: 0,
+        usd: BigInt(0),
+      }
+    });
+
+    console.log(`Player ${trading.userId}: finalIDR = ${finalIdrValue.toString()}`);
+  }
+
+  console.log("Final IDR calculation completed.");
+}
+
 export async function endTrading() {
   const activeTrading = await prisma.periodeTrading.findFirst({
     where: {
@@ -161,6 +221,12 @@ export async function endTrading() {
   });
 
   if (!activeTrading) throw new Error("No active trading to end.");
+
+  // If this is period 8 (the last period), calculate final IDR for all players
+  if (activeTrading.periode === LAST_PERIOD) {
+    console.log("Period 8 ending - running final IDR calculation...");
+    await calculateFinalIDR();
+  }
 
   await prisma.periodeTrading.update({
     where: { id: activeTrading.id },
