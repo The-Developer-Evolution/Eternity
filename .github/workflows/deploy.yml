@@ -32,4 +32,4 @@ jobs:
             # Cleanup unused images to save disk space
             docker image prune -f
             
-            echo "Deployment successful!"
+            echo "Deployment success!"
