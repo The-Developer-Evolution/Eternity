@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Bry's Server
 
 on:
   push:
