@@ -4,6 +4,7 @@ import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import BlackMarketInterface from "@/components/trading/BlackMarketInterface";
 import BlackMarketSellInterface from "@/components/trading/BlackMarketSellInterface";
 import { getBlackMarketItems } from "@/features/trading/services/blackmarket";
+import TradingTimer from "@/components/trading/TradingTimer";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,7 @@ export default async function Page() {
           className="relative z-1 w-1/2 h-auto"
         />
         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
+             <TradingTimer />
              <BlackMarketInterface items={items} />
              <BlackMarketSellInterface items={items} />
         </div>

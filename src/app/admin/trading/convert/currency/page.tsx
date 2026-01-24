@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import CurrencyConvertInterface from "@/components/trading/CurrencyConvertInterface";
+import TradingTimer from "@/components/trading/TradingTimer";
 
 import { getRunningTradingPeriod } from "@/features/trading/action";
 
@@ -25,7 +26,8 @@ export default async function Page() {
             className="relative z-1 w-1/2 h-auto"
             priority
           />
-          <CurrencyConvertInterface usdidrRate={currentRate} />
+            <TradingTimer />
+            <CurrencyConvertInterface usdidrRate={currentRate} />
       </div>
     </div>
   );

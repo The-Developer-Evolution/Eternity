@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import ShopInterface from "@/components/trading/ShopInterface";
+import TradingTimer from "@/components/trading/TradingTimer";
 import { getAllRawItems } from "@/features/trading/services/shop";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,10 @@ export default async function Page() {
           height={1080}
           className="relative z-1 w-1/2 h-auto"
         ></Image>
-        <ShopInterface initialItems={rawItems} />
+        <div className="flex flex-col w-full items-center gap-6 relative z-10 pb-10">
+            <TradingTimer />
+            <ShopInterface initialItems={rawItems} />
+        </div>
       </div>
     </div>
   );

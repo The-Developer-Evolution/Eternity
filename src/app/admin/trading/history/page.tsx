@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import HistoryLogInterface from "@/components/trading/HistoryLogInterface";
+import TradingTimer from "@/components/trading/TradingTimer";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,10 @@ export default async function Page() {
           height={1080}
           className="relative z-1 w-1/2 h-auto"
         ></Image>
-        <HistoryLogInterface />
+        <div className="flex flex-col w-full items-center gap-0 py-10 overflow-y-auto max-h-screen relative z-10">
+            <TradingTimer />
+            <HistoryLogInterface />
+        </div>
       </div>
     </div>
   );

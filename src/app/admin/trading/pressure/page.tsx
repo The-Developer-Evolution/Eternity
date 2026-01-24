@@ -1,6 +1,7 @@
 import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
+import TradingTimer from "@/components/trading/TradingTimer";
 
 export default function Page() {
   return (
@@ -17,6 +18,9 @@ export default function Page() {
           height={1080}
           className="relative z-1 w-1/2 h-auto"
         ></Image>
+        <div className="relative z-10 w-full flex justify-center">
+             <TradingTimer />
+        </div>
       </div>
     </div>
   );

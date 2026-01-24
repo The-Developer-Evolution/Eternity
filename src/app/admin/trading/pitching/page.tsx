@@ -3,6 +3,7 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import PitchingInterface from "@/components/trading/PitchingInterface";
 import PitchingRewardInterface from "@/components/trading/PitchingRewardInterface";
+import TradingTimer from "@/components/trading/TradingTimer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Role } from "@prisma/client";
@@ -42,6 +43,7 @@ export default async function Page() {
           className="relative mt-[5%] z-1 w-1/2 h-auto"
         />
         <div className="flex flex-col w-full items-center gap-8 overflow-y-auto max-h-screen">
+            <TradingTimer />
             {showFee && <PitchingInterface />}
             {showReward && <PitchingRewardInterface />}
             

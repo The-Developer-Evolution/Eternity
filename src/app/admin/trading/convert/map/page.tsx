@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import MapCraftRecipeInterface from "@/components/trading/MapCraftRecipeInterface";
+import TradingTimer from "@/components/trading/TradingTimer";
 import { getAllMapRecipes } from "@/features/trading/services/map";
 
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,7 @@ export default async function Page() {
           className="relative z-1 w-1/2 h-auto"
         />
         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
+             <TradingTimer />
              {/* <MapCraftInterface craftItems={craftItems} /> */}
              <MapCraftRecipeInterface mapRecipes={serializedMapRecipes} />
         </div>

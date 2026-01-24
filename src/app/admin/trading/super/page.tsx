@@ -2,6 +2,7 @@ import Image from "next/image";
 import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop";
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import { TradingAdminDashboard } from "@/components/ui/TradingAdminDashboard";
+import TradingTimer from "@/components/trading/TradingTimer";
 import { RallyPeriodStatus } from "@prisma/client";
 import { getActiveTradingPeriod, getAllTradingPeriods } from "@/features/trading/services/timer";
 
@@ -38,11 +39,15 @@ export default async function Page() {
             height={1080}
             className="relative z-1 w-1/2 h-auto"
           ></Image>
-          <TradingAdminDashboard 
-            initialContestState={initialContestStatus} 
-            activePeriodId={activePeriodId} 
-            periods={allPeriods} 
-          /> 
+          
+          <div className="relative z-10 w-full flex flex-col items-center gap-4">
+             {/* <TradingTimer /> */}
+             <TradingAdminDashboard 
+                initialContestState={initialContestStatus} 
+                activePeriodId={activePeriodId} 
+                periods={allPeriods} 
+             /> 
+          </div> 
       </div>
     </div>
   );
