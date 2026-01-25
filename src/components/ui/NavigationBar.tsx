@@ -17,44 +17,29 @@ export default function NavigationBar() {
     setIsOpen(false);
   };
 
-  // Get user role from session
   const userRole = session?.user?.role as Role | undefined;
+  const isSuper = userRole === Role.SUPER;
 
-  // Check if user has trading admin role
-  const tradingAdminRoles = [
-    Role.BLACKMARKET,
-    Role.BUYRAW,
-    Role.CRAFT,
-    Role.MAP,
-    Role.TALKSHOW,
-    Role.CURRENCY,
-    Role.PITCHING,
-    Role.PITCHINGGUARD,
-    Role.THUNT,
-    Role.SELL,
-    Role.PRESSURE,
-    Role.SUPER,
-  ] as const;
-  const isTradingAdmin =
-    userRole && (tradingAdminRoles as readonly Role[]).includes(userRole);
+  const showTalkshow = isSuper || userRole === Role.TALKSHOW;
 
-  // Check if user has rally admin role
-  const rallyAdminRoles = [
-    Role.MONSTER,
-    Role.UPGRADE,
-    Role.EXCHANGE,
-    Role.POSTGUARD,
-    Role.SUPER,
-  ] as const;
-  const isRallyAdmin =
-    userRole && (rallyAdminRoles as readonly Role[]).includes(userRole);
+  const showBlackmarket = isSuper || userRole === Role.BLACKMARKET;
+  const showBuyRaw = isSuper || userRole === Role.BUYRAW;
+  const showSell = isSuper || userRole === Role.SELL;
+  const showCurrency = isSuper || userRole === Role.CURRENCY;
+  const showCraft = isSuper || userRole === Role.CRAFT;
+  const showMap = isSuper || userRole === Role.MAP;
+  const showPitching = isSuper || userRole === Role.PITCHING || userRole === Role.PITCHINGGUARD;
+  const showThunt = isSuper || userRole === Role.THUNT;
+  const showNews = isSuper || userRole === Role.PRESSURE;
+  
+  const hasTradingAccess = isSuper || showBlackmarket || showBuyRaw || showSell || showCurrency || showCraft || showMap || showPitching || showThunt || showNews;
 
-  const TalkShowAdminRoles = [
-    Role.TALKSHOW,
-    Role.SUPER,
-  ] as const;
-  const isTalkShowAdmin =
-    userRole && (TalkShowAdminRoles as readonly Role[]).includes(userRole);
+  const showUpgrade = isSuper || userRole === Role.UPGRADE;
+  const showExchange = isSuper || userRole === Role.EXCHANGE;
+  const showPostguard = isSuper || userRole === Role.POSTGUARD;
+  const showMinusPoint = isSuper || userRole === Role.MONSTER || userRole === Role.POSTGUARD;
+  
+  const hasRallyAccess = isSuper || showUpgrade || showExchange || showPostguard || showMinusPoint;
 
   return (
     <>
@@ -67,7 +52,6 @@ export default function NavigationBar() {
           E
         </Link>
 
-        {/* Hamburger Button */}
         <div className="flex gap-4 items-center justify-center">
           {!session ? (
             <Link
@@ -102,7 +86,6 @@ export default function NavigationBar() {
           </button>
         </div>
 
-        {/* Menu Overlay */}
         <div
           className={`fixed inset-0 bg-[#04043A]/95 backdrop-blur-sm z-40 flex flex-col items-center overflow-y-auto pt-28 pb-10 transition-transform duration-300 ease-in-out ${
             isOpen ? "translate-x-0" : "translate-x-full"
@@ -124,7 +107,7 @@ export default function NavigationBar() {
               </div>
             )}
 
-            {isTalkShowAdmin && (
+            {showTalkshow && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
                   Admin Talkshow
@@ -139,118 +122,141 @@ export default function NavigationBar() {
               </div>
             )}
 
-            {/* Admin Trading Menu - Only show for trading admins */}
-            {isTradingAdmin && (
+            {hasTradingAccess && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
                   Admin Trading
                 </h3>
-                <Link
-                  href="/admin/trading/super"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Super Admin Trading
-                </Link>
+                
+                {isSuper && (
+                  <>
+                    <Link
+                      href="/admin/trading/super"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      Super Admin Trading
+                    </Link>
 
-                <Link
-                  href="/admin/trading/history"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  History Log
-                </Link>
+                    <Link
+                      href="/admin/trading/history"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      History Log
+                    </Link>
+                  </>
+                )}
 
-                <Link
-                  href="/admin/trading/blackmarket"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Blackmarket Registration
-                </Link>
+                {showBlackmarket && (
+                  <>
+                    <Link
+                      href="/admin/trading/blackmarket"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      Blackmarket Registration
+                    </Link>
 
-                <Link
-                  href="/admin/trading/blackmarket/input"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Blackmarket
-                </Link>
+                    <Link
+                      href="/admin/trading/blackmarket/input"
+                      onClick={closeMenu}
+                      className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                    >
+                      Blackmarket
+                    </Link>
+                  </>
+                )}
 
-                <Link
-                  href="/admin/trading/shop"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Buy Raw Material
-                </Link>
-                <Link
-                  href="/admin/trading/sell"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Ancient Market
-                </Link>
+                {showBuyRaw && (
+                  <Link
+                    href="/admin/trading/shop"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Buy Raw Material
+                  </Link>
+                )}
+                
+                {showSell && (
+                  <Link
+                    href="/admin/trading/sell"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Ancient Market
+                  </Link>
+                )}
 
-                <Link
-                  href="/admin/trading/convert/currency"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Money Changer
-                </Link>
+                {showCurrency && (
+                  <Link
+                    href="/admin/trading/convert/currency"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Money Changer
+                  </Link>
+                )}
 
-                <Link
-                  href="/admin/trading/convert/material"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Craft Item
-                </Link>
+                {showCraft && (
+                  <Link
+                    href="/admin/trading/convert/material"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Craft Item
+                  </Link>
+                )}
 
-                <Link
-                  href="/admin/trading/convert/map"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Forbidden Map
-                </Link>
+                {showMap && (
+                  <Link
+                    href="/admin/trading/convert/map"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Forbidden Map
+                  </Link>
+                )}
 
-                <Link
-                  href="/admin/trading/pitching"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Pitching
-                </Link>
+                {showPitching && (
+                  <Link
+                    href="/admin/trading/pitching"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Pitching
+                  </Link>
+                )}
 
-                <Link
-                  href="/admin/trading/news"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  News
-                </Link>
+                {showNews && (
+                  <Link
+                    href="/admin/trading/news"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    News
+                  </Link>
+                )}
 
-
-                <Link
-                  href="/admin/trading/treasure/rewards"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Treasure Hunt
-                </Link>
+                {showThunt && (
+                  <Link
+                    href="/admin/trading/treasure/rewards"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Treasure Hunt
+                  </Link>
+                )}
               </div>
             )}
 
-            {/* Admin Rally Menu - Only show for rally admins */}
-            {isRallyAdmin && (
+            {hasRallyAccess && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
                   Admin Rally
                 </h3>
 
-                {session?.user.role == "SUPER" && (
+                {isSuper && (
                   <div className="flex flex-col gap-4">
                     <Link
                       href="/admin/super"
@@ -269,38 +275,48 @@ export default function NavigationBar() {
                   </div>
                 )}
 
-                <Link
-                  href="/admin/rally/minus-point"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Minus Point
-                </Link>
-                <Link
-                  href="/admin/rally/upgrade"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Upgrade
-                </Link>
-                <Link
-                  href="/admin/rally/exchange"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Exchange
-                </Link>
-                <Link
-                  href="/admin/rally/posguard"
-                  onClick={closeMenu}
-                  className="text-white hover:text-[#78CCEE] transition-colors text-xl"
-                >
-                  Postguard
-                </Link>
+                {showMinusPoint && (
+                  <Link
+                    href="/admin/rally/minus-point"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Minus Point
+                  </Link>
+                )}
+                
+                {showUpgrade && (
+                  <Link
+                    href="/admin/rally/upgrade"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Upgrade
+                  </Link>
+                )}
+                
+                {showExchange && (
+                  <Link
+                    href="/admin/rally/exchange"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Exchange
+                  </Link>
+                )}
+                
+                {showPostguard && (
+                  <Link
+                    href="/admin/rally/posguard"
+                    onClick={closeMenu}
+                    className="text-white hover:text-[#78CCEE] transition-colors text-xl"
+                  >
+                    Postguard
+                  </Link>
+                )}
               </div>
             )}
 
-            {/* Peserta Menu - Show for all logged in users */}
             {session && (
               <div className="flex flex-col gap-4 mt-4">
                 <h3 className="text-[#78CCEE] text-2xl uppercase tracking-widest border-b border-[#78CCEE]/30 pb-2">
