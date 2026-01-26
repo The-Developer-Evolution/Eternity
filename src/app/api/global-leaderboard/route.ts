@@ -14,9 +14,11 @@ export async function GET(request: Request) {
     const users = await prisma.user.findMany({
       where: {
         role: "PARTICIPANT",
-        rallyData: {
-          isNot: null, // Hanya ambil user yang punya data rally
-        }
+        OR: [
+          { rallyData: { isNot: null } },
+          { tradingData: { isNot: null } },
+          { talkshowPoints: { gt: 0 } }
+        ]
       },
       select: {
         id: true,
