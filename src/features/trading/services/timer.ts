@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { getPusherServer } from "@/lib/pusher";
 import { revalidatePath } from "next/cache";
+import { cnvrtFinalIdrToIdr } from "./cnvrtFinalIdrToIdr";
 
 export async function getAllTradingPeriods() {
   return await prisma.periodeTrading.findMany({
@@ -199,6 +200,7 @@ async function calculateFinalIDR() {
       where: { id: trading.id },
       data: {
         finalIDR: finalIdrValue.toString(), // Store as string to handle large values
+        idr: finalIdrValue,
         eternites: 0,
         map: 0,
         usd: BigInt(0),
@@ -209,6 +211,10 @@ async function calculateFinalIDR() {
   }
 
   console.log("Final IDR calculation completed.");
+
+  // Transfer finalIDR to idr
+  // await cnvrtFinalIdrToIdr();
+  console.log("Final IDR transferred to IDR.");
 }
 
 export async function endTrading() {

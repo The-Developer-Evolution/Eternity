@@ -20,8 +20,10 @@ interface LeaderboardEntry {
 
 interface LeaderboardResponse {
     data: LeaderboardEntry[]
-    totalPages: number
-    currentPage: number
+    meta: {
+        totalPages: number
+        currentPage: number
+    }
 }
 
 interface LeaderboardProps {
@@ -52,7 +54,7 @@ export default function GlobalLeaderboard({
     );
 
     const leaderboardData = apiResponse?.data || [];
-    const totalPages = apiResponse?.totalPages || 1;
+    const totalPages = apiResponse?.meta?.totalPages || 1;
 
     useEffect(() => {
         if (!session) return;
