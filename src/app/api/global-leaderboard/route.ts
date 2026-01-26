@@ -83,7 +83,7 @@ export async function GET(request: Request) {
     // 4. Tahap 2: Kalkulasi FINAL GLOBAL SCORE (dengan bobot %)
     const processedUsers = usersWithRawScore.map((user) => {
       // a. Hitung poin Trading (IDR / 1 Milyar)
-      const tradingPoint = Number(user.tradingData?.idr || 0) / 1_000_000_000;
+      const tradingPoint = Math.max(0, Number(user.tradingData?.idr || 0) / 1_000_000_000);
       
       // b. Hitung poin Talkshow
       const talkshowPoint = user.talkshowPoints || 0;
