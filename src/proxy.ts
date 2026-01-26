@@ -20,6 +20,7 @@ const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   "/admin": [Role.SUPER],
   "/admin/trading/history": [Role.SUPER],
   "/admin/trading/newAccount": [Role.SUPER],
+  "/admin/trading/news": [Role.SUPER, Role.NEWS],
 };
 
 
