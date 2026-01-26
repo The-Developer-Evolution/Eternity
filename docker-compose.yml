@@ -1,73 +1,41 @@
 services:
-  migrate_reset:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: migrator
-    container_name: eternity_migrate_reset
-    command: pnpm prisma migrate reset --force
+  migration:
+    image: ghcr.io/the-developer-evolution/eternity:felix
+    container_name: eternity-migration
     env_file:
       - .env
+    command: prisma migrate deploy
     networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
+      - npm_default
+
   seed:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: migrator
-    container_name: eternity_seed
-    command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
+    image: ghcr.io/the-developer-evolution/eternity:felix
+    container_name: eternity-seed
     env_file:
       - .env
-    command: prisma migrate reset
+    command: prisma db seed
     depends_on:
       - migration
     networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
-  studio:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: migrator
-    container_name: eternity-studio
-    command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
-    env_file:
-      - .env
-    expose:
-      - "5555"
-    networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
-  app:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: runner
-      args:
-        - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
-        - NEXT_PUBLIC_SOKETI_HOST=${NEXT_PUBLIC_SOKETI_HOST}
-        - NEXT_PUBLIC_SOKETI_PORT=${NEXT_PUBLIC_SOKETI_PORT}
-        - NEXT_PUBLIC_SOKETI_TLS=${NEXT_PUBLIC_SOKETI_TLS}
-        - DATABASE_URL=${DATABASE_URL}
+      - npm_default
+
+  web:
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity
+    expose:
+      - 3000
     env_file:
       - .env
-    expose:
-      - "3000"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.90'
+    depends_on:
+      - seed
     networks:
-      - global_proxy
-      - eternity_internal
+      - npm_default
 
 networks:
-  global_proxy:
+  npm_default:
     external: true
-  eternity_internal:
-    driver: bridge
