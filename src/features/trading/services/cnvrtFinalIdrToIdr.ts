@@ -30,7 +30,7 @@ export const cnvrtFinalIdrToIdr = async () => {
         }).filter(Boolean); // Remove nulls
 
         if (updates.length > 0) {
-            // @ts-ignore
+            // @ts-expect-error
             await prisma.$transaction(updates);
         }
 
