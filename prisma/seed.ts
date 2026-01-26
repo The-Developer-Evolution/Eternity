@@ -540,6 +540,7 @@ async function main() {
     Role.TALKSHOW, 
     Role.THUNT, // done
     Role.UPGRADE, 
+    Role.NEWS
   ];
 
   const passwords = [
@@ -558,6 +559,7 @@ async function main() {
   "Mike753#", 
   "November468$", // THUNT
   "Oscar159%",
+  "Papa980!",
 ];
 
   for (let i = 0; i < roles.length; i++) {
