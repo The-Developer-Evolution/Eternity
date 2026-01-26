@@ -30,7 +30,7 @@ export const cnvrtFinalIdrToIdr = async () => {
         }).filter(Boolean); // Remove nulls
 
         if (updates.length > 0) {
-            // @ts-expect-error
+            // @ts-expect-error: Transaction type mismatch with complex union types
             await prisma.$transaction(updates);
         }
 
