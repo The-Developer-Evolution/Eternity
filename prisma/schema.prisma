@@ -340,6 +340,7 @@ enum Role {
   POSTGUARD
   MONSTER
   PRESSURE
+  NEWS
 }
 
 enum RallyPeriodStatus {

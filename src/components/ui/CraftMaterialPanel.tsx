@@ -247,7 +247,7 @@ export default function CraftMaterialPanel({
             </div>
           </div>
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-[#78CCEE] font-impact text-lg flex items-center gap-2 border-b border-[#684095] pb-2 tracking-widest uppercase">
               <Hammer size={18} /> Craft Big Item
             </h3>
@@ -281,7 +281,7 @@ export default function CraftMaterialPanel({
                 );
               })}
             </div>
-          </div>
+          </div> */}
         </div>
       ) : (
         <div className="text-center py-20 bg-[#3E344A]/30 border-2 border-dashed border-[#684095] rounded-2xl flex flex-col items-center justify-center">

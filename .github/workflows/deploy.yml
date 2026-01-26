@@ -1,4 +1,4 @@
-name: Deploy Bry's server
+name: Deploy Bry's Server
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             # Update this path to your project directory on the VPS
-            cd /var/www/devo/Eternity
+            cd /var/www/websites/Eternity
             
             echo "Deploying update..."
             
@@ -27,9 +27,9 @@ jobs:
             
             # Build and deploy using Docker Compose
             # This handles migrations (via depends_on: migrate) and app restart
-            docker compose up -d --build
+            docker compose build --no-cache && docker compose up -d
             
             # Cleanup unused images to save disk space
             docker image prune -f
             
-            echo "Deployment successful!"
+            echo "Deployment success!"

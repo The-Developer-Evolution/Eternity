@@ -6,10 +6,19 @@ import {
 } from "@/features/rally/services/timer";
 import { AdminDashboard } from "@/components/ui/AdminDashboard";
 import { RallyPeriodStatus } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id || session.user.role !== "SUPER") {
+    redirect("/");
+  }
+
   let initialContestStatus: RallyPeriodStatus | null = null;
   let activePeriodId: string | null = null;
 
