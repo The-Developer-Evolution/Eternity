@@ -163,18 +163,32 @@ const LAST_PERIOD = 8;
 
 /**
  * Calculate final IDR for all players at the end of period 8.
- * Converts eternites, maps, and USD to IDR.
- * Raw items and craft items are NOT converted.
+ * Converts eternites, maps, USD, and craft items to IDR.
+ * Raw items are NOT converted.
  */
 async function calculateFinalIDR() {
   console.log("Starting final IDR calculation for all players...");
   
-  // Get all trading data for participants
+  // Get craft prices for period 8 (price is in eternites)
+  const craftPeriodPrices = await prisma.craftPeriod.findMany({
+    where: { periode: LAST_PERIOD },
+  });
+  
+  // Create a map of craftId -> price (in eternites)
+  const craftPriceMap = new Map<string, bigint>();
+  for (const cp of craftPeriodPrices) {
+    craftPriceMap.set(cp.craftId, cp.price);
+  }
+  
+  console.log(`Loaded ${craftPriceMap.size} craft item prices for period ${LAST_PERIOD}`);
+  
+  // Get all trading data for participants with their craft inventory
   const allTradingData = await prisma.tradingData.findMany({
     include: {
       user: {
         select: { role: true }
-      }
+      },
+      craftUserAmounts: true
     }
   });
 
@@ -189,8 +203,18 @@ async function calculateFinalIDR() {
     const mapValue = BigInt(trading.map) * CONVERSION_RATES.MAP_TO_IDR;
     const usdValue = trading.usd * CONVERSION_RATES.USD_TO_IDR;
     
-    // Total conversion amount
-    const totalConversion = eternitesValue + mapValue + usdValue;
+    // Calculate craft items value (craft amount * craft price in eternites * eternite to IDR rate)
+    let craftItemsValue = BigInt(0);
+    for (const craftUserAmount of trading.craftUserAmounts) {
+      const craftPrice = craftPriceMap.get(craftUserAmount.craftItemId);
+      if (craftPrice) {
+        // craft amount * price in eternites * eternite to IDR rate
+        craftItemsValue += craftUserAmount.amount * craftPrice * CONVERSION_RATES.ETERNITE_TO_IDR;
+      }
+    }
+    
+    // Total conversion amount (now includes craft items)
+    const totalConversion = eternitesValue + mapValue + usdValue + craftItemsValue;
     
     // Calculate final IDR value (current IDR + all conversions)
     const finalIdrValue = trading.idr + totalConversion;
@@ -206,8 +230,16 @@ async function calculateFinalIDR() {
         usd: BigInt(0),
       }
     });
+    
+    // Reset all craft user amounts to 0
+    if (trading.craftUserAmounts.length > 0) {
+      await prisma.craftUserAmount.updateMany({
+        where: { tradingDataId: trading.id },
+        data: { amount: BigInt(0) }
+      });
+    }
 
-    console.log(`Player ${trading.userId}: finalIDR = ${finalIdrValue.toString()}`);
+    console.log(`Player ${trading.userId}: craftValue = ${craftItemsValue.toString()}, finalIDR = ${finalIdrValue.toString()}`);
   }
 
   console.log("Final IDR calculation completed.");
