@@ -23,9 +23,7 @@ export const cnvrtFinalIdrToIdr = async () => {
             return prisma.tradingData.update({
                 where: { id: data.id },
                 data: {
-                    idr: {
-                        increment: finalIdrVal,
-                    },
+                    idr: finalIdrVal,
                     finalIDR: "0",
                 },
             });
