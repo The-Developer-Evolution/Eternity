@@ -179,7 +179,7 @@ export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, p
       <div className="bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl text-center relative overflow-hidden">
         {/* Period Number Badge */}
         {currentPeriodNumber && isRunning && (
-          <div className="absolute top-4 right-4 bg-purple-900/50 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold text-purple-300 tracking-wider">
+          <div className="relative mx-auto mb-4 w-fit bg-purple-900/50 border border-purple-500/30 px-4 py-2 rounded-full text-xl font-bold text-purple-300 tracking-wider">
              PERIOD #{currentPeriodNumber}
           </div>
         )}
