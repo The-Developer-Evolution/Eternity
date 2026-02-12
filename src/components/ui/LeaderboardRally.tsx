@@ -174,10 +174,10 @@ export default function LeaderboardRally({
                 <tr className="bg-[#2f093b] border-b-2 text-white border-[#684095]">
                   <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">Rank</th>
                   <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">Name</th>
-                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Level</th>
+                  {/* <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Level</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Vault</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Minus Point</th>
-                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Eonix</th>
+                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Eonix</th> */}
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Score</th>
                 </tr>
               </thead>
