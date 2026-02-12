@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page() {
    const session = await getServerSession(authOptions);
-// 
+// a
   if (!session?.user?.id || session.user.role !== "SUPER") {
     redirect("/");
   }
