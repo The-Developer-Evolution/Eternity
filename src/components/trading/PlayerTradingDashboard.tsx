@@ -1,11 +1,13 @@
 "use client";
 
 import useSWR from "swr";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { RallyPeriodStatus } from "@prisma/client";
 import { getPusherClient } from "@/lib/pusher";
 import LinkButton from "@/components/common/LinkButton";
 import { FaBox, FaChartBar } from "react-icons/fa";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface TradingStatusResponse {
   status: RallyPeriodStatus;
@@ -40,6 +42,41 @@ interface PlayerTradingDashboardProps {
 }
 
 export function PlayerTradingDashboard({ periodId, initialStatus, stats, news, periodNumber }: PlayerTradingDashboardProps) {
+  return (
+    <Suspense>
+      <PlayerTradingDashboardContent 
+        periodId={periodId} 
+        initialStatus={initialStatus} 
+        stats={stats} 
+        news={news} 
+        periodNumber={periodNumber} 
+      />
+    </Suspense>
+  )
+}
+
+function PlayerTradingDashboardContent({ periodId, initialStatus, stats, news, periodNumber }: PlayerTradingDashboardProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const processedError = useRef<string | null>(null);
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error && processedError.current !== error) {
+      if (error === "no_active_period") {
+        toast.error("Player can only access the leaderboard when the game is running");
+      } else if (error === "period_8") {
+        toast.error("Player cant access leaderboard on 8th period");
+      }
+      
+      processedError.current = error;
+
+      // Clear the param
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete("error");
+      router.replace(`?${newParams.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const { data: tradingData, mutate } = useSWR<TradingStatusResponse>(
     periodId ? `/api/trading/status?periodId=${periodId}` : null,
