@@ -34,17 +34,10 @@ export default function TradingTimer() {
   );
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
-  const [currentPeriodNumber, setCurrentPeriodNumber] = useState<number | undefined>(undefined);
   
   const status = tradingData?.status ?? RallyPeriodStatus.NOT_STARTED;
   const isRunning = status === "ON_GOING" || status === "PAUSED";
-
-  // Update period number from initial fetch
-  useEffect(() => {
-    if (tradingData?.periodNumber !== undefined) {
-      setCurrentPeriodNumber(tradingData.periodNumber);
-    }
-  }, [tradingData?.periodNumber]);
+  const currentPeriodNumber = tradingData?.periodNumber;
 
   // Sync timer with server data
   useEffect(() => {
@@ -141,13 +134,9 @@ export default function TradingTimer() {
                 startTime: data.startTime ?? currentData.startTime,
                 endTime: data.endTime ?? currentData.endTime,
                 serverTime: new Date().toISOString(),
+                periodNumber: data.periodNumber ?? currentData.periodNumber,
             };
         }, { revalidate: false });
-        
-        // Update period number if provided in the event
-        if (data.periodNumber !== undefined) {
-            setCurrentPeriodNumber(data.periodNumber);
-        }
     });
 
     return () => {
@@ -163,7 +152,7 @@ export default function TradingTimer() {
       <div className="bg-gray-900/90 backdrop-blur-sm p-4 rounded-xl border border-[#684095] shadow-2xl text-center relative overflow-hidden">
         {/* Period Number Badge */}
         {currentPeriodNumber && isRunning && (
-          <div className="absolute top-2 right-2 bg-purple-900/50 border border-purple-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold text-purple-300 tracking-wider">
+          <div className="relative mx-auto mb-4 w-fit bg-purple-900/50 border border-purple-500/30 px-4 py-2 rounded-full text-xl font-bold text-purple-300 tracking-wider">
              PERIOD #{currentPeriodNumber}
           </div>
         )}

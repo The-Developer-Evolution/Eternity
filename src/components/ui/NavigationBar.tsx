@@ -30,7 +30,7 @@ export default function NavigationBar() {
   const showMap = isSuper || userRole === Role.MAP;
   const showPitching = isSuper || userRole === Role.PITCHING || userRole === Role.PITCHINGGUARD;
   const showThunt = isSuper || userRole === Role.THUNT;
-  const showNews = isSuper || userRole === Role.PRESSURE;
+  const showNews = isSuper || userRole === Role.NEWS;
   
   const hasTradingAccess = isSuper || showBlackmarket || showBuyRaw || showSell || showCurrency || showCraft || showMap || showPitching || showThunt || showNews;
 

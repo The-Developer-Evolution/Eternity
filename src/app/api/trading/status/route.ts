@@ -18,6 +18,7 @@ export async function GET(request: Request) {
           startTime: true,
           endTime: true,
           pausedTime: true,
+          periode: true,
         },
       });
 
@@ -34,6 +35,7 @@ export async function GET(request: Request) {
         endTime: period.endTime?.toISOString(),
         pausedTime: period.pausedTime?.toISOString(),
         serverTime: new Date().toISOString(),
+        periodNumber: period.periode,
       });
     }
 
@@ -46,6 +48,7 @@ export async function GET(request: Request) {
         startTime: null,
         endTime: null,
         serverTime: new Date().toISOString(),
+        periodNumber: null,
       });
     }
 
@@ -62,6 +65,7 @@ export async function GET(request: Request) {
           endTime: trading.endTime?.toISOString(),
           pausedTime: trading.pausedTime?.toISOString(),
           serverTime: new Date().toISOString(),
+          periodNumber: trading.periode,
         });
       } catch (error) {
         console.error("Failed to auto-end trading:", error);
@@ -74,6 +78,7 @@ export async function GET(request: Request) {
       endTime: trading.endTime?.toISOString(),
       pausedTime: trading.pausedTime?.toISOString(),
       serverTime: new Date().toISOString(),
+      periodNumber: trading.periode,
     });
   } catch (error) {
     console.error("Failed to fetch trading status:", error);
