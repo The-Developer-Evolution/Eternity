@@ -116,7 +116,7 @@ export default function LeaderboardRally({
             {entry.name}
           </span>
         </td>
-        <td className="px-4 py-4 text-center">
+        {/* <td className="px-4 py-4 text-center">
           <span className="font-impact text-lg text-[#78CCEE]">
             {entry.access_card_level}
           </span>
@@ -135,7 +135,7 @@ export default function LeaderboardRally({
           <span className="font-impact text-lg text-[#78CCEE]">
             {entry.eonix}
           </span>
-        </td>
+        </td> */}
         <td className="px-4 py-4 text-center">
           <span className="font-impact text-lg text-yellow-400">
             {entry.score.toLocaleString()}
