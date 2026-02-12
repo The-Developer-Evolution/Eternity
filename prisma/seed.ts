@@ -208,7 +208,7 @@ async function main() {
         price_map: 120000000,
         duration: 30,
         usdidr_rate: 16500,
-        news: "Stabil."
+        news: "Dunia berada dalam kondisi stabil dan kondusif, dengan aktivitas ekonomi berjalan normal serta lingkungan yang mendukung perencanaan jangka panjang."
       },
       {
         periode: 2,
@@ -216,7 +216,7 @@ async function main() {
         price_map: 118000000,
         duration: 20,
         usdidr_rate: 16830,
-        news: "Pajak naik."
+        news: "Kenaikan pajak mulai memengaruhi iklim ekonomi, meningkatkan tekanan biaya dan mengubah perilaku pelaku pasar dalam menjalankan aktivitas produksi dan distribusi."
       },
       {
         periode: 3,
@@ -224,7 +224,7 @@ async function main() {
         price_map: 116000000,
         duration: 20,
         usdidr_rate: 15989,
-        news: "Musim hujan."
+        news: "Musim hujan melanda berbagai wilayah, memengaruhi kelancaran aktivitas ekonomi dan distribusi serta meningkatkan ketidakpastian dalam perencanaan operasional."
       },
       {
         periode: 4,
@@ -232,7 +232,7 @@ async function main() {
         price_map: 114000000,
         duration: 20,
         usdidr_rate: 16628,
-        news: "Bencana karena hujan."
+        news: "Keadaan darurat menggeser fokus ekonomi dari pertumbuhan menuju respons cepat dan pemulihan infrastruktur penting."
       },
       {
         periode: 5,
@@ -240,7 +240,7 @@ async function main() {
         price_map: 112000000,
         duration: 20,
         usdidr_rate: 17293,
-        news: "Banjir berakhir."
+        news: "Banjir surut, masa pemulihan mulai terbentuk, ditandai dengan upaya penyeimbangan kembali aktivitas ekonomi setelah periode gangguan besar."
       },
       {
         periode: 6,
@@ -248,7 +248,7 @@ async function main() {
         price_map: 110000000,
         duration: 20,
         usdidr_rate: 18677,
-        news: "Munculnya pabrik baru dan adanya pabrik pesaing yang bangkrut."
+        news: "Aktivitas industri kembali bergerak dinamis, namun ketidakseimbangan struktural menciptakan persaingan dan tekanan operasional."
       },
       {
         periode: 7,
@@ -256,7 +256,7 @@ async function main() {
         price_map: 108000000,
         duration: 20,
         usdidr_rate: 17743,
-        news: "Cuaca stabil dan pembangunan besar-besaran perusahaan yang membutuhkan kayu, logam, dan kaca."
+        news: "Stabilitas ekonomi semakin menguat seiring meningkatnya pembangunan dan kepercayaan terhadap kondisi domestik."
       },
       {
         periode: 8,
@@ -264,7 +264,7 @@ async function main() {
         price_map: 106000000,
         duration: 20,
         usdidr_rate: 15969,
-        news: "Gunung berapi meletus dan terjadi kebakaran hutan."
+        news: "Gunung berapi meletus dan memicu gangguan pada lingkungan serta aktivitas ekonomi"
       },
     ],
     skipDuplicates: true,
