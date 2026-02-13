@@ -48,6 +48,8 @@ jobs:
           script: |
             cd /var/www/websites/Eternity
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "ucyenyen" --password-stdin
+            git fetch
+            git pull origin main
             docker compose pull app
             docker compose up -d
             docker image prune -f
