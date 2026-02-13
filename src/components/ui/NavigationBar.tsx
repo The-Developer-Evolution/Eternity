@@ -50,7 +50,7 @@ export default function NavigationBar() {
           onClick={closeMenu}
           className="text-[#78CCEE] z-50 relative font-impact text-5xl"
         >
-          <Image src="/assets/logo-effor.png" alt="Logo" width={100} height={100} className="w-24 h-auto" />
+          <Image src="/assets/logo-effor.png" alt="Logo" width={100} height={100} className="w-16 h-auto" />
         </Link>
 
         <div className="flex gap-4 items-center justify-center">
