@@ -1,9 +1,6 @@
 services:
   migrate_reset:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: migrator
+    image: ucyenyen/eternity-migrator:latest
     container_name: eternity_migrate_reset
     command: pnpm prisma migrate reset --force
     env_file:
@@ -15,10 +12,7 @@ services:
       - manual
 
   seed:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      target: migrator
+    image: ucyenyen/eternity-migrator:latest
     container_name: eternity_seed
     command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
     env_file:
