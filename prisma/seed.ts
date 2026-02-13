@@ -205,7 +205,7 @@ async function main() {
       {
         periode: 1,
         cost_map: 1000,
-        price_map: 120000000,
+        price_map: 120000000000,
         duration: 30,
         usdidr_rate: 16500,
         news: "Dunia berada dalam kondisi stabil dan kondusif, dengan aktivitas ekonomi berjalan normal serta lingkungan yang mendukung perencanaan jangka panjang."
@@ -213,7 +213,7 @@ async function main() {
       {
         periode: 2,
         cost_map: 1300,
-        price_map: 118000000,
+        price_map: 118000000000,
         duration: 20,
         usdidr_rate: 16830,
         news: "Kenaikan pajak mulai memengaruhi iklim ekonomi, meningkatkan tekanan biaya dan mengubah perilaku pelaku pasar dalam menjalankan aktivitas produksi dan distribusi."
@@ -221,7 +221,7 @@ async function main() {
       {
         periode: 3,
         cost_map: 1600,
-        price_map: 116000000,
+        price_map: 116000000000,
         duration: 20,
         usdidr_rate: 15989,
         news: "Musim hujan melanda berbagai wilayah, memengaruhi kelancaran aktivitas ekonomi dan distribusi serta meningkatkan ketidakpastian dalam perencanaan operasional."
@@ -229,7 +229,7 @@ async function main() {
       {
         periode: 4,
         cost_map: 1900,
-        price_map: 114000000,
+        price_map: 114000000000,
         duration: 20,
         usdidr_rate: 16628,
         news: "Keadaan darurat menggeser fokus ekonomi dari pertumbuhan menuju respons cepat dan pemulihan infrastruktur penting."
@@ -237,7 +237,7 @@ async function main() {
       {
         periode: 5,
         cost_map: 2200,
-        price_map: 112000000,
+        price_map: 112000000000,
         duration: 20,
         usdidr_rate: 17293,
         news: "Banjir surut, masa pemulihan mulai terbentuk, ditandai dengan upaya penyeimbangan kembali aktivitas ekonomi setelah periode gangguan besar."
@@ -245,7 +245,7 @@ async function main() {
       {
         periode: 6,
         cost_map: 2500,
-        price_map: 110000000,
+        price_map: 110000000000,
         duration: 20,
         usdidr_rate: 18677,
         news: "Aktivitas industri kembali bergerak dinamis, namun ketidakseimbangan struktural menciptakan persaingan dan tekanan operasional."
@@ -253,7 +253,7 @@ async function main() {
       {
         periode: 7,
         cost_map: 2800,
-        price_map: 108000000,
+        price_map: 108000000000,
         duration: 20,
         usdidr_rate: 17743,
         news: "Stabilitas ekonomi semakin menguat seiring meningkatnya pembangunan dan kepercayaan terhadap kondisi domestik."
@@ -261,7 +261,7 @@ async function main() {
       {
         periode: 8,
         cost_map: 3100,
-        price_map: 106000000,
+        price_map: 106000000000,
         duration: 20,
         usdidr_rate: 15969,
         news: "Gunung berapi meletus dan memicu gangguan pada lingkungan serta aktivitas ekonomi"
