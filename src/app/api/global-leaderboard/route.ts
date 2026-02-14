@@ -86,16 +86,16 @@ export async function GET(request: Request) {
       const tradingPoint = Math.max(0, Number(user.tradingData?.idr || 0) / 1_000_000_000);
       
       // b. Hitung poin Talkshow
-      const talkshowPoint = user.talkshowPoints || 0;
+      const talkshowPoint = user.talkshowPoints/600 || 0;
 
       // c. Hitung Global Score
       // (RallyScoreUser / MaxRallyScore * 45%) + (Trading * 40%) + (Talkshow * 15%)
       const normalizedRallyScore = (user.rawRallyScore / maxRallyScore);
       
       const totalGlobalScore = 
-        (normalizedRallyScore * 0.45) + 
-        (tradingPoint * 0.40) + 
-        (talkshowPoint * 0.15);
+        (normalizedRallyScore * 45) + 
+        (tradingPoint * 40) + 
+        (talkshowPoint * 15);
 
       return {
         id: user.id,
