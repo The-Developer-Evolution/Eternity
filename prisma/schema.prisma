@@ -9,19 +9,11 @@ datasource db {
 }
 
 model PeriodeTrading {
-<<<<<<< HEAD
-  id          String  @id @default(cuid())
-  periode     Int     @unique
-  cost_map    Decimal
-  price_map   Decimal
-  usdidr_rate Decimal
-=======
   id          String @id @default(cuid())
   periode     Int    @unique
   cost_map    BigInt
   price_map   BigInt
   usdidr_rate BigInt
->>>>>>> main
   duration    Int
   news        String
 
