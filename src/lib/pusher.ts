@@ -26,10 +26,6 @@ export const getPusherClient = () => {
       {
         cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
         wsHost: process.env.NEXT_PUBLIC_SOKETI_HOST!,
-        // For standard 443 wss, we can omit ports or keep them. 
-        // If port is 443, wsPort=443 might be confusing for 'ws'. 
-        // Best to let library defaults handle standard ports if possible, or force them if using custom.
-        // But since we want to try both:
         wsPort: port,
         wssPort: port,
         forceTLS: forceTLS,
@@ -72,13 +68,7 @@ export const getPusherServer = () => {
       secret: process.env.PUSHER_SECRET!,
       cluster: cluster,
       host: host,
-      port: port ? String(port) : undefined, // Pusher server lib often expects string for port in some versions, but number in others. Safe to pass what config expects? 
-      // Actually checking types for pusher@5.2.0: Options interface says `port?: string`. 
-      // Wait, if it expects string, then `process.env.SOKETI_PORT` was correct.
-      // But let's verify.
-      // If I look at type definition it usually says `port?: string`.
-      // Let's stick to what it was but log it.
-      // Actually, let's try explicitly passing it as string but cleaned.
+      port: port ? String(port) : undefined, 
       useTLS: useTLS,
     });
   }
