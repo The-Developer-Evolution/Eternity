@@ -16,11 +16,13 @@ export default async function Page() {
   
   // Status Checker
   const trading = await getActiveTradingPeriod();
-  if (!trading) {
+  const isSuper = session?.user?.role === "SUPER";
+
+  if (!trading && !isSuper) {
     redirect("/peserta/trading?error=no_active_period");
   }
   
-  if (trading.periode === 8) {
+  if (trading?.periode === 8 && !isSuper) {
     redirect("/peserta/trading?error=period_8");
   }
 
