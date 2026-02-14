@@ -29,6 +29,8 @@ services:
     command: /bin/sh -c "pnpm prisma generate && pnpm prisma studio"
     env_file:
       - .env
+    environment:
+      - COREPACK_ENABLE_DOWNLOAD_PROMPT=0 # <-- Add this to skip the prompt
     expose:
       - "5556"
     networks:
