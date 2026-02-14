@@ -3,11 +3,41 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// In-memory cache for rally leaderboard
+let cachedRallyLeaderboard: any = null;
+let cacheTimestamp: number = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+
+    // Check cache first
+    const now = Date.now();
+    if (cachedRallyLeaderboard && now - cacheTimestamp < CACHE_TTL) {
+      // Return cached data with pagination
+      const { processedUsers } = cachedRallyLeaderboard;
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+
+      const paginatedData = processedUsers
+        .slice(startIndex, endIndex)
+        .map((user: any, index: number) => ({
+          ...user,
+          rank: startIndex + index + 1,
+        }));
+
+      const totalPages = Math.ceil(processedUsers.length / limit);
+
+      return NextResponse.json({
+        data: paginatedData,
+        totalPages: totalPages,
+        currentPage: page,
+        cached: true, // Flag to indicate cached response
+      });
+    }
 
     // 1. Fetch users with rallyData
     // We only want users who have rallyData
@@ -99,10 +129,15 @@ export async function GET(request: Request) {
 
     const totalPages = Math.ceil(processedUsers.length / limit);
 
+    // Cache the full processed data
+    cachedRallyLeaderboard = { processedUsers };
+    cacheTimestamp = Date.now();
+
     return NextResponse.json({
       data: paginatedData,
       totalPages: totalPages,
       currentPage: page,
+      cached: false, // Flag to indicate fresh data
     });
   } catch (error) {
     console.error("Rally Leaderboard Error:", error);

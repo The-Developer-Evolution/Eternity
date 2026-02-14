@@ -42,6 +42,11 @@ export default function EonixPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // --- STATE: Spam Test ---
+  const [isSpamming, setIsSpamming] = useState(false);
+  const [spamDelay, setSpamDelay] = useState(100);
+  const [spamStats, setSpamStats] = useState({ sent: 0, errors: 0 });
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +65,39 @@ export default function EonixPanel({
     }
     return () => clearTimeout(timer);
   }, [cooldown]);
+
+  // --- EFFECT: Spam Logic ---
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const runSpam = async () => {
+      if (!isSpamming || !selectedUser) return;
+
+      try {
+        // Direct call bypassing confirmation/cooldown checks for testing
+        const result = await onAddEonix(selectedUser.id, amount);
+        
+        if (result.success) {
+          setSpamStats(prev => ({ ...prev, sent: prev.sent + 1 }));
+        } else {
+          setSpamStats(prev => ({ ...prev, errors: prev.errors + 1 }));
+        }
+      } catch (e) {
+        setSpamStats(prev => ({ ...prev, errors: prev.errors + 1 }));
+      }
+
+      // Schedule next
+      if (isSpamming) {
+         timeoutId = setTimeout(runSpam, spamDelay);
+      }
+    };
+
+    if (isSpamming) {
+      runSpam();
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isSpamming, selectedUser, amount, spamDelay, onAddEonix]); // Dependencies allow it to pick up new values
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -88,6 +126,8 @@ export default function EonixPanel({
     setError(null);
     setSuccess(null);
     setCooldown(0); 
+    setIsSpamming(false); // Stop spamming if user changes
+    setSpamStats({ sent: 0, errors: 0 });
   };
 
   const updateLocalState = (userId: string, newEonix: number) => {
@@ -222,6 +262,46 @@ export default function EonixPanel({
                 <button onClick={() => setAmount(amount + 50)} className="w-10 h-10 bg-white/5 rounded-lg hover:bg-white/10 text-white font-bold text-xl transition-all active:scale-90">+</button>
               </div>
             </div>
+
+            {/* --- SPAM TEST UI START --- 
+                To hide this UI, simply comment out or delete everything between 
+                SPAM TEST UI START and SPAM TEST UI END calls. 
+            */}
+            <div className="mb-6 border border-yellow-500/30 bg-yellow-500/5 p-3 rounded-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-yellow-500/20 px-2 py-0.5 text-[8px] text-yellow-500 font-bold">QA TOOL</div>
+                <p className="text-[10px] text-yellow-500 font-bold uppercase mb-2 tracking-[0.2em] flex items-center gap-2">
+                  ⚠️ Traffic Generator
+                </p>
+                
+                <div className="flex flex-col gap-3">
+                   <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1">Delay (ms)</label>
+                        <input 
+                          type="number" 
+                          value={spamDelay}
+                          onChange={(e) => setSpamDelay(Math.max(10, parseInt(e.target.value) || 100))}
+                          className="w-full bg-black/60 border border-white/10 rounded px-2 py-1 text-white text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                         <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1">Status</label>
+                         <div className="flex gap-2 text-[10px] font-mono">
+                            <span className="text-green-400">OK: {spamStats.sent}</span>
+                            <span className="text-red-400">ERR: {spamStats.errors}</span>
+                         </div>
+                      </div>
+                   </div>
+                   
+                   <button
+                    onClick={() => setIsSpamming(!isSpamming)}
+                    className={`w-full font-bold uppercase py-2 rounded-lg text-xs tracking-widest transition-all ${isSpamming ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500"}`}
+                   >
+                     {isSpamming ? "🛑 STOP FLOODING" : "⚡ START FLOODING"}
+                   </button>
+                </div>
+            </div>
+            {/* --- SPAM TEST UI END --- */}
 
             <div className="grid grid-cols-2 gap-3">
               <button

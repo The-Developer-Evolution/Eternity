@@ -1,51 +1,82 @@
 import prisma from "@/lib/prisma";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 export async function getMyInventory(userId: string) {
-  const big_items = await prisma.userBigItemInventory.findMany({
-    where: {
-      user_id: userId,
-    },
-    include: {
-      bigItem: true,
-    },
-  });
+  return unstable_cache(
+    async () => {
+      const big_items = await prisma.userBigItemInventory.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          bigItem: true,
+        },
+      });
 
-  const small_items = await prisma.userSmallItemInventory.findMany({
-    where: {
-      user_id: userId,
-    },
-    include: {
-      smallItem: true,
-    },
-  });
+      const small_items = await prisma.userSmallItemInventory.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          smallItem: true,
+        },
+      });
 
-  return {
-    big_items,
-    small_items,
-  };
+      return {
+        big_items,
+        small_items,
+      };
+    },
+    [`user-inventory-${userId}`],
+    {
+      revalidate: 30, // 30 seconds cache
+      tags: [`user-${userId}`],
+    },
+  )();
 }
 
 export async function getTheVaultRequirements(user_id: string) {
-  const userHasEterniaSigil = await prisma.userBigItemInventory.findFirst({
-    where: {
-      user_id: user_id,
-      big_item_id: "1",
-    },
-  });
+  const [userHasEterniaSigil, userHasChronoKey, userHasCoreFragment] =
+    await Promise.all([
+      prisma.userBigItemInventory.findFirst({
+        where: {
+          user_id: user_id,
+          big_item_id: "1",
+        },
+      }),
+      prisma.userBigItemInventory.findFirst({
+        where: {
+          user_id: user_id,
+          big_item_id: "2",
+        },
+      }),
+      prisma.userBigItemInventory.findFirst({
+        where: {
+          user_id: user_id,
+          big_item_id: "3",
+        },
+      }),
+    ]);
+  // const userHasEterniaSigil = await prisma.userBigItemInventory.findFirst({
+  //   where: {
+  //     user_id: user_id,
+  //     big_item_id: "1",
+  //   },
+  // });
 
-  const userHasChronoKey = await prisma.userBigItemInventory.findFirst({
-    where: {
-      user_id: user_id,
-      big_item_id: "2",
-    },
-  });
+  // const userHasChronoKey = await prisma.userBigItemInventory.findFirst({
+  //   where: {
+  //     user_id: user_id,
+  //     big_item_id: "2",
+  //   },
+  // });
 
-  const userHasCoreFragment = await prisma.userBigItemInventory.findFirst({
-    where: {
-      user_id: user_id,
-      big_item_id: "3",
-    },
-  });
+  // const userHasCoreFragment = await prisma.userBigItemInventory.findFirst({
+  //   where: {
+  //     user_id: user_id,
+  //     big_item_id: "3",
+  //   },
+  // });
 
   return {
     userHasEterniaSigil,
@@ -68,7 +99,7 @@ export async function craftTheVault(user_id: string) {
 
   if (missingMaterials.length > 0) {
     throw new Error(
-      `You need ${missingMaterials.join(", ")} to craft The Vault`
+      `You need ${missingMaterials.join(", ")} to craft The Vault`,
     );
   }
 
@@ -111,6 +142,9 @@ export async function craftTheVault(user_id: string) {
     throw new Error("Rally data not found for user");
   }
 
+  // Invalidate cache
+  revalidateTag(`user-${user_id}`);
+
   return result;
 }
 
@@ -124,79 +158,144 @@ export async function getAllBigItems() {
   return big_items;
 }
 
+// export async function craftBigItem(userId: string, resultItemId: string) {
+//   // Ambil semua bahan untuk item besar ini
+//   const recipes = await prisma.rallyBigItemRecipe.findMany({
+//     where: { result_item_id: resultItemId },
+//     include: { resultItem: true, smallItem: true },
+//   });
+
+//   if (!recipes || recipes.length === 0) {
+//     throw new Error("Recipe not found");
+//   }
+
+//   // Cek semua bahan
+//   for (const recipe of recipes) {
+//     const userSmallItem = await prisma.userSmallItemInventory.findFirst({
+//       where: {
+//         user_id: userId,
+//         small_item_id: recipe.small_item_id,
+//       },
+//     });
+//     if (!userSmallItem || userSmallItem.amount < recipe.quantity) {
+//       throw new Error(`Not enough ${recipe.smallItem.name}`);
+//     }
+//   }
+
+//   // Transaction: Kurangi semua bahan dan tambahkan item besar
+//   await prisma.$transaction(async (tx) => {
+//     for (const recipe of recipes) {
+//       const userSmallItem = await tx.userSmallItemInventory.findFirst({
+//         where: {
+//           user_id: userId,
+//           small_item_id: recipe.small_item_id,
+//         },
+//       });
+//       await tx.userSmallItemInventory.update({
+//         where: { id: userSmallItem!.id },
+//         data: { amount: { decrement: recipe.quantity } },
+//       });
+//     }
+
+//     const userBigItem = await tx.userBigItemInventory.findFirst({
+//       where: {
+//         user_id: userId,
+//         big_item_id: resultItemId,
+//       },
+//     });
+
+//     if (userBigItem) {
+//       await tx.userBigItemInventory.update({
+//         where: { id: userBigItem.id },
+//         data: { amount: { increment: 1 } },
+//       });
+//     } else {
+//       await tx.userBigItemInventory.create({
+//         data: {
+//           user_id: userId,
+//           big_item_id: resultItemId,
+//           amount: 1,
+//         },
+//       });
+//     }
+
+//     await tx.rallyActivityLog.create({
+//       data: {
+//         user_id: userId,
+//         message: `CRAFTED ${recipes[0].resultItem.name}\n` +
+//           recipes.map(r => `-${r.quantity}x ${r.smallItem.name}`).join("\n"),
+//       },
+//     });
+//   });
+
+//   return true;
+// }
 export async function craftBigItem(userId: string, resultItemId: string) {
-  // Ambil semua bahan untuk item besar ini
   const recipes = await prisma.rallyBigItemRecipe.findMany({
     where: { result_item_id: resultItemId },
     include: { resultItem: true, smallItem: true },
   });
 
-  if (!recipes || recipes.length === 0) {
-    throw new Error("Recipe not found");
-  }
+  if (!recipes.length) throw new Error("Recipe not found");
 
-  // Cek semua bahan
-  for (const recipe of recipes) {
-    const userSmallItem = await prisma.userSmallItemInventory.findFirst({
+  // Get all required IDs
+  const requiredItemIds = recipes.map((r) => r.small_item_id);
+
+  await prisma.$transaction(async (tx) => {
+    // FIX: Fetch all relevant inventory records in ONE query
+    const userItems = await tx.userSmallItemInventory.findMany({
       where: {
         user_id: userId,
-        small_item_id: recipe.small_item_id,
+        small_item_id: { in: requiredItemIds },
       },
     });
-    if (!userSmallItem || userSmallItem.amount < recipe.quantity) {
-      throw new Error(`Not enough ${recipe.smallItem.name}`);
-    }
-  }
 
-  // Transaction: Kurangi semua bahan dan tambahkan item besar
-  await prisma.$transaction(async (tx) => {
+    // Validate quantities
     for (const recipe of recipes) {
-      const userSmallItem = await tx.userSmallItemInventory.findFirst({
-        where: {
-          user_id: userId,
-          small_item_id: recipe.small_item_id,
-        },
-      });
+      const inventory = userItems.find(
+        (i) => i.small_item_id === recipe.small_item_id,
+      );
+      if (!inventory || inventory.amount < recipe.quantity) {
+        throw new Error(`Not enough ${recipe.smallItem.name}`);
+      }
+    }
+
+    // Deduct materials
+    for (const recipe of recipes) {
+      const inventory = userItems.find(
+        (i) => i.small_item_id === recipe.small_item_id,
+      )!;
       await tx.userSmallItemInventory.update({
-        where: { id: userSmallItem!.id },
+        where: { id: inventory.id },
         data: { amount: { decrement: recipe.quantity } },
       });
     }
 
-    const userBigItem = await tx.userBigItemInventory.findFirst({
+    // Upsert Big Item (Check and Create/Update)
+    await tx.userBigItemInventory.upsert({
       where: {
-        user_id: userId,
-        big_item_id: resultItemId,
+        // Note: This requires a @@unique([user_id, big_item_id]) in your Prisma schema
+        user_id_big_item_id: { user_id: userId, big_item_id: resultItemId },
       },
+      update: { amount: { increment: 1 } },
+      create: { user_id: userId, big_item_id: resultItemId, amount: 1 },
     });
-
-    if (userBigItem) {
-      await tx.userBigItemInventory.update({
-        where: { id: userBigItem.id },
-        data: { amount: { increment: 1 } },
-      });
-    } else {
-      await tx.userBigItemInventory.create({
-        data: {
-          user_id: userId,
-          big_item_id: resultItemId,
-          amount: 1,
-        },
-      });
-    }
 
     await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        message: `CRAFTED ${recipes[0].resultItem.name}\n` +
-          recipes.map(r => `-${r.quantity}x ${r.smallItem.name}`).join("\n"),
+        message:
+          `CRAFTED ${recipes[0].resultItem.name}\n` +
+          recipes.map((r) => `-${r.quantity}x ${r.smallItem.name}`).join("\n"),
       },
     });
   });
 
+  // Invalidate cache
+  revalidateTag(`user-${userId}`);
+
   return true;
 }
-
 export async function gachaItem(userId: string) {
   const excludedIds = ["1", "2", "3", "7"];
 
@@ -212,72 +311,78 @@ export async function gachaItem(userId: string) {
     throw new Error("No small items available for gacha");
   }
 
-
-
-  const rallyData = await prisma.rallyData.findUnique({
-    where: {
-      user_id: userId,
-    },
-  });
-
-  if (!rallyData || rallyData.enonix < 3) {
-    throw new Error("Not enough enonix for gacha");
-  }
-
-  await prisma.rallyData.update({
-    where: {
-      user_id: userId,
-    },
-    data: {
-      enonix: {
-        decrement: 3,
-      },
-    },
-  });
-
-  const randomIndex = Math.floor(Math.random() * smallItems.length);
-  const selectedItem = smallItems[randomIndex];
-
-  const userSmallItem = await prisma.userSmallItemInventory.findFirst({
-    where: {
-      user_id: userId,
-      small_item_id: selectedItem.id,
-    },
-  });
-
-  if (userSmallItem) {
-    await prisma.userSmallItemInventory.update({
+  // Perform all operations in a transaction to prevent race conditions
+  const selectedItem = await prisma.$transaction(async (tx) => {
+    const rallyData = await tx.rallyData.findUnique({
       where: {
-        id: userSmallItem.id,
+        user_id: userId,
+      },
+    });
+
+    if (!rallyData || rallyData.enonix < 3) {
+      throw new Error("Not enough enonix for gacha");
+    }
+
+    await tx.rallyData.update({
+      where: {
+        user_id: userId,
       },
       data: {
-        amount: {
-          increment: 1,
+        enonix: {
+          decrement: 3,
         },
       },
     });
-  } else {
-    await prisma.userSmallItemInventory.create({
-      data: {
+
+    const randomIndex = Math.floor(Math.random() * smallItems.length);
+    const selected = smallItems[randomIndex];
+
+    const userSmallItem = await tx.userSmallItemInventory.findFirst({
+      where: {
         user_id: userId,
-        small_item_id: selectedItem.id,
-        amount: 1,
+        small_item_id: selected.id,
       },
     });
-  }
 
-  await prisma.rallyActivityLog.create({
-    data: {
-      user_id: userId,
-      message: `GACHA (+${selectedItem.name})\n -3 EONIX`,
-    },
+    if (userSmallItem) {
+      await tx.userSmallItemInventory.update({
+        where: {
+          id: userSmallItem.id,
+        },
+        data: {
+          amount: {
+            increment: 1,
+          },
+        },
+      });
+    } else {
+      await tx.userSmallItemInventory.create({
+        data: {
+          user_id: userId,
+          small_item_id: selected.id,
+          amount: 1,
+        },
+      });
+    }
+
+    await tx.rallyActivityLog.create({
+      data: {
+        user_id: userId,
+        message: `GACHA (+${selected.name})\n -3 EONIX`,
+      },
+    });
+
+    return selected;
   });
+
+  // Invalidate cache
+  revalidateTag(`user-${userId}`);
 
   return selectedItem;
 }
 
 export async function buySmallItem(userId: string, itemId: string) {
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const rallyData = await tx.rallyData.findUnique({
       where: { user_id: userId },
     });
@@ -327,10 +432,15 @@ export async function buySmallItem(userId: string, itemId: string) {
 
     return true;
   });
+
+  // Invalidate cache
+  revalidateTag(`user-${userId}`);
+
+  return result;
 }
 
 export async function buyZoneCard(userId: string, eonixAMT: number) {
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const rallyData = await tx.rallyData.findUnique({
       where: { user_id: userId },
     });
@@ -359,83 +469,79 @@ export async function buyZoneCard(userId: string, eonixAMT: number) {
 
     return true;
   });
+
+  // Invalidate cache
+  revalidateTag(`user-${userId}`);
+
+  return result;
 }
 
 export async function buySpecialTicket(
   userId: string,
-  items: { id: string; type: 'big' | 'small'; amount: number }[]
+  items: { id: string; type: "big" | "small"; amount: number }[],
 ) {
-  // Get active period
   const activePeriod = await prisma.rallyPeriod.findFirst({
     where: { status: "ON_GOING" },
   });
 
-  if (!activePeriod) {
-    throw new Error("No active rally period");
+  if (!activePeriod || (activePeriod.special_ticket_stock ?? 0) <= 0) {
+    throw new Error("Ticket unavailable or out of stock");
   }
 
-  if (!activePeriod.special_ticket_stock || activePeriod.special_ticket_stock <= 0) {
-    throw new Error("Special ticket out of stock");
-  }
-
-  // Validate items (max 2)
-  if (items.length === 0 || items.length > 2) {
-    throw new Error("Must select 1-2 items");
-  }
+  const bigItemIds = items.filter((i) => i.type === "big").map((i) => i.id);
+  const smallItemIds = items.filter((i) => i.type === "small").map((i) => i.id);
 
   await prisma.$transaction(async (tx) => {
-    // Check and deduct items from user inventory
+    // Batch fetch inventory
+    const [userBigItems, userSmallItems] = await Promise.all([
+      tx.userBigItemInventory.findMany({
+        where: { user_id: userId, big_item_id: { in: bigItemIds } },
+      }),
+      tx.userSmallItemInventory.findMany({
+        where: { user_id: userId, small_item_id: { in: smallItemIds } },
+      }),
+    ]);
+
+    // Validation & Update Loop
     for (const item of items) {
-      if (item.type === 'big') {
-        const userBigItem = await tx.userBigItemInventory.findFirst({
-          where: {
-            user_id: userId,
-            big_item_id: item.id,
-          },
-        });
+      const inv =
+        item.type === "big"
+          ? userBigItems.find((i) => i.big_item_id === item.id)
+          : userSmallItems.find((i) => i.small_item_id === item.id);
 
-        if (!userBigItem || userBigItem.amount < item.amount) {
-          throw new Error(`Not enough ${item.type} item`);
-        }
-
-        await tx.userBigItemInventory.update({
-          where: { id: userBigItem.id },
-          data: { amount: { decrement: item.amount } },
-        });
-      } else {
-        const userSmallItem = await tx.userSmallItemInventory.findFirst({
-          where: {
-            user_id: userId,
-            small_item_id: item.id,
-          },
-        });
-
-        if (!userSmallItem || userSmallItem.amount < item.amount) {
-          throw new Error(`Not enough ${item.type} item with id ${item.id}`);
-        }
-
-        await tx.userSmallItemInventory.update({
-          where: { id: userSmallItem.id },
-          data: { amount: { decrement: item.amount } },
-        });
+      if (!inv || inv.amount < item.amount) {
+        throw new Error(
+          `Insufficient quantity for ${item.type} item: ${item.id}`,
+        );
       }
+
+      const model =
+        item.type === "big"
+          ? tx.userBigItemInventory
+          : tx.userSmallItemInventory;
+      await (model as any).update({
+        where: { id: inv.id },
+        data: { amount: { decrement: item.amount } },
+      });
     }
 
-    // Decrement special ticket stock
     await tx.rallyPeriod.update({
       where: { id: activePeriod.id },
       data: { special_ticket_stock: { decrement: 1 } },
     });
 
-    // Log activity
     await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        message: `BOUGHT ${activePeriod.special_ticket_name}\n` +
-          items.map(i => `-${i.amount}x ${i.type} item`).join("\n"),
+        message:
+          `BOUGHT ${activePeriod.special_ticket_name}\n` +
+          items.map((i) => `-${i.amount}x ${i.type}`).join("\n"),
       },
     });
   });
+
+  // Invalidate cache
+  revalidateTag(`user-${userId}`);
 
   return true;
 }
