@@ -10,7 +10,6 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    // 1. Ambil data User beserta SEMUA komponen yang dibutuhkan rumus
     const users = await prisma.user.findMany({
       where: {
         role: "PARTICIPANT",
@@ -32,7 +31,7 @@ export async function GET(request: Request) {
             enonix: true,
           }
         },
-        // Tambahkan fetch inventory untuk rumus baru
+        // Inventory sekarang menggunakan BigInt di database
         userBigItemInventory: {
           select: { amount: true }
         },
@@ -41,14 +40,12 @@ export async function GET(request: Request) {
         },
         tradingData: {
           select: {
-            idr: true,
+            idr: true, // Decimal (mendukung angka besar + koma)
           }
         }
       }
     });
 
-    // 2. Tahap 1: Hitung RAW RALLY SCORE untuk setiap user
-    // Kita perlu array sementara ini untuk mencari nilai Highest Point yang akurat sesuai rumus
     const usersWithRawScore = users.map((user) => {
       const rallyData = user.rallyData;
       const level = rallyData?.access_card_level || 0;
@@ -56,12 +53,14 @@ export async function GET(request: Request) {
       const eonix = rallyData?.enonix || 0;
       const minusPoint = rallyData?.minus_point || 0;
 
-      // Hitung total item dari inventory
-      const totalBigItems = user.userBigItemInventory.reduce((sum, item) => sum + item.amount, 0);
-      const totalSmallItems = user.userSmallItemInventory.reduce((sum, item) => sum + item.amount, 0);
+      // PENTING: Konversi BigInt ke Number agar bisa dijumlahkan
+      const totalBigItems = user.userBigItemInventory.reduce((sum, item) => 
+        sum + Number(item.amount), 0
+      );
+      const totalSmallItems = user.userSmallItemInventory.reduce((sum, item) => 
+        sum + Number(item.amount), 0
+      );
 
-      // --- RUMUS BARU RALLY POINT ---
-      // Level * 1000 + Vault * 250 + BigItems * 50 + SmallItems * 10 + Eonix - MinusPoint
       const rawRallyScore = 
         (level * 1000) + 
         (vault * 250) + 
@@ -70,26 +69,18 @@ export async function GET(request: Request) {
         (eonix * 1) - 
         (minusPoint * 1);
 
-      return {
-        ...user,
-        rawRallyScore // Simpan skor mentah untuk dibandingkan nanti
-      };
+      return { ...user, rawRallyScore };
     });
 
-    // 3. Cari Highest Point dari hasil hitungan di atas
-    // Jika tidak ada user atau max score 0, set jadi 1 (agar tidak divide by zero)
     const maxRallyScore = Math.max(...usersWithRawScore.map(u => u.rawRallyScore), 0) || 1;
 
-    // 4. Tahap 2: Kalkulasi FINAL GLOBAL SCORE (dengan bobot %)
     const processedUsers = usersWithRawScore.map((user) => {
-      // a. Hitung poin Trading (IDR / 1 Milyar)
-      const tradingPoint = Math.max(0, Number(user.tradingData?.idr || 0) / 1_000_000_000);
+      // PENTING: Konversi Decimal (IDR) ke Number untuk pembagian 1 Miliar
+      // Decimal dari Prisma bisa langsung di-Number-kan
+      const idrValue = user.tradingData?.idr ? Number(user.tradingData.idr) : 0;
+      const tradingPoint = Math.max(0, idrValue / 1_000_000_000);
       
-      // b. Hitung poin Talkshow
       const talkshowPoint = user.talkshowPoints || 0;
-
-      // c. Hitung Global Score
-      // (RallyScoreUser / MaxRallyScore * 45%) + (Trading * 40%) + (Talkshow * 15%)
       const normalizedRallyScore = (user.rawRallyScore / maxRallyScore);
       
       const totalGlobalScore = 
@@ -100,34 +91,27 @@ export async function GET(request: Request) {
       return {
         id: user.id,
         name: user.name,
-        // Data pendukung untuk ditampilkan di UI (opsional)
         rally_level: user.rallyData?.access_card_level || 0,
-        rally_vault: user.rallyData?.vault || 0,
-        raw_rally_point: user.rawRallyScore, // Nilai asli Rally point
-        totalPoints: totalGlobalScore, // Nilai akhir untuk sorting leaderboard global
+        raw_rally_point: user.rawRallyScore,
+        // Gunakan .toFixed(2) jika ingin membatasi koma di UI
+        totalPoints: totalGlobalScore, 
       };
     });
 
-    // 5. Sorting Global (Tertinggi ke Terendah)
     processedUsers.sort((a, b) => b.totalPoints - a.totalPoints);
 
-    // 6. Pagination
     const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    
-    const paginatedData = processedUsers.slice(startIndex, endIndex).map((user, index) => ({
+    const paginatedData = processedUsers.slice(startIndex, startIndex + limit).map((user, index) => ({
       ...user,
       rank: startIndex + index + 1,
     }));
 
-    const totalPages = Math.ceil(processedUsers.length / limit);
-
     return NextResponse.json({
       data: paginatedData,
       meta: {
-        totalPages,
+        totalPages: Math.ceil(processedUsers.length / limit),
         currentPage: page,
-        highestRallyScore: maxRallyScore // Info tambahan jika perlu debug nilai pembagi
+        highestRallyScore: maxRallyScore
       }
     });
 

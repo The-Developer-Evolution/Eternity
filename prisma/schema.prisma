@@ -11,9 +11,9 @@ datasource db {
 model PeriodeTrading {
   id          String @id @default(cuid())
   periode     Int    @unique
-  cost_map    Int
-  price_map   Int
-  usdidr_rate Int
+  cost_map    Decimal
+  price_map   Decimal
+  usdidr_rate Decimal
   duration    Int
   news        String
 
@@ -52,8 +52,8 @@ model User {
 model TradingData {
   id        String  @id @default(cuid())
   userId    String  @unique
-  idr       BigInt  @default(-10000000000)
-  usd       BigInt  @default(0)
+  idr       Decimal  @default(-10000000000)
+  usd       Decimal  @default(0)
   eternites Int     @default(10000)
   map       Int     @default(0)
   point     Int     @default(0)
@@ -125,7 +125,7 @@ model RawPeriod {
   rawId   String
   periode Int
 
-  price          BigInt
+  price          Decimal
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
 }
@@ -135,7 +135,7 @@ model CraftPeriod {
   craftId String
   periode Int
 
-  price BigInt
+  price Decimal
 
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
@@ -155,7 +155,7 @@ model CraftStockPeriod {
   craftId        String
   stock          Int
   periode        Int
-  price          BigInt
+  price          Decimal
   craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
 }
@@ -165,7 +165,7 @@ model RawStockPeriod {
   rawId          String
   stock          Int
   periode        Int
-  price          BigInt
+  price          Decimal
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
 }
