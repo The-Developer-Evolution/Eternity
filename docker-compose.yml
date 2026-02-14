@@ -8,16 +8,18 @@ services:
     networks:
       - global_proxy
 
-  # seed:
-  #   image: ghcr.io/the-developer-evolution/eternity:latest
-  #   container_name: eternity-seed
-  #   env_file:
-  #     - .env
-  #   command: prisma db seed
-  #   depends_on:
-  #     - migration
-  #   networks:
-  #     - global_proxy
+  seed:
+    image: ghcr.io/the-developer-evolution/eternity:latest
+    container_name: eternity-seed
+    env_file:
+      - .env
+    command: prisma db seed
+    depends_on:
+      - migration
+    networks:
+      - global_proxy
+    profiles:
+      - manual
 
   studio:
     image: ghcr.io/the-developer-evolution/eternity:latest
@@ -28,7 +30,7 @@ services:
     expose:
       - "5555"
     depends_on:
-      - seed
+      - migration
     networks:
       - global_proxy
 
@@ -43,9 +45,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.90'
+          cpus: '1'
     depends_on:
-      - seed
+      - migration
     networks:
       - global_proxy
 
