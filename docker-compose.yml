@@ -19,6 +19,19 @@ services:
     networks:
       - npm_default
 
+  studio:
+    image: ghcr.io/the-developer-evolution/eternity:felix
+    container_name: eternity-studio
+    env_file:
+      - .env
+    command: prisma studio --port 5555
+    expose:
+      - "5555"
+    depends_on:
+      - seed
+    networks:
+      - npm_default
+
   web:
     image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity
