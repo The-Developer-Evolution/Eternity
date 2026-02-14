@@ -24,13 +24,13 @@ services:
       - manual
 
   studio:
-    image: ucyenyen/eternity:latest
+    image: ucyenyen/eternity-migrator:latest
     container_name: eternity-studio
-    command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
+    command: /bin/sh -c "pnpm prisma generate && pnpm prisma studio --port 5555 --hostname 0.0.0.0"
     env_file:
       - .env
-    expose:
-      - "5555"
+    ports:
+      - "5556:5555"
     networks:
       - global_proxy
       - eternity_internal
