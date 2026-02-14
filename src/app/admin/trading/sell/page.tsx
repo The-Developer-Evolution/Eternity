@@ -3,13 +3,16 @@ import BackgroundAssetsDesktop from "@/components/common/BackgroundAssetsDesktop
 import BackgroundAssetsMobile from "@/components/common/BackgroundAssetsMobile";
 import SellInterface from "@/components/trading/SellInterface";
 import TradingTimer from "@/components/trading/TradingTimer";
-import { getSellableItems, getMapPrice } from "@/features/trading/services/sell";
+import {
+  getSellableItems,
+  getMapPrice,
+} from "@/features/trading/services/sell";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const { rawItems, craftItems } = await getSellableItems();
-  const mapPrice = await getMapPrice();
+  const mapPrice = Number(await getMapPrice());
 
   return (
     <div className="overflow-hidden">
@@ -26,8 +29,12 @@ export default async function Page() {
           className="relative z-1 w-1/2 h-auto"
         />
         <div className="flex flex-col w-full items-center gap-8 py-10 overflow-y-auto max-h-screen">
-             <TradingTimer />
-             <SellInterface rawItems={rawItems} craftItems={craftItems} mapPrice={mapPrice} />
+          <TradingTimer />
+          <SellInterface
+            rawItems={rawItems}
+            craftItems={craftItems}
+            mapPrice={mapPrice}
+          />
         </div>
       </div>
     </div>

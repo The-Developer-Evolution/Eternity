@@ -9,11 +9,19 @@ datasource db {
 }
 
 model PeriodeTrading {
+<<<<<<< HEAD
   id          String  @id @default(cuid())
   periode     Int     @unique
   cost_map    Decimal
   price_map   Decimal
   usdidr_rate Decimal
+=======
+  id          String @id @default(cuid())
+  periode     Int    @unique
+  cost_map    BigInt
+  price_map   BigInt
+  usdidr_rate BigInt
+>>>>>>> main
   duration    Int
   news        String
 
@@ -53,7 +61,7 @@ model TradingData {
   id        String  @id @default(cuid())
   userId    String  @unique
   idr       BigInt  @default(-10000000000)
-  usd       Decimal @default(0)
+  usd       BigInt  @default(0)
   eternites Int     @default(10000)
   map       Int     @default(0)
   point     Int     @default(0)
@@ -125,7 +133,7 @@ model RawPeriod {
   rawId   String
   periode Int
 
-  price          Decimal
+  price          BigInt
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
 }
@@ -135,7 +143,7 @@ model CraftPeriod {
   craftId String
   periode Int
 
-  price Decimal
+  price BigInt
 
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
@@ -155,7 +163,7 @@ model CraftStockPeriod {
   craftId        String
   stock          Int
   periode        Int
-  price          Decimal
+  price          BigInt
   craftItem      CraftItem      @relation(fields: [craftId], references: [id], onDelete: Cascade)
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
 }
@@ -165,7 +173,7 @@ model RawStockPeriod {
   rawId          String
   stock          Int
   periode        Int
-  price          Decimal
+  price          BigInt
   periodeTrading PeriodeTrading @relation(fields: [periode], references: [periode], onDelete: Cascade)
   rawItem        RawItem        @relation(fields: [rawId], references: [id], onDelete: Cascade)
 }
