@@ -1,59 +1,54 @@
 services:
-  migrate_reset:
-    image: ucyenyen/eternity-migrator:latest
-    container_name: eternity_migrate_reset
-    command: pnpm prisma migrate reset --force
+  migration:
+    image: ghcr.io/the-developer-evolution/eternity:felix
+    container_name: eternity-migration
     env_file:
       - .env
+    command: prisma migrate deploy
     networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
+      - npm_default
 
   seed:
-    image: ucyenyen/eternity-migrator:latest
-    container_name: eternity_seed
-    command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
+    image: ghcr.io/the-developer-evolution/eternity:felix
+    container_name: eternity-seed
     env_file:
       - .env
+    command: prisma db seed
+    depends_on:
+      - migration
     networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
+      - npm_default
 
   studio:
-    image: ucyenyen/eternity-migrator:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-studio
-    command: /bin/sh -c "pnpm prisma generate && pnpm prisma studio --port 5556 --hostname 0.0.0.0"
     env_file:
       - .env
-    environment:
-      - COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+    command: prisma studio --port 5555
     expose:
-      - "5556"
+      - "5555"
+    depends_on:
+      - seed
     networks:
-      - global_proxy
-      - eternity_internal
-    profiles:
-      - manual
+      - npm_default
 
-  app:
-    # UPDATED: Use the pre-built image from Docker Hub instead of building locally
-    image: ucyenyen/eternity:latest
+  web:
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity
-    restart: always
+    expose:
+      - 3000
     env_file:
       - .env
-    expose:
-      - "3000"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.90'
+    depends_on:
+      - seed
     networks:
-      - global_proxy
-      - eternity_internal
+      - npm_default
 
 networks:
-  global_proxy:
+  npm_default:
     external: true
-  eternity_internal:
-    driver: bridge
