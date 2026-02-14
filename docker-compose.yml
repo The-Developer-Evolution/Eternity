@@ -8,16 +8,16 @@ services:
     networks:
       - global_proxy
 
-  seed:
-    image: ghcr.io/the-developer-evolution/eternity:latest
-    container_name: eternity-seed
-    env_file:
-      - .env
-    command: prisma db seed
-    depends_on:
-      - migration
-    networks:
-      - global_proxy
+  # seed:
+  #   image: ghcr.io/the-developer-evolution/eternity:latest
+  #   container_name: eternity-seed
+  #   env_file:
+  #     - .env
+  #   command: prisma db seed
+  #   depends_on:
+  #     - migration
+  #   networks:
+  #     - global_proxy
 
   studio:
     image: ghcr.io/the-developer-evolution/eternity:latest
