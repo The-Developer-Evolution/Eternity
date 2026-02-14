@@ -1,31 +1,41 @@
 import prisma from "@/lib/prisma";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 export async function getLeaderBoardData() {
-  const leaderboard = await prisma.rallyData.findMany({
-    orderBy: [
-      { point: "desc" },
-      { vault: "desc" },
-      { enonix: "desc" },
-      { minus_point: "asc" }
-    ],
-    include: {
-      user: true
+  return unstable_cache(
+    async () => {
+      const leaderboard = await prisma.rallyData.findMany({
+        orderBy: [
+          { point: "desc" },
+          { vault: "desc" },
+          { enonix: "desc" },
+          { minus_point: "asc" },
+        ],
+        include: {
+          user: true,
+        },
+        where: {
+          NOT: {
+            vault: 0,
+          },
+        },
+      });
+
+      return leaderboard;
     },
-    where: {
-      NOT: {
-        vault: 0
-      }
-    }
-  })
-  
-  return leaderboard;
+    ["rally-leaderboard"],
+    {
+      revalidate: 60, // Cache for 60 seconds
+      tags: ["leaderboard"],
+    },
+  )();
 }
 
 export async function minusEonix(userId: string, amount: number) {
   const userData = await prisma.rallyData.findUnique({
     where: {
-      user_id: userId
-    }
+      user_id: userId,
+    },
   });
 
   if (!userData) {
@@ -40,11 +50,11 @@ export async function minusEonix(userId: string, amount: number) {
 
   const updatedData = await prisma.rallyData.update({
     where: {
-      user_id: userId
+      user_id: userId,
     },
     data: {
-      enonix: updatedEnonix
-    }
+      enonix: updatedEnonix,
+    },
   });
 
   return updatedData;
@@ -53,8 +63,8 @@ export async function minusEonix(userId: string, amount: number) {
 export async function addEonix(userId: string, amount: number) {
   const userData = await prisma.rallyData.findUnique({
     where: {
-      user_id: userId
-    }
+      user_id: userId,
+    },
   });
 
   if (!userData) {
@@ -65,23 +75,26 @@ export async function addEonix(userId: string, amount: number) {
 
   const updatedData = await prisma.rallyData.update({
     where: {
-      user_id: userId
+      user_id: userId,
     },
     data: {
-      enonix: updatedEnonix
-    }
+      enonix: updatedEnonix,
+    },
   });
 
   return updatedData;
 }
 
-
-export async function addSmallItem(userId: string, smallItemId: string, amount: number) {
+export async function addSmallItem(
+  userId: string,
+  smallItemId: string,
+  amount: number,
+) {
   const userSmallItemInventory = await prisma.userSmallItemInventory.findFirst({
     where: {
       user_id: userId,
-      small_item_id: smallItemId
-    }
+      small_item_id: smallItemId,
+    },
   });
 
   if (userSmallItemInventory) {
@@ -89,11 +102,11 @@ export async function addSmallItem(userId: string, smallItemId: string, amount: 
 
     const updatedInventory = await prisma.userSmallItemInventory.update({
       where: {
-        id: userSmallItemInventory.id
+        id: userSmallItemInventory.id,
       },
       data: {
-        amount: updatedAmount
-      }
+        amount: updatedAmount,
+      },
     });
 
     return updatedInventory;
@@ -102,20 +115,24 @@ export async function addSmallItem(userId: string, smallItemId: string, amount: 
       data: {
         user_id: userId,
         small_item_id: smallItemId,
-        amount: amount
-      }
+        amount: amount,
+      },
     });
 
     return newInventory;
   }
 }
 
-export async function addBigItem(userId: string, bigItemId: string, amount: number) {
+export async function addBigItem(
+  userId: string,
+  bigItemId: string,
+  amount: number,
+) {
   const userBigItemInventory = await prisma.userBigItemInventory.findFirst({
     where: {
       user_id: userId,
-      big_item_id: bigItemId
-    }
+      big_item_id: bigItemId,
+    },
   });
 
   if (userBigItemInventory) {
@@ -123,11 +140,11 @@ export async function addBigItem(userId: string, bigItemId: string, amount: numb
 
     const updatedInventory = await prisma.userBigItemInventory.update({
       where: {
-        id: userBigItemInventory.id
+        id: userBigItemInventory.id,
       },
       data: {
-        amount: updatedAmount
-      }
+        amount: updatedAmount,
+      },
     });
 
     return updatedInventory;
@@ -136,8 +153,8 @@ export async function addBigItem(userId: string, bigItemId: string, amount: numb
       data: {
         user_id: userId,
         big_item_id: bigItemId,
-        amount: amount
-      }
+        amount: amount,
+      },
     });
 
     return newInventory;
@@ -147,8 +164,8 @@ export async function addBigItem(userId: string, bigItemId: string, amount: numb
 export async function minusPoint(userId: string, points: number) {
   const userData = await prisma.rallyData.findUnique({
     where: {
-      user_id: userId
-    }
+      user_id: userId,
+    },
   });
 
   if (!userData) {
@@ -159,11 +176,11 @@ export async function minusPoint(userId: string, points: number) {
 
   const updatedData = await prisma.rallyData.update({
     where: {
-      user_id: userId
+      user_id: userId,
     },
     data: {
-      minus_point: updatedMinusPoint
-    }
+      minus_point: updatedMinusPoint,
+    },
   });
 
   return updatedData;
@@ -172,8 +189,8 @@ export async function minusPoint(userId: string, points: number) {
 export async function neutralizeMinusPoint(userId: string, points: number) {
   const userData = await prisma.rallyData.findUnique({
     where: {
-      user_id: userId
-    }
+      user_id: userId,
+    },
   });
 
   if (!userData) {
@@ -184,11 +201,11 @@ export async function neutralizeMinusPoint(userId: string, points: number) {
 
   const updatedData = await prisma.rallyData.update({
     where: {
-      user_id: userId
+      user_id: userId,
     },
     data: {
-      minus_point: updatedMinusPoint
-    }
+      minus_point: updatedMinusPoint,
+    },
   });
 
   return updatedData;
@@ -197,8 +214,8 @@ export async function neutralizeMinusPoint(userId: string, points: number) {
 export async function upgradeAccessCard(userId: string) {
   const userData = await prisma.rallyData.findUnique({
     where: {
-      user_id: userId
-    }
+      user_id: userId,
+    },
   });
 
   if (!userData) {
@@ -207,11 +224,12 @@ export async function upgradeAccessCard(userId: string) {
 
   const requirements = await prisma.access_card_upgrade_cost.findUnique({
     where: {
-      id: userData.access_card_level
-    }, include:{
+      id: userData.access_card_level,
+    },
+    include: {
       bigItem: true,
-      smallItem: true
-    }
+      smallItem: true,
+    },
   });
 
   if (!requirements) {
@@ -221,60 +239,75 @@ export async function upgradeAccessCard(userId: string) {
   if (userData.enonix < requirements.eonix_cost) {
     throw new Error("Insufficient Eonix balance");
   }
-  
-  if(userData.access_card_level >= 5){
+
+  if (userData.access_card_level >= 5) {
     throw new Error("Access Card is already at maximum level");
   }
 
   const userSmallItemInventory = await prisma.userSmallItemInventory.findFirst({
     where: {
       user_id: userId,
-      small_item_id: requirements.smallItem?.id
-    }
+      small_item_id: requirements.smallItem?.id,
+    },
   });
 
   const userBigItemInventory = await prisma.userBigItemInventory.findFirst({
     where: {
       user_id: userId,
-      big_item_id: requirements.bigItem?.id
-    }
+      big_item_id: requirements.bigItem?.id,
+    },
   });
 
-  if(!userSmallItemInventory || userSmallItemInventory.amount < requirements.small_item_amount_required){
+  if (
+    !userSmallItemInventory ||
+    userSmallItemInventory.amount < requirements.small_item_amount_required
+  ) {
     throw new Error("Insufficient small item for upgrade");
   }
-  if(!userBigItemInventory || userBigItemInventory.amount < requirements.big_item_amount_required){
+  if (
+    !userBigItemInventory ||
+    userBigItemInventory.amount < requirements.big_item_amount_required
+  ) {
     throw new Error("Insufficient big item for upgrade");
   }
 
   const updatedEnonix = userData.enonix - requirements.eonix_cost;
-  
+
   const updatedData = await prisma.rallyData.update({
     where: {
-      user_id: userId
+      user_id: userId,
     },
     data: {
-      enonix: updatedEnonix
-    }
+      enonix: updatedEnonix,
+    },
   });
 
   return updatedData;
 }
 
 export async function getRallyDataByUserId(userId: string) {
-  const rallyData = await prisma.rallyData.findUnique({
-    where: {
-      user_id: userId
-    }
-  });
+  return unstable_cache(
+    async () => {
+      const rallyData = await prisma.rallyData.findUnique({
+        where: {
+          user_id: userId,
+        },
+      });
 
-  return rallyData;
-} 
+      return rallyData;
+    },
+    [`rally-data-${userId}`],
+    {
+      revalidate: 30, // 30 seconds cache
+      tags: [`user-${userId}`],
+    },
+  )();
+}
 
 export async function giveItemsToUser(
   userId: string,
-  items: { id: string; type: 'big' | 'small'; amount: number }[],
-  eonix?: number
+  items: { id: string; type: "big" | "small"; amount: number }[],
+  eonix?: number,
 ) {
   await prisma.$transaction(async (tx) => {
     const logMessages: string[] = [];
@@ -290,7 +323,7 @@ export async function giveItemsToUser(
 
     // Give items
     for (const item of items) {
-      if (item.type === 'big') {
+      if (item.type === "big") {
         const existingItem = await tx.userBigItemInventory.findFirst({
           where: {
             user_id: userId,
@@ -351,10 +384,13 @@ export async function giveItemsToUser(
     await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        message: `RECEIVED FROM POSTGUARD\n${logMessages.join('\n')}`,
+        message: `RECEIVED FROM POSTGUARD\n${logMessages.join("\n")}`,
       },
     });
   });
+
+  // Invalidate cache immediately so user sees new items
+  revalidateTag(`user-${userId}`);
 
   return true;
 }
