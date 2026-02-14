@@ -1,130 +1,130 @@
-'use server'
+"use server";
 import { getUserTradingById } from "@/features/user/trading.service";
-import {  BalanceLogType, BalanceTradingResource } from "@prisma/client";
+import { BalanceLogType, BalanceTradingResource } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ActionResult } from "@/types/actionResult";
 import { TradingData } from "@prisma/client";
 import { getRunningTradingPeriod } from "../action";
 
-export type CurrencyType = 'IDR' | 'USD' | 'ETERNITE';
+export type CurrencyType = "IDR" | "USD" | "ETERNITE";
 
 export async function convertCurrency(
-    userId: string, 
-    amount: number, 
-    from: CurrencyType, 
-    to: CurrencyType
+  userId: string,
+  amount: number,
+  from: CurrencyType,
+  to: CurrencyType,
 ): Promise<ActionResult<TradingData>> {
-    const period = await getRunningTradingPeriod()
-    if (!period) return { success: false, error: "The game is PAUSED" };
+  const period = await getRunningTradingPeriod();
+  if (!period) return { success: false, error: "The game is PAUSED" };
 
-    // 2. Validate inputs
-    if (amount <= 0) return { success: false, error: "Amount must be positive" };
-    if (from === to) return { success: false, error: "Cannot convert to same currency" };
+  // 2. Validate inputs
+  if (amount <= 0) return { success: false, error: "Amount must be positive" };
+  if (from === to)
+    return { success: false, error: "Cannot convert to same currency" };
 
+  const rates = {
+    IDR: 1,
+    USD: Number(period.usdidr_rate),
+    ETERNITE: 1000000,
+  };
 
-    const rates = {
-        IDR: 1,
-        USD: period.usdidr_rate,
-        ETERNITE: 1000000
-    };
+  const fromRate = rates[from];
+  const toRate = rates[to];
 
-    const fromRate = rates[from];
-    const toRate = rates[to];
-    
-    // 3. Calculate conversion
-    // Formula: Amount * (ValueFrom / ValueTo)
-    // Example: 1 USD (14000) -> IDR (1) = 14000 / 1 = 14000 IDR. Correct.
-    const convertedAmount = Math.floor(amount * (fromRate / toRate));
-    
-    if (convertedAmount <= 0) {
-         return { success: false, error: "Converted amount is too small" };
-    }
+  // 3. Calculate conversion
+  // Formula: Amount * (ValueFrom / ValueTo)
+  // Example: 1 USD (14000) -> IDR (1) = 14000 / 1 = 14000 IDR. Correct.
+  const convertedAmount = Math.floor(amount * (fromRate / toRate));
 
-    // 4. Get User Data
-    const userResult = await getUserTradingById(userId);
-    if (!userResult.success || !userResult.data?.tradingData) {
-        return { success: false, error: "User or trading data not found" };
-    }
-    const tradingData = userResult.data.tradingData;
+  if (convertedAmount <= 0) {
+    return { success: false, error: "Converted amount is too small" };
+  }
 
-    // 5. Check Balance
-    const currentBalance = (() => {
-        if (from === 'IDR') return Number(tradingData.idr);
-        if (from === 'USD') return Number(tradingData.usd);
-        if (from === 'ETERNITE') return Number(tradingData.eternites);
-        return 0;
-    })();
+  // 4. Get User Data
+  const userResult = await getUserTradingById(userId);
+  if (!userResult.success || !userResult.data?.tradingData) {
+    return { success: false, error: "User or trading data not found" };
+  }
+  const tradingData = userResult.data.tradingData;
 
-    if (currentBalance < amount) {
-        return { success: false, error: `Insufficient ${from} balance` };
-    }
+  // 5. Check Balance
+  const currentBalance = (() => {
+    if (from === "IDR") return Number(tradingData.idr);
+    if (from === "USD") return Number(tradingData.usd);
+    if (from === "ETERNITE") return Number(tradingData.eternites);
+    return 0;
+  })();
 
-    // 6. Transaction
-    const fieldMap: Record<CurrencyType, keyof TradingData> = {
-        'IDR': 'idr',
-        'USD': 'usd',
-        'ETERNITE': 'eternites'
-    };
-    
-    // Map to Enum
-    const resourceMap: Record<CurrencyType, BalanceTradingResource> = {
-        'IDR': BalanceTradingResource.IDR,
-        'USD': BalanceTradingResource.USD,
-        'ETERNITE': BalanceTradingResource.ETERNITES
-    };
+  if (currentBalance < amount) {
+    return { success: false, error: `Insufficient ${from} balance` };
+  }
 
-    // Prepare update data
-    // Values need to be BigInt for IDR/USD, Int for ETERNITE.
-    // We used Math.floor above so numbers are integers.
-    // Prepare update data
-    // Values need to be BigInt for IDR/USD, Int for ETERNITE.
-    // We used Math.floor above so numbers are integers.
-    // const decrementValue = from === 'ETERNITE' ? Math.floor(amount) : BigInt(Math.floor(amount));
-    // const incrementValue = to === 'ETERNITE' ? convertedAmount : BigInt(convertedAmount);
+  // 6. Transaction
+  const fieldMap: Record<CurrencyType, keyof TradingData> = {
+    IDR: "idr",
+    USD: "usd",
+    ETERNITE: "eternites",
+  };
 
-    const [] = await prisma.$transaction([
-        // Update Balances (Single Update if possible? No, different fields)
-        // Actually we can do one update with multiple field changes
-        prisma.tradingData.update({
-            where: { id: tradingData.id },
-            data: {
-                [fieldMap[from]]: { decrement: BigInt(Math.floor(amount)) },
-                [fieldMap[to]]: { increment: BigInt(convertedAmount) }
-            } 
-        }),
-        
-        // Log Debit
-         prisma.balanceTradingLog.create({
-            data: {
-                tradingDataId: tradingData.id,
-                amount: BigInt(Math.floor(-amount)),
-                type: BalanceLogType.DEBIT,
-                resource: resourceMap[from],
-                message: `Converted ${amount} ${from} to ${to}`
-            }
-        }),
+  // Map to Enum
+  const resourceMap: Record<CurrencyType, BalanceTradingResource> = {
+    IDR: BalanceTradingResource.IDR,
+    USD: BalanceTradingResource.USD,
+    ETERNITE: BalanceTradingResource.ETERNITES,
+  };
 
-        // Log Credit
-         prisma.balanceTradingLog.create({
-            data: {
-                tradingDataId: tradingData.id,
-                amount: BigInt(convertedAmount),
-                type: BalanceLogType.CREDIT,
-                resource: resourceMap[to],
-                message: `Received ${convertedAmount} ${to} from ${from}`
-            }
-        }),
-    ]);
+  // Prepare update data
+  // Values need to be BigInt for IDR/USD, Int for ETERNITE.
+  // We used Math.floor above so numbers are integers.
+  // Prepare update data
+  // Values need to be BigInt for IDR/USD, Int for ETERNITE.
+  // We used Math.floor above so numbers are integers.
+  // const decrementValue = from === 'ETERNITE' ? Math.floor(amount) : BigInt(Math.floor(amount));
+  // const incrementValue = to === 'ETERNITE' ? convertedAmount : BigInt(convertedAmount);
 
-    // Return fresh data 
-    const finalData = await prisma.tradingData.findUnique({
-        where: { id: tradingData.id },
-         include: {
-            rawUserAmounts: true,
-            craftUserAmounts: true,
-            balanceTradingLogs: true,
-        },
-    });
+  const [] = await prisma.$transaction([
+    // Update Balances (Single Update if possible? No, different fields)
+    // Actually we can do one update with multiple field changes
+    prisma.tradingData.update({
+      where: { id: tradingData.id },
+      data: {
+        [fieldMap[from]]: { decrement: BigInt(Math.floor(amount)) },
+        [fieldMap[to]]: { increment: BigInt(convertedAmount) },
+      },
+    }),
 
-    return { success: true, data: finalData! };
+    // Log Debit
+    prisma.balanceTradingLog.create({
+      data: {
+        tradingDataId: tradingData.id,
+        amount: BigInt(Math.floor(-amount)),
+        type: BalanceLogType.DEBIT,
+        resource: resourceMap[from],
+        message: `Converted ${amount} ${from} to ${to}`,
+      },
+    }),
+
+    // Log Credit
+    prisma.balanceTradingLog.create({
+      data: {
+        tradingDataId: tradingData.id,
+        amount: BigInt(convertedAmount),
+        type: BalanceLogType.CREDIT,
+        resource: resourceMap[to],
+        message: `Received ${convertedAmount} ${to} from ${from}`,
+      },
+    }),
+  ]);
+
+  // Return fresh data
+  const finalData = await prisma.tradingData.findUnique({
+    where: { id: tradingData.id },
+    include: {
+      rawUserAmounts: true,
+      craftUserAmounts: true,
+      balanceTradingLogs: true,
+    },
+  });
+
+  return { success: true, data: finalData! };
 }

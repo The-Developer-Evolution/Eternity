@@ -6,10 +6,10 @@ import TradingTimer from "@/components/trading/TradingTimer";
 
 import { getRunningTradingPeriod } from "@/features/trading/action";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export default async function Page() {
   const period = await getRunningTradingPeriod();
-  const currentRate = period?.usdidr_rate ?? 16000;
+  const currentRate = Number(period?.usdidr_rate ?? 16000);
 
   return (
     <div className="overflow-hidden">
@@ -17,17 +17,17 @@ export default async function Page() {
         <BackgroundAssetsDesktop />
         <BackgroundAssetsMobile />
         <div className="absolute bg-gradient-to-b from-[7%] from-[#AE00DE]/0 to-[#23328C] w-screen h-screen top-0 left-0"></div>
-          <Image
-            src={"/assets/eternity-logo.svg"}
-            alt="eternity-logo"
-            draggable={false}
-            width={1920}
-            height={1080}
-            className="relative z-1 w-1/2 h-auto"
-            priority
-          />
-            <TradingTimer />
-            <CurrencyConvertInterface usdidrRate={currentRate} />
+        <Image
+          src={"/assets/eternity-logo.svg"}
+          alt="eternity-logo"
+          draggable={false}
+          width={1920}
+          height={1080}
+          className="relative z-1 w-1/2 h-auto"
+          priority
+        />
+        <TradingTimer />
+        <CurrencyConvertInterface usdidrRate={currentRate} />
       </div>
     </div>
   );

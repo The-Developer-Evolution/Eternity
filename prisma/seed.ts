@@ -449,7 +449,7 @@ async function main() {
         periode: pData.periode,
         rawId: item.id,
         stock: item.stock,
-        price: item.price, // TS requires BigInt() wrapper here
+        price: BigInt(item.price), // TS requires BigInt() wrapper here
       });
     }
 
@@ -459,7 +459,7 @@ async function main() {
         periode: pData.periode,
         craftId: item.id,
         stock: item.stock,
-        price: item.price,
+        price: BigInt(item.price),
       });
     }
   }
