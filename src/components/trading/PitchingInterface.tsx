@@ -7,8 +7,8 @@ import { payPitchingFee } from "@/features/trading/services/pitching";
 import { Loader2, CheckCircle, AlertCircle, User, Gavel, FileText, Globe, MapPin } from "lucide-react";
 
 const FEE_OPTIONS = [
-    { label: "LOCAL PITCHING", amount: 9000, icon: MapPin },
-    { label: "GLOBAL PITCHING", amount: 15000, icon: Globe },
+    { label: "LOCAL PITCHING", amount: 4000, icon: MapPin },
+    { label: "GLOBAL PITCHING", amount: 9000, icon: Globe },
 ];
 
 export default function PitchingInterface() {

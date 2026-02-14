@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import ActionButton from "@/components/common/ActionButton";
 import { Role } from "@prisma/client";
+import Image from "next/image";
 
 export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function NavigationBar() {
   const showMap = isSuper || userRole === Role.MAP;
   const showPitching = isSuper || userRole === Role.PITCHING || userRole === Role.PITCHINGGUARD;
   const showThunt = isSuper || userRole === Role.THUNT;
-  const showNews = isSuper || userRole === Role.PRESSURE;
+  const showNews = isSuper || userRole === Role.NEWS;
   
   const hasTradingAccess = isSuper || showBlackmarket || showBuyRaw || showSell || showCurrency || showCraft || showMap || showPitching || showThunt || showNews;
 
@@ -49,7 +50,7 @@ export default function NavigationBar() {
           onClick={closeMenu}
           className="text-[#78CCEE] z-50 relative font-impact text-5xl"
         >
-          E
+          <Image src="/assets/logo-effor.png" alt="Logo" width={100} height={100} className="w-16 h-auto" />
         </Link>
 
         <div className="flex gap-4 items-center justify-center">

@@ -116,7 +116,7 @@ export default function LeaderboardRally({
             {entry.name}
           </span>
         </td>
-        <td className="px-4 py-4 text-center">
+        {/* <td className="px-4 py-4 text-center">
           <span className="font-impact text-lg text-[#78CCEE]">
             {entry.access_card_level}
           </span>
@@ -135,7 +135,7 @@ export default function LeaderboardRally({
           <span className="font-impact text-lg text-[#78CCEE]">
             {entry.eonix}
           </span>
-        </td>
+        </td> */}
         <td className="px-4 py-4 text-center">
           <span className="font-impact text-lg text-yellow-400">
             {entry.score.toLocaleString()}
@@ -174,10 +174,10 @@ export default function LeaderboardRally({
                 <tr className="bg-[#2f093b] border-b-2 text-white border-[#684095]">
                   <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">Rank</th>
                   <th className="px-4 py-3 text-left font-impact text-sm uppercase tracking-wider">Name</th>
-                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Level</th>
+                  {/* <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Level</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Vault</th>
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Minus Point</th>
-                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Eonix</th>
+                  <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Eonix</th> */}
                   <th className="px-4 py-3 text-center font-impact text-sm uppercase tracking-wider">Score</th>
                 </tr>
               </thead>

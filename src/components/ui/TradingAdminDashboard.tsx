@@ -18,6 +18,7 @@ interface TradingStatusResponse {
   endTime?: string;
   pausedTime?: string;
   serverTime?: string;
+  periodNumber?: number;
 }
 
 const formatTime = (seconds: number) => {
@@ -210,6 +211,13 @@ export function TradingAdminDashboard({ initialContestState, periods, activePeri
   return (
     <div className="max-w-2xl mx-auto bg-gray-900/90 backdrop-blur-sm p-6 rounded-xl border border-[#684095] shadow-2xl mb-8">
       <div className="mb-6 text-center border-b border-gray-700 pb-4">
+        {/* Period Number Badge */}
+        {tradingData?.periodNumber && (status === "ON_GOING" || status === "PAUSED") && (
+          <div className="relative mx-auto mb-4 w-fit bg-purple-900/50 border border-purple-500/30 px-4 py-2 rounded-full text-xl font-bold text-purple-300 tracking-wider">
+             PERIOD #{tradingData.periodNumber}
+          </div>
+        )}
+
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-1">Trading Status</p>
         <p className={`text-4xl font-impact tracking-wide ${
           status === "ON_GOING" ? "text-green-400" : 

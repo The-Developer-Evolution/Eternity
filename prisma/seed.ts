@@ -31,7 +31,7 @@ const RECIPES: RecipePattern[] = [
 
 // Forbidden MAP's REICPE
 const MAP_RECIPES = [
-  { brownPaper: 4, pen: 1, ink: 2, dividers: 1, magnifyingGlass: 1 },
+  { brownPaper: 3, pen: 1, ink: 2, dividers: 1, magnifyingGlass: 1 },
 ];
 
 // stock and price in BlackMarket
@@ -205,66 +205,66 @@ async function main() {
       {
         periode: 1,
         cost_map: 1000,
-        price_map: 120000000,
+        price_map: 120000000000,
         duration: 30,
         usdidr_rate: 16500,
-        news: "Stabil."
+        news: "Dunia berada dalam kondisi stabil dan kondusif, dengan aktivitas ekonomi berjalan normal serta lingkungan yang mendukung perencanaan jangka panjang."
       },
       {
         periode: 2,
         cost_map: 1300,
-        price_map: 118000000,
+        price_map: 118000000000,
         duration: 20,
         usdidr_rate: 16830,
-        news: "Pajak naik."
+        news: "Kenaikan pajak mulai memengaruhi iklim ekonomi, meningkatkan tekanan biaya dan mengubah perilaku pelaku pasar dalam menjalankan aktivitas produksi dan distribusi."
       },
       {
         periode: 3,
         cost_map: 1600,
-        price_map: 116000000,
+        price_map: 116000000000,
         duration: 20,
         usdidr_rate: 15989,
-        news: "Musim hujan."
+        news: "Musim hujan melanda berbagai wilayah, memengaruhi kelancaran aktivitas ekonomi dan distribusi serta meningkatkan ketidakpastian dalam perencanaan operasional."
       },
       {
         periode: 4,
         cost_map: 1900,
-        price_map: 114000000,
+        price_map: 114000000000,
         duration: 20,
         usdidr_rate: 16628,
-        news: "Bencana karena hujan."
+        news: "Keadaan darurat menggeser fokus ekonomi dari pertumbuhan menuju respons cepat dan pemulihan infrastruktur penting."
       },
       {
         periode: 5,
         cost_map: 2200,
-        price_map: 112000000,
+        price_map: 112000000000,
         duration: 20,
         usdidr_rate: 17293,
-        news: "Banjir berakhir."
+        news: "Banjir surut, masa pemulihan mulai terbentuk, ditandai dengan upaya penyeimbangan kembali aktivitas ekonomi setelah periode gangguan besar."
       },
       {
         periode: 6,
         cost_map: 2500,
-        price_map: 110000000,
+        price_map: 110000000000,
         duration: 20,
         usdidr_rate: 18677,
-        news: "Munculnya pabrik baru dan adanya pabrik pesaing yang bangkrut."
+        news: "Aktivitas industri kembali bergerak dinamis, namun ketidakseimbangan struktural menciptakan persaingan dan tekanan operasional."
       },
       {
         periode: 7,
         cost_map: 2800,
-        price_map: 108000000,
+        price_map: 108000000000,
         duration: 20,
         usdidr_rate: 17743,
-        news: "Cuaca stabil dan pembangunan besar-besaran perusahaan yang membutuhkan kayu, logam, dan kaca."
+        news: "Stabilitas ekonomi semakin menguat seiring meningkatnya pembangunan dan kepercayaan terhadap kondisi domestik."
       },
       {
         periode: 8,
         cost_map: 3100,
-        price_map: 106000000,
+        price_map: 106000000000,
         duration: 20,
         usdidr_rate: 15969,
-        news: "Gunung berapi meletus dan terjadi kebakaran hutan."
+        news: "Gunung berapi meletus dan memicu gangguan pada lingkungan serta aktivitas ekonomi"
       },
     ],
     skipDuplicates: true,
@@ -599,116 +599,71 @@ async function main() {
   // Dummy Users
   // =========================
 
-  const dummyUserNames = [
-    "001_Indonesia",
-    "002_Malaysia",
-    "003_Singapore",
-    "004_Thailand",
-    "005_Philippines",
-    "006_Vietnam",
-    "007_Laos",
-    "008_Cambodia",
-    "009_Myanmar",
-    "010_Brunei",
-    "011_Japan",
-    "012_SouthKorea",
-    "013_NorthKorea",
-    "014_China",
-    "015_Taiwan",
-    "016_HongKong",
-    "017_Macau",
-    "018_India",
-    "019_Pakistan",
-    "020_Bangladesh",
-    "021_Nepal",
-    "022_Bhutan",
-    "023_SriLanka",
-    "024_Maldives",
-    "025_Afghanistan",
-    "026_Iran",
-    "027_Iraq",
-    "028_SaudiArabia",
-    "029_UnitedArabEmirates",
-    "030_Qatar",
-    "031_Kuwait",
-    "032_Oman",
-    "033_Yemen",
-    "034_Jordan",
-    "035_Israel",
-    "036_Palestine",
-    "037_Turkey",
-    "038_Greece",
-    "039_Italy",
-    "040_France",
-    "041_Germany",
-    "042_Netherlands",
-    "043_Belgium",
-    "044_Switzerland",
-    "045_Austria",
-    "046_Spain",
-    "047_Portugal",
-    "048_UnitedKingdom",
-    "049_Ireland",
-    "050_Iceland",
-    "051_Norway",
-    "052_Sweden",
-    "053_Finland",
-    "054_Denmark",
-    "055_Poland",
-    "056_CzechRepublic",
-    "057_Slovakia",
-    "058_Hungary",
-    "059_Romania",
-    "060_Bulgaria",
-    "061_Serbia",
-    "062_Croatia",
-    "063_Slovenia",
-    "064_Bosnia",
-    "065_Montenegro",
-    "066_Albania",
-    "067_Russia",
-    "068_Ukraine",
-    "069_Belarus",
-    "070_Lithuania",
-    "071_Latvia",
-    "072_Estonia",
-    "073_UnitedStates",
-    "074_Canada",
-    "075_Mexico",
-    "076_Brazil",
-    "077_Argentina",
-    "078_Chile",
-    "079_Peru",
-    "080_Colombia",
-    "081_Venezuela",
-    "082_Bolivia",
-    "083_Paraguay",
-    "084_Uruguay",
-    "085_Ecuador",
-    "086_Panama",
-    "087_CostaRica",
-    "088_Cuba",
-    "089_Jamaica",
-    "090_Haiti",
-    "091_DominicanRepublic",
-    "092_Australia",
-    "093_NewZealand",
-    "094_PapuaNewGuinea",
-    "095_Fiji",
-    "096_SolomonIslands",
-    "097_SouthAfrica",
-    "098_Nigeria",
-    "099_Kenya",
-    "100_Egypt",
+  const participantUsers = [
+    { name: "@ourlucky", password: "Ourlucky77." },
+    { name: "Chasio", password: "Chasio" },
+    { name: "LombaSabtu Minggu", password: "CarelGeorgeSteven" },
+    { name: "ATHENA", password: "athena123" },
+    { name: "triokegelapanpart 2", password: "triopart2" },
+    { name: "PBBJB", password: "PBBJB2728" },
+    { name: "Pecel Juara", password: "peceljuara7k" },
+    { name: "GenAlpha", password: "papasisipaga88" },
+    { name: "himmel", password: "petraoke" },
+    { name: "RevenueRangers", password: "aditmadejoy" },
+    { name: "Kwak Kwik Kwuk", password: "Kwekkwek" },
+    { name: "Husky", password: "Libels123" },
+    { name: "Pejuang bitcoin", password: "iphschool" },
+    { name: "Tjahaja Asia", password: "1 sampai 10" },
+    { name: "Circlefarminitiative", password: "Jadijuara1" },
+    { name: "Cihuhuy", password: "jogetketlin" },
+    { name: "trizzierssehat", password: "trizziersjayajayajaya" },
+    { name: "threeleches", password: "12345678" },
+    { name: "Indomie", password: "sangargogo" },
+    { name: "Alyntika", password: "Alyntika" },
+    { name: "Hustle Hive", password: "Tempetingtacos" },
+    { name: "TERSERAH", password: "denyhandokoarip" },
+    { name: "SMAZAONE", password: "12345678" },
+    { name: "SMAZA TWO", password: "qwertyuiop" },
+    { name: "Bikini Bottom", password: "Bejengre123" },
+    { name: "smazaone", password: "smazaone" },
+    { name: "Penggembira", password: "qwerty@123" },
+    { name: "YanSiTon", password: "3bapak" },
+    { name: "Pocky", password: "PockyAbc987" },
+    { name: "anton", password: "4nt0n" },
+    { name: "TRES", password: "tifrecelemmastress123" },
+    { name: "Nalalmpatc", password: "Nalaisme2026" },
+    { name: "Nalalmpact", password: "Nalaisme2026" },
+    { name: "M3nangAmin", password: "SEMOGA MENANG AMIN" },
+    { name: "morgancorp", password: "morgancorporation" },
+    { name: "elmiti", password: "p@ssword!1" },
+    { name: "Trio_Limbus", password: "LimbusCompanyPeak" },
+    { name: "Wiwi", password: "Skibidiwiwi" },
+    { name: "capkakitigasiapmenang", password: "capkakitigagacor" },
+    { name: "KIRANA", password: "Leonxkirana" },
+    { name: "CELITA", password: "14042008" },
+    { name: "alleyesonELCIDA", password: "Elcida_123" },
+    { name: "EQUINOX", password: "EQUINOXWILLWIN#8965" },
+    { name: "HapHoo", password: "nalajosjis" },
+    { name: "lennoxx_", password: "Lennox_2026" },
+    { name: "Cihuhuy", password: "Christian05" },
+    { name: "cashback50ribu", password: "ekokolikheru" },
+    { name: "BEBEK KAYANG", password: "rit" },
+    { name: "Smart team", password: "Smartteamsukses" },
+    { name: "Hustle hive", password: "Tempetingtacos" },
+    { name: "Cihuhuy uc", password: "Happy chinese new year" }
   ];
 
-  for (const name of dummyUserNames) {
+  for (const user of participantUsers) {
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    
     await prisma.user.upsert({
-      where: { name },
-      update: {},
+      where: { name: user.name },
+      update: {
+        password: hashedPassword,
+      },
       create: {
-        name,
-        password: await bcrypt.hash("12345678", 10),
+        name: user.name,
+        password: hashedPassword,
         tradingData: {
           create: {
             eternites: 10000,
@@ -717,7 +672,7 @@ async function main() {
         },
       },
     });
-    console.log(`Created dummy user: ${name}`);
+    console.log(`Created/Updated participant user: ${user.name}`);
   }
 
   console.log({ masterTrading });
@@ -994,14 +949,14 @@ async function main() {
       { name: "Guess The Order", period_id: "7", zone_id: "2", eonix_cost: 3 },
       { name: "Guess The Order", period_id: "8", zone_id: "2", eonix_cost: 2 },
 
-      { name: "Tunnel And Ball", period_id: "1", zone_id: "2", eonix_cost: 3 },
-      { name: "Tunnel And Ball", period_id: "2", zone_id: "2", eonix_cost: 2 },
-      { name: "Tunnel And Ball", period_id: "3", zone_id: "2", eonix_cost: 4 },
-      { name: "Tunnel And Ball", period_id: "4", zone_id: "2", eonix_cost: 2 },
-      { name: "Tunnel And Ball", period_id: "5", zone_id: "2", eonix_cost: 2 },
-      { name: "Tunnel And Ball", period_id: "6", zone_id: "2", eonix_cost: 3 },
-      { name: "Tunnel And Ball", period_id: "7", zone_id: "2", eonix_cost: 3 },
-      { name: "Tunnel And Ball", period_id: "8", zone_id: "2", eonix_cost: 2 },
+      { name: "Stack Board", period_id: "1", zone_id: "2", eonix_cost: 3 },
+      { name: "Stack Board", period_id: "2", zone_id: "2", eonix_cost: 2 },
+      { name: "Stack Board", period_id: "3", zone_id: "2", eonix_cost: 4 },
+      { name: "Stack Board", period_id: "4", zone_id: "2", eonix_cost: 2 },
+      { name: "Stack Board", period_id: "5", zone_id: "2", eonix_cost: 2 },
+      { name: "Stack Board", period_id: "6", zone_id: "2", eonix_cost: 3 },
+      { name: "Stack Board", period_id: "7", zone_id: "2", eonix_cost: 3 },
+      { name: "Stack Board", period_id: "8", zone_id: "2", eonix_cost: 2 },
 
       {
         name: "Leading The Blind",
@@ -1134,14 +1089,14 @@ async function main() {
       { name: "Maze Marker", period_id: "7", zone_id: "3", eonix_cost: 2 },
       { name: "Maze Marker", period_id: "8", zone_id: "3", eonix_cost: 2 },
 
-      { name: "Pass The Flour", period_id: "1", zone_id: "3", eonix_cost: 2 },
-      { name: "Pass The Flour", period_id: "2", zone_id: "3", eonix_cost: 3 },
-      { name: "Pass The Flour", period_id: "3", zone_id: "3", eonix_cost: 3 },
-      { name: "Pass The Flour", period_id: "4", zone_id: "3", eonix_cost: 3 },
-      { name: "Pass The Flour", period_id: "5", zone_id: "3", eonix_cost: 3 },
-      { name: "Pass The Flour", period_id: "6", zone_id: "3", eonix_cost: 4 },
-      { name: "Pass The Flour", period_id: "7", zone_id: "3", eonix_cost: 2 },
-      { name: "Pass The Flour", period_id: "8", zone_id: "3", eonix_cost: 2 },
+      // { name: "Pass The Flour", period_id: "1", zone_id: "3", eonix_cost: 2 },
+      // { name: "Pass The Flour", period_id: "2", zone_id: "3", eonix_cost: 3 },
+      // { name: "Pass The Flour", period_id: "3", zone_id: "3", eonix_cost: 3 },
+      // { name: "Pass The Flour", period_id: "4", zone_id: "3", eonix_cost: 3 },
+      // { name: "Pass The Flour", period_id: "5", zone_id: "3", eonix_cost: 3 },
+      // { name: "Pass The Flour", period_id: "6", zone_id: "3", eonix_cost: 4 },
+      // { name: "Pass The Flour", period_id: "7", zone_id: "3", eonix_cost: 2 },
+      // { name: "Pass The Flour", period_id: "8", zone_id: "3", eonix_cost: 2 },
 
       {
         name: "Two Facts One Lies",

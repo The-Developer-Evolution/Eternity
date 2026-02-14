@@ -6,10 +6,24 @@ import { getTradingLeaderboard } from "../../../../features/trading/services/lea
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 
+import { getActiveTradingPeriod } from "../../../../features/trading/services/timer";
+import { redirect } from "next/navigation";
+
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
+  
+  // Status Checker
+  const trading = await getActiveTradingPeriod();
+  if (!trading) {
+    redirect("/peserta/trading?error=no_active_period");
+  }
+  
+  if (trading.periode === 8) {
+    redirect("/peserta/trading?error=period_8");
+  }
+
   const data = await getTradingLeaderboard();
   
   // Transform data to match component interface and mark current user
