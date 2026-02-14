@@ -26,7 +26,7 @@ services:
   studio:
     image: ucyenyen/eternity-migrator:latest
     container_name: eternity-studio
-    command: /bin/sh -c "pnpm prisma generate && pnpm prisma studio --port 5555 --hostname 0.0.0.0"
+    command: /bin/sh -c "pnpm prisma generate && pnpm prisma studio --port 5555"
     env_file:
       - .env
     ports:
