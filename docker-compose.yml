@@ -1,41 +1,57 @@
 services:
-  migration:
-    image: ghcr.io/the-developer-evolution/eternity:felix
-    container_name: eternity-migration
+  migrate_reset:
+    image: ucyenyen/eternity-migrator:latest
+    container_name: eternity_migrate_reset
+    command: pnpm prisma migrate reset --force
     env_file:
       - .env
-    command: prisma migrate deploy
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+    profiles:
+      - manual
 
   seed:
-    image: ghcr.io/the-developer-evolution/eternity:felix
-    container_name: eternity-seed
+    image: ucyenyen/eternity-migrator:latest
+    container_name: eternity_seed
+    command: /bin/sh -c "pnpm prisma generate && pnpm tsx prisma/seed.ts"
     env_file:
       - .env
-    command: prisma db seed
-    depends_on:
-      - migration
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+    profiles:
+      - manual
 
-  web:
-    image: ghcr.io/the-developer-evolution/eternity:felix
-    container_name: eternity
-    expose:
-      - 3000
+  studio:
+    image: ucyenyen/eternity:latest
+    container_name: eternity-studio
+    command: pnpm prisma studio --port 5555 --hostname 0.0.0.0
     env_file:
       - .env
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '0.90'
-    depends_on:
-      - seed
+    expose:
+      - "5555"
     networks:
-      - npm_default
+      - global_proxy
+      - eternity_internal
+    profiles:
+      - manual
+
+  app:
+    # UPDATED: Use the pre-built image from Docker Hub instead of building locally
+    image: ucyenyen/eternity:latest
+    container_name: eternity
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    networks:
+      - global_proxy
+      - eternity_internal
 
 networks:
-  npm_default:
+  global_proxy:
     external: true
+  eternity_internal:
+    driver: bridge
