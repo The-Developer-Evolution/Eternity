@@ -463,7 +463,7 @@ export async function buyZoneCard(userId: string, eonixAMT: number) {
     await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        message: `BOUGHT Zone Card -10 EONIX`,
+        message: `BOUGHT Zone Card -${eonixAMT} EONIX`,
       },
     });
 
