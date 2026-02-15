@@ -438,7 +438,7 @@ export async function buySmallItem(userId: string, itemId: string) {
 
   return result;
 }
-
+//  {/* redeploy chunk error dik why */}
 export async function buyZoneCard(userId: string, eonixAMT: number) {
   const result = await prisma.$transaction(async (tx) => {
     const rallyData = await tx.rallyData.findUnique({
