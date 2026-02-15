@@ -1,13 +1,15 @@
 // app/api/global-leaderboard/route.ts
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { unstable_cache } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
-// Cached function to fetch and calculate leaderboard
-const getGlobalLeaderboardData = unstable_cache(
-  async () => {
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+
     const users = await prisma.user.findMany({
       where: {
         role: "PARTICIPANT",
@@ -29,6 +31,7 @@ const getGlobalLeaderboardData = unstable_cache(
             enonix: true,
           },
         },
+        // Tambahkan fetch inventory untuk rumus baru
         userBigItemInventory: {
           select: { amount: true },
         },
@@ -43,7 +46,8 @@ const getGlobalLeaderboardData = unstable_cache(
       },
     });
 
-    // Calculate raw scores in a single pass
+    // 2. Tahap 1: Hitung RAW RALLY SCORE untuk setiap user
+    // Kita perlu array sementara ini untuk mencari nilai Highest Point yang akurat sesuai rumus
     const usersWithRawScore = users.map((user) => {
       const rallyData = user.rallyData;
       const level = rallyData?.access_card_level || 0;
@@ -51,62 +55,56 @@ const getGlobalLeaderboardData = unstable_cache(
       const eonix = rallyData?.enonix || 0;
       const minusPoint = rallyData?.minus_point || 0;
 
-      // Optimized: Calculate totals without intermediate arrays
-      let totalBigItems = 0;
-      for (const item of user.userBigItemInventory) {
-        totalBigItems += item.amount;
-      }
+      // Hitung total item dari inventory
+      const totalBigItems = user.userBigItemInventory.reduce(
+        (sum, item) => sum + item.amount,
+        0,
+      );
+      const totalSmallItems = user.userSmallItemInventory.reduce(
+        (sum, item) => sum + item.amount,
+        0,
+      );
 
-      let totalSmallItems = 0;
-      for (const item of user.userSmallItemInventory) {
-        totalSmallItems += item.amount;
-      }
-
-      // Rally score formula
+      // --- RUMUS BARU RALLY POINT ---
+      // Level * 1000 + Vault * 250 + BigItems * 50 + SmallItems * 10 + Eonix - MinusPoint
       const rawRallyScore =
         level * 1000 +
         vault * 250 +
         totalBigItems * 50 +
         totalSmallItems * 10 +
-        eonix -
-        minusPoint;
+        eonix * 1 -
+        minusPoint * 1;
 
       return {
-        id: user.id,
-        name: user.name,
-        talkshowPoints: user.talkshowPoints,
-        tradingIdr: Number(user.tradingData?.idr || 0),
-        rallyData: user.rallyData,
-        rawRallyScore,
+        ...user,
+        rawRallyScore, // Simpan skor mentah untuk dibandingkan nanti
       };
     });
 
-    // Find max/min in single pass
-    let maxRallyScore = 1;
-    let maxTradingIdr = 0;
-    let lowestTradingIdr = Number.MAX_SAFE_INTEGER;
-
-    for (const user of usersWithRawScore) {
-      if (user.rawRallyScore > maxRallyScore)
-        maxRallyScore = user.rawRallyScore;
-      if (user.tradingIdr > maxTradingIdr) maxTradingIdr = user.tradingIdr;
-      if (user.tradingIdr < lowestTradingIdr)
-        lowestTradingIdr = user.tradingIdr;
-    }
-
-    // Handle edge case
-    if (lowestTradingIdr === Number.MAX_SAFE_INTEGER) lowestTradingIdr = 0;
-
-    // Calculate final scores
-    const tradingRange = maxTradingIdr - lowestTradingIdr || 1; // Prevent division by zero
-
+    // 3. Cari Highest Point dari hasil hitungan di atas
+    // Jika tidak ada user atau max score 0, set jadi 1 (agar tidak divide by zero)
+    const maxRallyScore =
+      Math.max(...usersWithRawScore.map((u) => u.rawRallyScore), 0) || 1;
+    const maxTradingIdr = Math.max(
+      ...usersWithRawScore.map((u) => Number(u.tradingData?.idr || 0)),
+      0,
+    );
+    const lowestTradingIdr = Math.min(
+      ...usersWithRawScore.map((u) => Number(u.tradingData?.idr || 0)),
+      0,
+    );
     const processedUsers = usersWithRawScore.map((user) => {
+      // a. Hitung poin Trading (IDR / 1 Milyar)
       const tradingPoint = Math.max(
         0,
-        (user.tradingIdr - lowestTradingIdr) / tradingRange,
+        (Number(user.tradingData?.idr || 0) - lowestTradingIdr) / (maxTradingIdr - lowestTradingIdr),
       );
 
+      // b. Hitung poin Talkshow
       const talkshowPoint = user.talkshowPoints / 600 || 0;
+
+      // c. Hitung Global Score
+      // (RallyScoreUser / MaxRallyScore * 45%) + (Trading * 40%) + (Talkshow * 15%)
       const normalizedRallyScore = user.rawRallyScore / maxRallyScore;
 
       const totalGlobalScore =
@@ -115,35 +113,18 @@ const getGlobalLeaderboardData = unstable_cache(
       return {
         id: user.id,
         name: user.name,
+        // Data pendukung untuk ditampilkan di UI (opsional)
         rally_level: user.rallyData?.access_card_level || 0,
         rally_vault: user.rallyData?.vault || 0,
-        raw_rally_point: user.rawRallyScore,
-        totalPoints: totalGlobalScore,
+        raw_rally_point: user.rawRallyScore, // Nilai asli Rally point
+        totalPoints: totalGlobalScore, // Nilai akhir untuk sorting leaderboard global
       };
     });
 
-    // Sort by score (descending)
+    // 5. Sorting Global (Tertinggi ke Terendah)
     processedUsers.sort((a, b) => b.totalPoints - a.totalPoints);
 
-    return { processedUsers, maxRallyScore };
-  },
-  ["global-leaderboard"],
-  {
-    revalidate: 30, // Cache for 30 seconds
-    tags: ["global-leaderboard"],
-  },
-);
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-
-    // Get cached data
-    const { processedUsers, maxRallyScore } = await getGlobalLeaderboardData();
-
-    // Paginate in memory (cheap operation)
+    // 6. Pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
@@ -161,7 +142,7 @@ export async function GET(request: Request) {
       meta: {
         totalPages,
         currentPage: page,
-        highestRallyScore: maxRallyScore,
+        highestRallyScore: maxRallyScore, // Info tambahan jika perlu debug nilai pembagi
       },
     });
   } catch (error) {
