@@ -20,11 +20,6 @@ interface SmallItem {
   price: number;
 }
 
-interface BigItem {
-  id: string;
-  name: string;
-}
-
 interface Recipe {
   id: string;
   result_item_id: string;
@@ -38,19 +33,17 @@ interface Recipe {
 interface CraftMaterialPanelProps {
   users?: User[];
   smallItems: SmallItem[];
-  bigItems: BigItem[];
   bigItemsRecipe: Recipe[];
-  onBuyMaterial: (userId: string, itemId: string) => Promise<{ success: boolean; error?: string }>;
-  onCraftBigItem: (userId: string, recipeId: string) => Promise<{ success: boolean; error?: string }>;
+  onBuyMaterial: (
+    userId: string,
+    itemId: string,
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export default function CraftMaterialPanel({
   users = [],
   smallItems = [],
-  bigItems = [],
-  bigItemsRecipe = [],
   onBuyMaterial,
-  onCraftBigItem,
 }: CraftMaterialPanelProps) {
   const [localUsers, setLocalUsers] = useState<User[]>(users);
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
@@ -60,20 +53,23 @@ export default function CraftMaterialPanel({
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string>("");
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLocalUsers(users);
     if (selectedUser) {
-      const updated = users.find(u => u.id === selectedUser.id);
+      const updated = users.find((u) => u.id === selectedUser.id);
       if (updated) setSelectedUser(updated);
     }
   }, [users, selectedUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowUserDropdown(false);
       }
     };
@@ -83,35 +79,34 @@ export default function CraftMaterialPanel({
 
   // Create a debounced search handler
   const debouncedSearch = useMemo(
-    () => debounce((query: string) => {
-      if (!query) {
-         setFilteredUsers(users); // Reset if empty
-         return;
-      }
-      const lowerQuery = query.toLowerCase();
-      const filtered = users.filter((u) =>
-        u.name.toLowerCase().includes(lowerQuery)
-      );
-      setFilteredUsers(filtered);
-    }, 300),
-    [users]
+    () =>
+      debounce((query: string) => {
+        if (!query) {
+          setFilteredUsers(users); // Reset if empty
+          return;
+        }
+        const lowerQuery = query.toLowerCase();
+        const filtered = users.filter((u) =>
+          u.name.toLowerCase().includes(lowerQuery),
+        );
+        setFilteredUsers(filtered);
+      }, 300),
+    [users],
   );
 
   useEffect(() => {
-     // Initial load
-     setFilteredUsers(users);
-     return () => {
-       debouncedSearch.cancel();
-     };
+    // Initial load
+    setFilteredUsers(users);
+    return () => {
+      debouncedSearch.cancel();
+    };
   }, [users, debouncedSearch]);
-
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     debouncedSearch(value);
   };
-
 
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
@@ -121,10 +116,21 @@ export default function CraftMaterialPanel({
     setSuccess("");
   };
 
-  const handleAction = async (actionName: string, itemName: string, id: string, actionFn: (uid: string, itemId: string) => Promise<{ success: boolean; error?: string }>, isPurchase: boolean) => {
+  const handleAction = async (
+    actionName: string,
+    itemName: string,
+    id: string,
+    actionFn: (
+      uid: string,
+      itemId: string,
+    ) => Promise<{ success: boolean; error?: string }>,
+    isPurchase: boolean,
+  ) => {
     if (!selectedUser) return;
 
-    const confirmAction = window.confirm(`Apakah Anda yakin ingin melakukan ${actionName} untuk ${itemName}?`);
+    const confirmAction = window.confirm(
+      `Apakah Anda yakin ingin melakukan ${actionName} untuk ${itemName}?`,
+    );
     if (!confirmAction) return;
 
     setIsLoading(id);
@@ -133,24 +139,31 @@ export default function CraftMaterialPanel({
 
     try {
       const res = await actionFn(selectedUser.id, id);
-      
+
       if (res.success) {
         setSuccess(`${actionName} ${itemName} Berhasil!`);
-        
+
         if (isPurchase) {
-          const newEnonix = Math.max(0, (selectedUser.rallyData?.enonix || 0) - 5);
-          
-          const updatedUsers = localUsers.map(u => 
-            u.id === selectedUser.id 
-              ? { ...u, rallyData: { ...u.rallyData!, enonix: newEnonix } } 
-              : u
+          const newEnonix = Math.max(
+            0,
+            (selectedUser.rallyData?.enonix || 0) - 5,
+          );
+
+          const updatedUsers = localUsers.map((u) =>
+            u.id === selectedUser.id
+              ? { ...u, rallyData: { ...u.rallyData!, enonix: newEnonix } }
+              : u,
           );
           setLocalUsers(updatedUsers);
 
-          setSelectedUser(prev => prev ? {
-            ...prev,
-            rallyData: { ...prev.rallyData!, enonix: newEnonix }
-          } : null);
+          setSelectedUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  rallyData: { ...prev.rallyData!, enonix: newEnonix },
+                }
+              : null,
+          );
         }
       } else {
         setError(res.error || `Gagal melakukan ${actionName}`);
@@ -181,8 +194,8 @@ export default function CraftMaterialPanel({
             placeholder="Type name..."
             className="w-full bg-[#3E344A] text-white px-4 py-3 rounded-lg border-2 border-[#684095] focus:border-[#78CCEE] outline-none transition-colors pr-10"
           />
-          <ChevronDown 
-            className={`absolute right-3 top-1/2 -translate-y-1/2 text-[#78CCEE] transition-transform ${showUserDropdown ? 'rotate-180' : ''}`}
+          <ChevronDown
+            className={`absolute right-3 top-1/2 -translate-y-1/2 text-[#78CCEE] transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
             size={20}
           />
         </div>
@@ -198,10 +211,14 @@ export default function CraftMaterialPanel({
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-white font-semibold">{user.name}</p>
-                    <p className="text-[10px] text-slate-400 uppercase">ID: {user.id.slice(0, 8)}</p>
+                    <p className="text-[10px] text-slate-400 uppercase">
+                      ID: {user.id.slice(0, 8)}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[#41FFA3] text-xs font-bold uppercase tracking-tighter">Eonix: {user.rallyData?.enonix || 0}</p>
+                    <p className="text-[#41FFA3] text-xs font-bold uppercase tracking-tighter">
+                      Eonix: {user.rallyData?.enonix || 0}
+                    </p>
                   </div>
                 </div>
               </button>
@@ -213,14 +230,20 @@ export default function CraftMaterialPanel({
       {selectedUser && (
         <div className="w-full p-4 bg-[#3E344A] border-2 border-[#78CCEE] rounded-xl mb-6 flex justify-between items-center animate-in fade-in slide-in-from-top-2">
           <div>
-            <p className="text-[#78CCEE] text-[10px] font-bold uppercase tracking-[0.2em]">Target Participant:</p>
+            <p className="text-[#78CCEE] text-[10px] font-bold uppercase tracking-[0.2em]">
+              Target Participant:
+            </p>
             <p className="text-white text-xl font-impact uppercase tracking-wider">
               {selectedUser.name}
             </p>
           </div>
           <div className="text-right bg-black/20 p-2 rounded-lg border border-white/5">
-             <p className="text-slate-400 text-[9px] uppercase font-bold">Current Eonix</p>
-             <p className="text-[#41FFA3] text-2xl font-impact leading-none">{selectedUser.rallyData?.enonix || 0}</p>
+            <p className="text-slate-400 text-[9px] uppercase font-bold">
+              Current Eonix
+            </p>
+            <p className="text-[#41FFA3] text-2xl font-impact leading-none">
+              {selectedUser.rallyData?.enonix || 0}
+            </p>
           </div>
         </div>
       )}
@@ -233,11 +256,27 @@ export default function CraftMaterialPanel({
             </h3>
             <div className="space-y-2">
               {smallItems.map((item) => (
-                <div key={item.id} className="bg-[#3E344A] border-2 border-[#684095] p-3 rounded-xl flex justify-between items-center hover:border-[#41FFA3]/50 transition-colors">
-                  <span className="text-white font-bold text-sm uppercase tracking-tight">{item.name}</span>
+                <div
+                  key={item.id}
+                  className="bg-[#3E344A] border-2 border-[#684095] p-3 rounded-xl flex justify-between items-center hover:border-[#41FFA3]/50 transition-colors"
+                >
+                  <span className="text-white font-bold text-sm uppercase tracking-tight">
+                    {item.name}
+                  </span>
                   <button
-                    disabled={isLoading !== null || (selectedUser.rallyData?.enonix || 0) < item.price}
-                    onClick={() => handleAction("Pembelian", item.name, item.id, onBuyMaterial, true)}
+                    disabled={
+                      isLoading !== null ||
+                      (selectedUser.rallyData?.enonix || 0) < item.price
+                    }
+                    onClick={() =>
+                      handleAction(
+                        "Pembelian",
+                        item.name,
+                        item.id,
+                        onBuyMaterial,
+                        true,
+                      )
+                    }
                     className="bg-[#41FFA3] hover:bg-[#2ee089] text-[#3E344A] font-impact px-4 py-2 rounded-lg text-xs transition-all active:scale-95 disabled:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-green-500/10"
                   >
                     {isLoading === item.id ? "..." : "BUY"}
@@ -285,16 +324,24 @@ export default function CraftMaterialPanel({
         </div>
       ) : (
         <div className="text-center py-20 bg-[#3E344A]/30 border-2 border-dashed border-[#684095] rounded-2xl flex flex-col items-center justify-center">
-           <Package className="text-[#684095] mb-4 opacity-50" size={64} />
-           <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-xs">Waiting for selection</p>
+          <Package className="text-[#684095] mb-4 opacity-50" size={64} />
+          <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-xs">
+            Waiting for selection
+          </p>
         </div>
       )}
 
       {(error || success) && (
-        <div className={`mt-6 p-4 rounded-xl text-center text-xs font-bold border-2 animate-in slide-in-from-bottom-2 ${
-          error ? "bg-red-500/10 border-red-500 text-red-400" : "bg-green-500/10 border-green-500 text-green-400"
-        }`}>
-          {error ? `⚠️ ERROR: ${error.toUpperCase()}` : `✅ SUCCESS: ${success.toUpperCase()}`}
+        <div
+          className={`mt-6 p-4 rounded-xl text-center text-xs font-bold border-2 animate-in slide-in-from-bottom-2 ${
+            error
+              ? "bg-red-500/10 border-red-500 text-red-400"
+              : "bg-green-500/10 border-green-500 text-green-400"
+          }`}
+        >
+          {error
+            ? `⚠️ ERROR: ${error.toUpperCase()}`
+            : `✅ SUCCESS: ${success.toUpperCase()}`}
         </div>
       )}
     </div>

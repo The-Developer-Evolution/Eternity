@@ -8,14 +8,17 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@prisma/client";
 import { gachaItemAction } from "@/features/rally/actions/gacha-action";
-import { craftItemAction, craftVaultAction, buyItemAction, buySpecialTicketAction } from "@/features/rally/actions/craft-item-action";
-import CardPanel from "@/components/ui/CardPanel"
+import {
+  craftVaultAction,
+  buyItemAction,
+  buySpecialTicketAction,
+} from "@/features/rally/actions/craft-item-action";
+import CardPanel from "@/components/ui/CardPanel";
 import CraftMaterialPanel from "@/components/ui/CraftMaterialPanel";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
-  // Authorization check
   if (!session?.user?.id) {
     return null;
   }
@@ -26,7 +29,6 @@ export default async function Page() {
     return null;
   }
 
-  // Fetch all participant users with their rally data
   const users = await prisma.user.findMany({
     where: {
       role: Role.PARTICIPANT,
@@ -54,7 +56,7 @@ export default async function Page() {
       special_ticket_name: true,
       special_ticket_stock: true,
       name: true,
-    }
+    },
   });
 
   // Fetch all small items for display
@@ -83,7 +85,7 @@ export default async function Page() {
     include: {
       resultItem: true,
       smallItem: true,
-    }
+    },
   });
 
   const mappedUsers = users.map((user) => ({
@@ -102,17 +104,17 @@ export default async function Page() {
             users={mappedUsers}
             bigItems={bigItems}
             smallItems={smallItems}
-            ticketName={currentSpecialTicket?.special_ticket_name || "No ticket"}
+            ticketName={
+              currentSpecialTicket?.special_ticket_name || "No ticket"
+            }
             ticketStock={currentSpecialTicket?.special_ticket_stock || 0}
             onBuyTicket={buySpecialTicketAction}
           />
           <CraftMaterialPanel
             users={mappedUsers}
             smallItems={smallItems}
-            bigItems={bigItems}
             bigItemsRecipe={bigItemsRecipe}
-            onBuyMaterial={buyItemAction} // Buat action baru untuk ini
-            onCraftBigItem={craftItemAction} // Gunakan action craftItemAction yang sudah ada
+            onBuyMaterial={buyItemAction}
           />
           <CraftVaultPanel
             users={mappedUsers}
@@ -125,6 +127,6 @@ export default async function Page() {
           />
         </CardPanel>
       </div>
-    </div >
+    </div>
   );
 }

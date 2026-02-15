@@ -395,13 +395,13 @@ export async function buySmallItem(userId: string, itemId: string) {
       throw new Error("ITEM NOT FOUND");
     }
 
-    if (!rallyData || rallyData.enonix < 5) {
-      throw new Error("ENONIX NOT ENOUGH (NEED 5)");
+    if (!rallyData || rallyData.enonix < item.price) {
+      throw new Error(`ENONIX NOT ENOUGH (NEED ${item.price})`);
     }
 
     await tx.rallyData.update({
       where: { user_id: userId },
-      data: { enonix: { decrement: 5 } },
+      data: { enonix: { decrement: item.price } },
     });
 
     const existingInventory = await tx.userSmallItemInventory.findFirst({
@@ -426,11 +426,11 @@ export async function buySmallItem(userId: string, itemId: string) {
     await tx.rallyActivityLog.create({
       data: {
         user_id: userId,
-        message: `BOUGHT (${item.name}) -5 EONIX`,
+        message: `BOUGHT (${item.name}) -${item.price} EONIX`,
       },
     });
 
-    return true;
+    return true;  
   });
 
   // Invalidate cache
