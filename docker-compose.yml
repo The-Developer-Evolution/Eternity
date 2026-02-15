@@ -1,15 +1,15 @@
 services:
   migration:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-migration
     env_file:
       - .env
     command: prisma migrate deploy
     networks:
-      - global_proxy
+      - npm_default
 
   seed:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-seed
     env_file:
       - .env
@@ -17,12 +17,10 @@ services:
     depends_on:
       - migration
     networks:
-      - global_proxy
-    profiles:
-      - manual
+      - npm_default
 
   studio:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity-studio
     env_file:
       - .env
@@ -30,12 +28,12 @@ services:
     expose:
       - "5555"
     depends_on:
-      - migration
+      - seed
     networks:
-      - global_proxy
+      - npm_default
 
   web:
-    image: ghcr.io/the-developer-evolution/eternity:latest
+    image: ghcr.io/the-developer-evolution/eternity:felix
     container_name: eternity
     expose:
       - 3000
@@ -45,12 +43,12 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '0.90'
     depends_on:
-      - migration
+      - seed
     networks:
-      - global_proxy
+      - npm_default
 
 networks:
-  global_proxy:
+  npm_default:
     external: true
