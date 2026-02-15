@@ -267,7 +267,7 @@ export default function EonixPanel({
                 To hide this UI, simply comment out or delete everything between 
                 SPAM TEST UI START and SPAM TEST UI END calls. 
             */}
-            <div className="mb-6 border border-yellow-500/30 bg-yellow-500/5 p-3 rounded-xl relative overflow-hidden">
+            {/* <div className="mb-6 border border-yellow-500/30 bg-yellow-500/5 p-3 rounded-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-yellow-500/20 px-2 py-0.5 text-[8px] text-yellow-500 font-bold">QA TOOL</div>
                 <p className="text-[10px] text-yellow-500 font-bold uppercase mb-2 tracking-[0.2em] flex items-center gap-2">
                   ⚠️ Traffic Generator
@@ -300,7 +300,7 @@ export default function EonixPanel({
                      {isSpamming ? "🛑 STOP FLOODING" : "⚡ START FLOODING"}
                    </button>
                 </div>
-            </div>
+            </div> */}
             {/* --- SPAM TEST UI END --- */}
 
             <div className="grid grid-cols-2 gap-3">
